@@ -110,10 +110,10 @@
         android:layout_marginBottom="50dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/ll_voicesearch_rule"
         app:layout_constraintBottom_toTopOf="@id/bt_voicesearch_result"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ll_voicesearch_rule">
+        app:layout_constraintRight_toRightOf="parent" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -147,9 +147,9 @@
         android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/ll_voicesearch_answer"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ll_voicesearch_answer" />
+        app:layout_constraintRight_toRightOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
