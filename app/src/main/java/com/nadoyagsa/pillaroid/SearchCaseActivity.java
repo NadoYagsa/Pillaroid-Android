@@ -1,2 +1,13 @@
-package com.nadoyagsa.pillaroid;public class SearchCaseActivity {
+package com.nadoyagsa.pillaroid;
+
+import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class SearchCaseActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_search_case);
+    }
 }
