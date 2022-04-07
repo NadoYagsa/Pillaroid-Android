@@ -28,7 +28,7 @@
         android:textStyle="bold" />
 
     <ImageView
-        android:id="@+id/tv_ab_medicineresult_subscribe"
+        android:id="@+id/iv_ab_medicineresult_subscribe"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_gravity="center"
@@ -38,7 +38,7 @@
         android:src="@drawable/icon_star_off" />
 
     <ImageView
-        android:id="@+id/tv_ab_medicineresult_alarm"
+        android:id="@+id/iv_ab_medicineresult_alarm"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_gravity="center"
