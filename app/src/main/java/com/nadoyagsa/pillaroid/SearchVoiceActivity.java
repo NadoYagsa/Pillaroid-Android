@@ -9,12 +9,12 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class SearchByVoiceActivity extends AppCompatActivity {
+public class SearchVoiceActivity extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_voice_search);
+        setContentView(R.layout.activity_search_voice);
 
         Toolbar toolbar = findViewById(R.id.tb_voicesearch_toolbar);
         setSupportActionBar(toolbar);
