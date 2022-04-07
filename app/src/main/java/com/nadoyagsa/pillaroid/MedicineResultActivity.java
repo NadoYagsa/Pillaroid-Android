@@ -1,7 +1,11 @@
 package com.nadoyagsa.pillaroid;
 
+import android.app.AlertDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -35,5 +39,36 @@ public class MedicineResultActivity extends AppCompatActivity {
         TextView tvTitle = toolbar.findViewById(R.id.tv_ab_medicineresult_title);
         tvTitle.setText("타이레놀정 160mg");
         tvTitle.setSelected(true);
+
+        ImageView ivAlarm = toolbar.findViewById(R.id.iv_ab_medicineresult_alarm);
+        ivAlarm.setOnClickListener(v -> showAlarmDialog());
+    }
+
+    public final void showAlarmDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_alarm, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.show();
+
+        TextView tvOk = dialogView.findViewById(R.id.tv_dialog_addalarm_ok);
+        tvOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        TextView tvCancel = dialogView.findViewById(R.id.tv_dialog_addalarm_cancel);
+        tvCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
     }
 }
