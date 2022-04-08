@@ -5,14 +5,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:layout_width="120dp"
-        android:layout_height="40dp"
-        android:layout_margin="10dp"
-        android:backgroundTint="#000000"
-        android:contentDescription="필라로이드 텍스트 로고"
-        android:scaleType="fitCenter"
-        android:src="@drawable/icon_text_logo" />
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tb_main_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:contentInsetEnd="0dp"
+        app:contentInsetStart="0dp" />
 
     <View
         android:layout_width="match_parent"
@@ -30,7 +28,7 @@
             android:id="@+id/ll_main_camera"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
+            android:layout_marginVertical="2dp"
             android:layout_weight="1"
             android:background="@drawable/bg_r7white_shadow"
             android:backgroundTint="#220BE6"
@@ -60,7 +58,7 @@
             android:id="@+id/ll_main_voice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
+            android:layout_marginVertical="2dp"
             android:layout_weight="1"
             android:background="@drawable/bg_r7white_shadow"
             android:backgroundTint="#620CF0"
@@ -90,7 +88,7 @@
             android:id="@+id/ll_main_prescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
+            android:layout_marginVertical="2dp"
             android:layout_weight="1"
             android:background="@drawable/bg_r7white_shadow"
             android:backgroundTint="#AF19FF"
@@ -120,7 +118,7 @@
             android:id="@+id/ll_main_mypage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
+            android:layout_marginVertical="2dp"
             android:layout_weight="1"
             android:background="@drawable/bg_r7white_shadow"
             android:backgroundTint="#DE0CF0"
