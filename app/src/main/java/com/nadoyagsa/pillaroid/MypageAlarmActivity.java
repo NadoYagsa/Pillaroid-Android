@@ -1,5 +1,6 @@
 package com.nadoyagsa.pillaroid;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -51,8 +52,6 @@ public class MypageAlarmActivity extends AppCompatActivity {
 
     private void toolbarListener(Toolbar toolbar) {
         AppCompatButton btSetTime = toolbar.findViewById(R.id.bt_ab_alarm_time_setting);
-        btSetTime.setOnClickListener(view -> {
-            //startActivity(new Intent(this, TimeSettingActivity.class));
-        });
+        btSetTime.setOnClickListener(view -> startActivity(new Intent(this, TimeSettingActivity.class)));
     }
 }
