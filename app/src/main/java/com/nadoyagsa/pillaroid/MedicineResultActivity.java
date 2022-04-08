@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.Toolbar;
 
 import com.nadoyagsa.pillaroid.data.MedicineInfo;
@@ -53,13 +54,13 @@ public class MedicineResultActivity extends AppCompatActivity {
         tvTitle.setText("타이레놀정500밀리그람");
         tvTitle.setSelected(true);  //ellipsize="marquee" 실행되도록 selected 설정
 
-        ImageView ivAlarm = toolbar.findViewById(R.id.iv_ab_medicineresult_alarm);
-        ivAlarm.setOnClickListener(v -> showAlarmDialog());
-
-        ImageView ivSubscribe = toolbar.findViewById(R.id.iv_ab_medicineresult_subscribe);
-        ivSubscribe.setOnClickListener(v -> {
-            //TODO: 즐겨찾기 관리
+        AppCompatImageButton ibtStar = toolbar.findViewById(R.id.ibt_ab_medicineresult_star);
+        ibtStar.setOnClickListener(v -> {
+            //TODO: 즐겨찾기 관리 (ibtStar.tag=on/off)
         });
+
+        AppCompatImageButton ivAlarm = toolbar.findViewById(R.id.ibt_ab_medicineresult_alarm);
+        ivAlarm.setOnClickListener(v -> showAlarmDialog());
     }
 
     public final void showAlarmDialog() {
