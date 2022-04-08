@@ -29,7 +29,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
 
     private void initActionBar(Toolbar toolbar) {
         ImageView ivIcon = toolbar.findViewById(R.id.iv_ab_icontext_icon);
-        ivIcon.setImageResource(R.drawable.icon_voice_bl);
+        ivIcon.setImageResource(R.drawable.icon_voice);
         ivIcon.setContentDescription("녹음기 아이콘");
 
         TextView tvTitle = toolbar.findViewById(R.id.tv_ab_icontext_title);
