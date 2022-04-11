@@ -48,6 +48,7 @@ public class MypageAlarmActivity extends AppCompatActivity {
         DividerItemDecoration devider = new DividerItemDecoration(this, 1);
         devider.setDrawable(Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.item_divide_bar, null)));
         rvAlarm.addItemDecoration(devider);
+
     }
 
     private void toolbarListener(Toolbar toolbar) {

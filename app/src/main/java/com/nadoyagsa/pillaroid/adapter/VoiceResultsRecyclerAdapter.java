@@ -1,6 +1,7 @@
 package com.nadoyagsa.pillaroid.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,12 +10,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.nadoyagsa.pillaroid.MedicineResultActivity;
 import com.nadoyagsa.pillaroid.R;
+import com.nadoyagsa.pillaroid.VoiceResultsActivity;
 import com.nadoyagsa.pillaroid.data.VoiceResultInfo;
 
 import java.util.ArrayList;
 
 public class VoiceResultsRecyclerAdapter extends RecyclerView.Adapter<VoiceResultsRecyclerAdapter.VoiceResultsViewHolder> {
+    private Context context;
     private final ArrayList<VoiceResultInfo> voiceResultsList;
 
     public VoiceResultsRecyclerAdapter(ArrayList<VoiceResultInfo> voiceResultsList) {
@@ -24,7 +28,7 @@ public class VoiceResultsRecyclerAdapter extends RecyclerView.Adapter<VoiceResul
     @NonNull
     @Override
     public VoiceResultsRecyclerAdapter.VoiceResultsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+        context = parent.getContext();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View view = inflater.inflate(R.layout.item_voice_results, parent, false);
@@ -43,13 +47,21 @@ public class VoiceResultsRecyclerAdapter extends RecyclerView.Adapter<VoiceResul
         return voiceResultsList.size();
     }
 
-    public static class VoiceResultsViewHolder extends RecyclerView.ViewHolder {
+    public class VoiceResultsViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvName;
 
         public VoiceResultsViewHolder(@NonNull View itemView) {
             super(itemView);
 
             this.tvName = itemView.findViewById(R.id.tv_item_voiceresults_name);
+
+            itemView.setOnClickListener(v -> {
+                int pos = getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    //TODO: 약의 세부 내용 보여줌
+                    context.startActivity(new Intent(context, MedicineResultActivity.class));
+                }
+            });
         }
     }
 }

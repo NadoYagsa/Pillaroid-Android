@@ -1,5 +1,6 @@
 package com.nadoyagsa.pillaroid;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -7,7 +8,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.Toolbar;
+
+import java.util.Objects;
 
 public class SearchVoiceActivity extends AppCompatActivity {
 
@@ -19,12 +23,15 @@ public class SearchVoiceActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.tb_voicesearch_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
+            Objects.requireNonNull(actionBar).setDisplayShowCustomEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false);
         View customView = View.inflate(this, R.layout.actionbar_icon_text, null);
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
         initActionBar(toolbar);
+
+        AppCompatButton btResult = findViewById(R.id.bt_voicesearch_result);
+        btResult.setOnClickListener(v -> startActivity(new Intent(this, VoiceResultsActivity.class)));
     }
 
     private void initActionBar(Toolbar toolbar) {

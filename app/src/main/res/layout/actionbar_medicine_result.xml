@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:padding="15dp">
+    android:padding="10dp">
 
     <ImageView
         android:id="@+id/iv_ab_medicineresult_icon"
@@ -23,7 +23,6 @@
         android:paddingHorizontal="15dp"
         android:singleLine="true"
         android:text="타이틀"
-        android:textColor="@color/black"
         android:textSize="24sp"
         android:textStyle="bold" />
 
