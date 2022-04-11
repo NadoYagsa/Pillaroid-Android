@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pillaroid">
         <activity
-            android:name=".MainActivity"
+            android:name=".IntroActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,10 +18,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".IntroActivity" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".SearchCameraActivity"/>
+        <activity android:name=".SearchCaseActivity"/>
+        <activity android:name=".SearchPillActivity"/>
+        <activity android:name=".PrescriptionResultActivity"/>
         <activity android:name=".SearchVoiceActivity" />
         <activity android:name=".VoiceResultsActivity" />
         <activity android:name=".MedicineResultActivity" />
+        <activity android:name=".LoginActivity"/>
+        <activity android:name=".MypageActivity"/>
+        <activity android:name=".MypageFavoritesActivity"/>
+        <activity android:name=".MypageAlarmActivity"/>
+        <activity android:name=".TimeSettingActivity"/>
+        
     </application>
 
 </manifest>
