@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:padding="15dp">
+
+    <ImageView
+        android:id="@+id/iv_ab_medicineresult_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_weight="0"
+        android:scaleType="fitCenter" />
+
+    <TextView
+        android:id="@+id/tv_ab_medicineresult_title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:ellipsize="marquee"
+        android:paddingHorizontal="15dp"
+        android:singleLine="true"
+        android:text="타이틀"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/ibt_ab_medicineresult_star"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:layout_weight="0"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_star_off"
+        android:tag="off" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/ibt_ab_medicineresult_alarm"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="20dp"
+        android:layout_weight="0"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_bell_off" />
+
+</LinearLayout>
