@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@drawable/bg_r10white_top"
-        android:backgroundTint="#8E00D8"
+        android:backgroundTint="@color/main_color"
         android:gravity="center"
         android:text="알림 생성"
         android:textColor="@color/white"
@@ -28,7 +28,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="레이블: "
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <EditText
@@ -51,7 +50,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="복용 기간: "
-            android:textColor="@color/black"
             android:textSize="16sp" />
 
         <EditText
@@ -66,7 +64,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="일"
-            android:textColor="@color/black"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -86,7 +83,6 @@
             android:backgroundTint="#C4C4C4"
             android:gravity="center"
             android:text="취소"
-            android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -96,7 +92,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/bg_r10white_bottomright"
-            android:backgroundTint="#8E00D8"
+            android:backgroundTint="@color/main_color"
             android:gravity="center"
             android:text="확인"
             android:textColor="@color/white"

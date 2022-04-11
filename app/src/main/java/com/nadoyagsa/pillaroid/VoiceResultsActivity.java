@@ -55,6 +55,8 @@ public class VoiceResultsActivity extends AppCompatActivity {
         VoiceResultsRecyclerAdapter voiceResultsRecyclerAdapter = new VoiceResultsRecyclerAdapter(voiceResults);
         rvResults.setAdapter(voiceResultsRecyclerAdapter);
         rvResults.setItemAnimator(null);
+
+
     }
 
     private void initActionBar(Toolbar toolbar) {

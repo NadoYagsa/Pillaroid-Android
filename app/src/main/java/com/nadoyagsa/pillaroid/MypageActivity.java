@@ -1,7 +1,9 @@
 package com.nadoyagsa.pillaroid;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,5 +26,11 @@ public class MypageActivity extends AppCompatActivity {
         View customView = View.inflate(this, R.layout.actionbar_mypage, null);
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
+
+        RelativeLayout rlFavorites = findViewById(R.id.rl_mypage_favorites);
+        rlFavorites.setOnClickListener(v -> startActivity(new Intent(this, MypageFavoritesActivity.class)));
+
+        RelativeLayout rlAlarm = findViewById(R.id.rl_mypage_alarm);
+        rlAlarm.setOnClickListener(v -> startActivity(new Intent(this, MypageAlarmActivity.class)));
     }
 }

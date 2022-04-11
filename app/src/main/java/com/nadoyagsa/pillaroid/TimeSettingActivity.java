@@ -23,11 +23,11 @@ public class TimeSettingActivity extends AppCompatActivity {
             Objects.requireNonNull(actionBar).setDisplayShowCustomEnabled(true);
             actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setDisplayHomeAsUpEnabled(false);
-        View customView = View.inflate(this, R.layout.actionbar_general, null);
+        View customView = View.inflate(this, R.layout.actionbar_icon_text, null);
         /* 액션바 아이콘과 주제 설정 */
-        ImageView ivIcon = customView.findViewById(R.id.iv_ab_general_icon);
+        ImageView ivIcon = customView.findViewById(R.id.iv_ab_icontext_icon);
         ivIcon.setImageResource(R.drawable.icon_alarm);
-        TextView tvTopic = customView.findViewById(R.id.tv_ab_general_topic);
+        TextView tvTopic = customView.findViewById(R.id.tv_ab_icontext_title);
         tvTopic.setText("알림 시간대 설정");
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
