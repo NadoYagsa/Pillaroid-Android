@@ -1,9 +1,16 @@
 package com.nadoyagsa.pillaroid;
 
+import static android.speech.tts.TextToSpeech.ERROR;
+import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
+import static android.speech.tts.TextToSpeech.SUCCESS;
+
 import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
@@ -12,13 +19,23 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.Toolbar;
 
 import com.nadoyagsa.pillaroid.data.MedicineInfo;
 
+import java.util.Locale;
+import java.util.Objects;
+
 public class MedicineResultActivity extends AppCompatActivity {
     private MedicineInfo result;
+
+    private TextToSpeech tts;
+
+    private AppCompatImageButton ivAlarm;
+    private View dialogView;
+    private AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +45,31 @@ public class MedicineResultActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.tb_medicineresult_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
+            Objects.requireNonNull(actionBar).setDisplayShowCustomEnabled(true);
+            actionBar.setDisplayShowCustomEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false);
         View customView = View.inflate(this, R.layout.actionbar_medicine_result, null);
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
         initActionBar(toolbar);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String voiceSpeed = preferences.getString("voiceSpeed", "1");   //음성 속도
+
+        tts = new TextToSpeech(this, status -> {
+            if (status == SUCCESS) {
+                tts.setSpeechRate(Float.parseFloat(voiceSpeed));
+            } else if (status != ERROR) {
+                tts.setLanguage(Locale.KOREAN);
+            }
+        });
+
+        dialogView = getLayoutInflater().inflate(R.layout.dialog_add_alarm, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         //임시 데이터
         result = new MedicineInfo(
@@ -59,33 +95,48 @@ public class MedicineResultActivity extends AppCompatActivity {
             //TODO: 즐겨찾기 관리 (ibtStar.tag=on/off)
         });
 
-        AppCompatImageButton ivAlarm = toolbar.findViewById(R.id.ibt_ab_medicineresult_alarm);
+        ivAlarm = toolbar.findViewById(R.id.ibt_ab_medicineresult_alarm);
         ivAlarm.setOnClickListener(v -> showAlarmDialog());
     }
 
     public final void showAlarmDialog() {
-        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_alarm, null);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(dialogView);
-
-        final AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.show();
 
         final EditText etLabel = dialogView.findViewById(R.id.et_dialog_addalarm_label);
         etLabel.setHint(result.getMedicineName());
+
+        TextView tvCancel = dialogView.findViewById(R.id.tv_dialog_addalarm_cancel);
+        if (ivAlarm.getTag().equals("on")) {
+            tvCancel.setText("삭제");
+        }
 
         TextView tvOk = dialogView.findViewById(R.id.tv_dialog_addalarm_ok);
         tvOk.setOnClickListener(v -> {
             String label = etLabel.getText().toString().equals("") ? etLabel.getHint().toString() : etLabel.getText().toString();
             int days = Integer.parseInt(((EditText) dialogView.findViewById(R.id.et_dialog_addalarm_days)).getText().toString());
 
+            tts.speak(label + " 이름으로 알림이 생성되었습니다. 복용 기간은 " + days + "일 입니다.", QUEUE_FLUSH, null, null);
+
             //TODO: days 값이 유효하면 서버에 알림 내용 저장
+
+            dialog.hide();
+            ivAlarm.setBackgroundDrawable(AppCompatResources.getDrawable(this, R.drawable.icon_bell_on));
+            ivAlarm.setTag("on");
         });
 
-        TextView tvCancel = dialogView.findViewById(R.id.tv_dialog_addalarm_cancel);
-        tvCancel.setOnClickListener(v -> dialog.dismiss());
+        tvCancel.setOnClickListener(v -> {
+            if (ivAlarm.getTag().equals("on")) {
+                tts.speak("알림이 삭제되었습니다.", QUEUE_FLUSH, null, null);
+
+                //TODO: 서버에 알림 삭제 요청 (사용자 및 의약품 품목일련번호 통해 삭제)
+
+                ivAlarm.setBackgroundDrawable(AppCompatResources.getDrawable(this, R.drawable.icon_bell_off));
+                ivAlarm.setTag("off");
+                ((TextView)v).setText("취소");
+            }
+            etLabel.setText("");
+            ((EditText) dialogView.findViewById(R.id.et_dialog_addalarm_days)).setText("");
+            dialog.dismiss();
+        });
     }
 }
