@@ -52,13 +52,16 @@
                     android:layout_height="20dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/icon_minus" />
+
                 <TextView
+                    android:id="@+id/tv_mypage_guide_volume"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="25dp"
-                    android:text="3"
+                    android:text="8"
                     android:textSize="20sp"
                     android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/iv_mypage_guide_plus"
                     android:layout_width="20dp"
