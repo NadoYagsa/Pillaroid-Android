@@ -45,7 +45,7 @@ public class IntroActivity extends AppCompatActivity {
                 TextView tvDescription = findViewById(R.id.tv_intro_description);
                 tts.speak(tvDescription.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, null);
             } else if (status != ERROR) {
-                Log.e("TTS", "Initilization Failed");
+                Log.e("TTS", "Initialization Failed");
             }
         });
 

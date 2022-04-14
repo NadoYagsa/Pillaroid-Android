@@ -61,9 +61,14 @@ public class MypageActivity extends AppCompatActivity {
 
         tts = new TextToSpeech(this, status -> {
             if (status == SUCCESS) {
+                int result = tts.setLanguage(Locale.KOREAN);
+                if (result == TextToSpeech.LANG_MISSING_DATA
+                        || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.e("TTS", "Language is not supported");
+                }
                 tts.setSpeechRate(Float.parseFloat(voiceSpeed));
             } else if (status != ERROR) {
-                tts.setLanguage(Locale.KOREAN);
+                Log.e("TTS", "Initialization Failed");
             }
         });
 
