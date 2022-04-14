@@ -95,7 +95,7 @@ public class MedicineResultActivity extends AppCompatActivity {
             //TODO: 즐겨찾기 관리 (ibtStar.tag=on/off)
         });
 
-        ivAlarm = toolbar.findViewById(R.id.ibt_ab_medicineresult_alarm);
+        ivAlarm = toolbar.findViewById(R.id.ibt_ab_medicineresult_alarm);   //TODO: 시각장애인 모드일 때 description 읽어주는지 확인하기
         ivAlarm.setOnClickListener(v -> showAlarmDialog());
     }
 
@@ -138,5 +138,20 @@ public class MedicineResultActivity extends AppCompatActivity {
             ((EditText) dialogView.findViewById(R.id.et_dialog_addalarm_days)).setText("");
             dialog.dismiss();
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            //tts 자원 해제
+            if (tts != null) {
+                tts.stop();
+                tts.shutdown();
+                tts = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
