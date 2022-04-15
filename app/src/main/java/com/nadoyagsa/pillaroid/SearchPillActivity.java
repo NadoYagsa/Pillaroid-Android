@@ -3,9 +3,7 @@ package com.nadoyagsa.pillaroid;
 import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
@@ -21,9 +19,6 @@ public class SearchPillActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_pill);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String voiceSpeed = preferences.getString("voiceSpeed", "1");   //음성 속도
-
         tts = new TextToSpeech(this, status -> {
             if (status == SUCCESS) {
                 int result = tts.setLanguage(Locale.KOREAN);
@@ -31,7 +26,7 @@ public class SearchPillActivity extends AppCompatActivity {
                         || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.e("TTS", "Language is not supported");
                 }
-                tts.setSpeechRate(Float.parseFloat(voiceSpeed));
+                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
 
                 tts.speak("후면 카메라가 켜졌습니다. 손에 알약을 놓고 카메라 뒤로 위치시켜주세요.", TextToSpeech.QUEUE_FLUSH, null, null);
             } else if (status != ERROR) {

@@ -6,10 +6,8 @@ import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
@@ -30,10 +28,10 @@ import java.util.Objects;
 
 public class MypageActivity extends AppCompatActivity {
     private AudioManager mAudioManager;
-    private SharedPreferences preferences;
     private TextToSpeech tts;
 
     private IndicatorSeekBar isbVoiceSpeed;
+    private TextView tvGuideVolume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +51,11 @@ public class MypageActivity extends AppCompatActivity {
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String voiceSpeed = preferences.getString("voiceSpeed", "1");
+        tvGuideVolume = findViewById(R.id.tv_mypage_guide_volume);
+        tvGuideVolume.setText(String.valueOf(SharedPrefManager.read("guideVolume", 8)));
 
         isbVoiceSpeed = findViewById(R.id.isb_mypage_voice_speed);
-        isbVoiceSpeed.setProgress(Float.parseFloat(voiceSpeed) * 100);
+        isbVoiceSpeed.setProgress(SharedPrefManager.read("voiceSpeed", (float) 1) * 100);
 
         tts = new TextToSpeech(this, status -> {
             if (status == SUCCESS) {
@@ -66,7 +64,7 @@ public class MypageActivity extends AppCompatActivity {
                         || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.e("TTS", "Language is not supported");
                 }
-                tts.setSpeechRate(Float.parseFloat(voiceSpeed));
+                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
             }
@@ -78,7 +76,7 @@ public class MypageActivity extends AppCompatActivity {
     private void setListener() {
         @SuppressLint("ApplySharedPref")
         View.OnClickListener guideVolumeClickListener = ivGuideView -> {
-            TextView tvGuideVolume = findViewById(R.id.tv_mypage_guide_volume);
+            tvGuideVolume = findViewById(R.id.tv_mypage_guide_volume);
             int guideVolume = Integer.parseInt(tvGuideVolume.getText().toString());
 
             if (guideVolume == mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) && ivGuideView == findViewById(R.id.iv_mypage_guide_plus)) {
@@ -91,10 +89,7 @@ public class MypageActivity extends AppCompatActivity {
             if (ivGuideView == findViewById(R.id.iv_mypage_guide_plus)) guideVolume++;
             else if (ivGuideView == findViewById(R.id.iv_mypage_guide_minus)) guideVolume--;
 
-            SharedPreferences.Editor edit = preferences.edit();
-            edit.putString("guideVolume", String.valueOf(guideVolume));
-            edit.commit();
-
+            SharedPrefManager.write("guideVolume", guideVolume);
             tvGuideVolume.setText(String.valueOf(guideVolume));
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, guideVolume, AudioManager.FLAG_SHOW_UI);
 
@@ -117,11 +112,7 @@ public class MypageActivity extends AppCompatActivity {
             @Override
             public void onSeeking(SeekParams seekParams) {
                 float speed = (float) seekParams.progress / 100;
-
-                SharedPreferences.Editor edit = preferences.edit();
-                edit.putString("voiceSpeed", String.valueOf(speed));
-                edit.commit();
-
+                SharedPrefManager.write("voiceSpeed", speed);
                 tts.setSpeechRate(speed);
                 tts.speak(speed + " 배속으로 설정되었습니다", QUEUE_FLUSH, null, null);
             }
