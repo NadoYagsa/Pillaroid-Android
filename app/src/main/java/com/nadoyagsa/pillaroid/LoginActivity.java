@@ -1,7 +1,9 @@
 package com.nadoyagsa.pillaroid;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -24,6 +26,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
+    private boolean isLogin = false;
     private char fromWhere;     //f는 즐겨찾기 목록 확인, a는 알람 목록 확인
     
     @Override
@@ -53,8 +56,15 @@ public class LoginActivity extends AppCompatActivity {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.code() == 200 || response.code() == 201) {
                         try {
+                            isLogin = true;
                             JSONObject loginInfo = new JSONObject(Objects.requireNonNull(response.body()));
-                            Long userIdx = loginInfo.getJSONObject("user").getLong("userIdx");
+                            String token = loginInfo.getString("authToken");
+
+                            // 토큰을 저장함
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString("token", token);
+                            editor.commit();
 
                             if (fromWhere == 'f')
                                 startActivity(new Intent(LoginActivity.this, MypageFavoritesActivity.class));
@@ -82,4 +92,18 @@ public class LoginActivity extends AppCompatActivity {
 
         return null;
     };
+
+    @Override
+    public void finish() {
+        if (isLogin) {
+            Intent loginIntent = new Intent();
+            setResult(RESULT_OK, loginIntent);
+        }
+        else {
+            Intent returnIntent = new Intent();
+            setResult(RESULT_CANCELED, returnIntent);
+        }
+
+        super.finish();
+    }
 }
