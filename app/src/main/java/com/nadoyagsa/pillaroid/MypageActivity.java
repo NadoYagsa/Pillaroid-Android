@@ -100,6 +100,9 @@ public class MypageActivity extends AppCompatActivity {
 
             isToken = false;
             llLogout.setVisibility(View.INVISIBLE);
+
+            //TODO: 위에서 tts 객체 생성하는 것보다 아래의 코드가 더 빠름! 위의 코드 수정 요망!
+            tts.speak("로그아웃이 완료되었습니다.", QUEUE_FLUSH, null, null);
         });
     }
 
@@ -169,26 +172,32 @@ public class MypageActivity extends AppCompatActivity {
                     }
                 });
 
-        // 자동로그인 안됨->LoginActivity로 이동  ||  자동로그인 됨->MypageFavoritesActivity(즐겨찾기 목록)으로 이동
+        // 자동로그인 됨->MypageFavoritesActivity(즐겨찾기 목록)으로 이동  ||  자동로그인 안됨->LoginActivity로 이동
         RelativeLayout rlFavorites = findViewById(R.id.rl_mypage_favorites);
         rlFavorites.setOnClickListener(view -> {
             String token = preferences.getString("token", "");
             if (!token.equals(""))
                 startActivity(new Intent(this, MypageFavoritesActivity.class));
             else {
+                //TODO: 문장이 너무 길어서 음성이 너무 오래 들림
+                tts.speak("즐겨찾기 기능은 로그인이 필요해 카카오 로그인 화면으로 넘어갑니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+
                 Intent loginIntent = new Intent(this, LoginActivity.class);
                 loginIntent.putExtra("from", 'f');
                 startActivityResultLogin.launch(loginIntent);
             }
         });
 
-        // 자동로그인 안됨->LoginActivity로 이동  ||  자동로그인 됨->MypageAlarmActivity(알람 목록)으로 이동
+        // 자동로그인 됨->MypageAlarmActivity(알림 목록)으로 이동  ||  자동로그인 안됨->LoginActivity로 이동
         RelativeLayout rlAlarm = findViewById(R.id.rl_mypage_alarm);
         rlAlarm.setOnClickListener(view -> {
             String token = preferences.getString("token", "");
             if (!token.equals(""))
                 startActivity(new Intent(this, MypageAlarmActivity.class));
             else {
+                //TODO: 문장이 너무 길어서 음성이 너무 오래 들림
+                tts.speak("알림 기능은 로그인이 필요해 카카오 로그인 화면으로 넘어갑니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+                
                 Intent loginIntent = new Intent(this, LoginActivity.class);
                 loginIntent.putExtra("from", 'a');
                 startActivityResultLogin.launch(loginIntent);
