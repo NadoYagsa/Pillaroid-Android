@@ -1,7 +1,7 @@
 package com.nadoyagsa.pillaroid;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -24,10 +24,14 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
+    private char fromWhere;     //f는 즐겨찾기 목록 확인, a는 알람 목록 확인
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        fromWhere = getIntent().getCharExtra("from", 'a');
 
         LinearLayout llKakaoLogin = findViewById(R.id.ll_login_kakao);
         llKakaoLogin.setOnClickListener(view -> {
@@ -51,12 +55,13 @@ public class LoginActivity extends AppCompatActivity {
                         try {
                             JSONObject loginInfo = new JSONObject(Objects.requireNonNull(response.body()));
                             Long userIdx = loginInfo.getJSONObject("user").getLong("userIdx");
-                            Log.i("확인용", loginInfo.toString());
 
-                            //TODO: 클릭한 버튼이 무엇인지 확인(즐겨찾기? or 알람?)
-                            //startActivity(new Intent(LoginActivity.this, MypageAlarmActivity.class));
-                            //startActivity(new Intent(LoginActivity.this, MypageFavoritesActivity.class));
-                            //finish();
+                            if (fromWhere == 'f')
+                                startActivity(new Intent(LoginActivity.this, MypageFavoritesActivity.class));
+                            else if (fromWhere == 'a')
+                                startActivity(new Intent(LoginActivity.this, MypageAlarmActivity.class));
+
+                            finish();
                         } catch (JSONException e) { e.printStackTrace(); }
                     }
                     else {

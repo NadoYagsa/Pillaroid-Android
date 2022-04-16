@@ -5,6 +5,7 @@ import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
@@ -14,6 +15,7 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -49,6 +51,7 @@ public class MypageActivity extends AppCompatActivity {
         View customView = View.inflate(this, R.layout.actionbar_mypage, null);
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
+        setToolbarListener(toolbar);
 
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -73,6 +76,13 @@ public class MypageActivity extends AppCompatActivity {
         });
 
         setListener();
+    }
+    
+    private void setToolbarListener(Toolbar toolbar) {
+        LinearLayout llLogout = toolbar.findViewById(R.id.ll_ab_mypage_logout);
+        llLogout.setOnClickListener(view -> {
+            //TODO: 로그아웃
+        });
     }
 
     private void setListener() {
@@ -132,10 +142,28 @@ public class MypageActivity extends AppCompatActivity {
         });
 
         RelativeLayout rlFavorites = findViewById(R.id.rl_mypage_favorites);
-        rlFavorites.setOnClickListener(v -> startActivity(new Intent(this, MypageFavoritesActivity.class)));
+        rlFavorites.setOnClickListener(view -> {
+            //TODO: 로그인이 되어 있는 상황이라면 즐겨찾기 목록으로 이동
+            //if
+                //startActivity(new Intent(this, MypageFavoritesActivity.class));
+            //else {
+                Intent loginIntent = new Intent(this, LoginActivity.class);
+                loginIntent.putExtra("from", 'f');
+                startActivity(loginIntent);
+            //}
+        });
 
         RelativeLayout rlAlarm = findViewById(R.id.rl_mypage_alarm);
-        rlAlarm.setOnClickListener(v -> startActivity(new Intent(this, MypageAlarmActivity.class)));
+        rlAlarm.setOnClickListener(view -> {
+            //TODO: 로그인이 되어 있는 상황이라면 알람 목록으로 이동
+            //if ()
+            //startActivity(new Intent(this, MypageAlarmActivity.class));
+            //else {
+                Intent loginIntent = new Intent(this, LoginActivity.class);
+                loginIntent.putExtra("from", 'a');
+                startActivity(loginIntent);
+            //}
+        });
     }
 
     @Override
