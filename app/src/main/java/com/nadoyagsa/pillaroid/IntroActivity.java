@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -17,6 +18,9 @@ import java.util.Locale;
 
 public class IntroActivity extends AppCompatActivity {
     private TextToSpeech tts;
+    private final String INTRO_DESCRIPTION = "intro-description";
+
+    TextView tvDescription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +32,7 @@ public class IntroActivity extends AppCompatActivity {
         AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);    //설정한 음량값으로 음량 조절
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, SharedPrefManager.read("guideVolume", 8), AudioManager.FLAG_SHOW_UI);
 
+        tvDescription = findViewById(R.id.tv_intro_description);
         tts = new TextToSpeech(this, status -> {
             if (status == SUCCESS) {
                 int result = tts.setLanguage(Locale.KOREAN);
@@ -37,13 +42,27 @@ public class IntroActivity extends AppCompatActivity {
                 }
                 tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
 
-                TextView tvDescription = findViewById(R.id.tv_intro_description);
-                tts.speak(tvDescription.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, null);
-
-                //TODO: tts speak 끝나면 MainActivity 로 넘어가기
+                tts.speak(tvDescription.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, INTRO_DESCRIPTION);
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
             }
+        });
+
+        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) { }
+
+            @Override
+            public void onDone(String utteranceId) {
+                if (utteranceId.equals(INTRO_DESCRIPTION)) {
+                    //tts speak 끝나면 MainActivity 로 넘어가기
+                    startActivity(new Intent(IntroActivity.this, MainActivity.class));
+                    finish();
+                }
+            }
+
+            @Override
+            public void onError(String utteranceId) { }
         });
 
         AppCompatButton btNext = findViewById(R.id.bt_intro_next);
