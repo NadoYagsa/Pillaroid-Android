@@ -5,11 +5,9 @@ import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.app.AlertDialog;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
@@ -54,9 +52,6 @@ public class MedicineResultActivity extends AppCompatActivity {
         actionBar.setCustomView(customView, params);
         initActionBar(toolbar);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String voiceSpeed = preferences.getString("voiceSpeed", "1");   //음성 속도
-
         tts = new TextToSpeech(this, status -> {
             if (status == SUCCESS) {
                 int result = tts.setLanguage(Locale.KOREAN);
@@ -64,7 +59,7 @@ public class MedicineResultActivity extends AppCompatActivity {
                         || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.e("TTS", "Language is not supported");
                 }
-                tts.setSpeechRate(Float.parseFloat(voiceSpeed));
+                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
             }

@@ -5,9 +5,7 @@ import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.widget.LinearLayout;
@@ -36,9 +34,8 @@ public class LoginActivity extends AppCompatActivity {
     private boolean isLogin = false;
     private char fromWhere;     //f는 즐겨찾기 목록 확인, a는 알람 목록 확인
 
-    private SharedPreferences preferences;
     private TextToSpeech tts;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +43,6 @@ public class LoginActivity extends AppCompatActivity {
 
         fromWhere = getIntent().getCharExtra("from", 'a');
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
-        String voiceSpeed = preferences.getString("voiceSpeed", "1");
         tts = new TextToSpeech(this, status -> {
             if (status == SUCCESS) {
                 int result = tts.setLanguage(Locale.KOREAN);
@@ -55,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
                         || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.e("TTS", "Language is not supported");
                 }
-                tts.setSpeechRate(Float.parseFloat(voiceSpeed));
+                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
             }
@@ -86,9 +81,7 @@ public class LoginActivity extends AppCompatActivity {
                             String token = loginInfo.getString("authToken");
 
                             // 토큰을 저장함
-                            SharedPreferences.Editor editor = preferences.edit();
-                            editor.putString("token", token);
-                            editor.commit();
+                            SharedPrefManager.write("token", token);
 
                             if (fromWhere == 'f') {
                                 tts.speak("로그인 되셨습니다. 즐겨찾기 목록 화면으로 넘어갑니다.", QUEUE_FLUSH, null, null);

@@ -4,9 +4,7 @@ import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
@@ -39,9 +37,6 @@ public class SearchVoiceActivity extends AppCompatActivity {
         actionBar.setCustomView(customView, params);
         initActionBar(toolbar);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String voiceSpeed = preferences.getString("voiceSpeed", "1");   //음성 속도
-
         tts = new TextToSpeech(this, status -> {
             if (status == SUCCESS) {
                 int result = tts.setLanguage(Locale.KOREAN);
@@ -49,7 +44,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
                         || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.e("TTS", "Language is not supported");
                 }
-                tts.setSpeechRate(Float.parseFloat(voiceSpeed));
+                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
 
                 //TODO: layout text들 string.xml에 넣으면 getString(R.string._)로 바꾸기
                 tts.speak("검색할 의약품 이름을 볼륨 버튼을 누르고 말해주세요.", TextToSpeech.QUEUE_FLUSH, null, null);
