@@ -6,10 +6,8 @@ import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
@@ -35,21 +33,33 @@ public class MypageActivity extends AppCompatActivity {
     private boolean isToken = false;
 
     private AudioManager mAudioManager;
-    private LinearLayout llLogout;
-    private SharedPreferences preferences;
-    private IndicatorSeekBar isbVoiceSpeed;
     private TextToSpeech tts;
+
+    private IndicatorSeekBar isbVoiceSpeed;
+    private LinearLayout llLogout;
+    private TextView tvGuideVolume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mypage);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        String token = preferences.getString("token", "");
+        String token = SharedPrefManager.read("token", "");
         if (!token.equals(""))
             isToken = true;
+
+        tts = new TextToSpeech(this, status -> {
+            if (status == SUCCESS) {
+                int result = tts.setLanguage(Locale.KOREAN);
+                if (result == TextToSpeech.LANG_MISSING_DATA
+                        || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.e("TTS", "Language is not supported");
+                }
+                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
+            } else if (status != ERROR) {
+                Log.e("TTS", "Initialization Failed");
+            }
+        });
 
         Toolbar toolbar = findViewById(R.id.tb_mypage_toolbar);
         setSupportActionBar(toolbar);
@@ -67,22 +77,10 @@ public class MypageActivity extends AppCompatActivity {
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        String voiceSpeed = preferences.getString("voiceSpeed", "1");
+        tvGuideVolume = findViewById(R.id.tv_mypage_guide_volume);
+        tvGuideVolume.setText(String.valueOf(SharedPrefManager.read("guideVolume", 8)));
         isbVoiceSpeed = findViewById(R.id.isb_mypage_voice_speed);
-        isbVoiceSpeed.setProgress(Float.parseFloat(voiceSpeed) * 100);
-
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA
-                        || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(Float.parseFloat(voiceSpeed));
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
+        isbVoiceSpeed.setProgress(SharedPrefManager.read("voiceSpeed", (float) 1) * 100);
 
         setListener();
     }
@@ -94,14 +92,11 @@ public class MypageActivity extends AppCompatActivity {
             llLogout.setVisibility(View.INVISIBLE);
 
         llLogout.setOnClickListener(view -> {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.remove("token");
-            editor.commit();
+            SharedPrefManager.remove("token");
 
             isToken = false;
             llLogout.setVisibility(View.INVISIBLE);
 
-            //TODO: 위에서 tts 객체 생성하는 것보다 아래의 코드가 더 빠름! 위의 코드 수정 요망!
             tts.speak("로그아웃이 완료되었습니다.", QUEUE_FLUSH, null, null);
         });
     }
@@ -109,7 +104,7 @@ public class MypageActivity extends AppCompatActivity {
     private void setListener() {
         @SuppressLint("ApplySharedPref")
         View.OnClickListener guideVolumeClickListener = ivGuideView -> {
-            TextView tvGuideVolume = findViewById(R.id.tv_mypage_guide_volume);
+            tvGuideVolume = findViewById(R.id.tv_mypage_guide_volume);
             int guideVolume = Integer.parseInt(tvGuideVolume.getText().toString());
 
             if (guideVolume == mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) && ivGuideView == findViewById(R.id.iv_mypage_guide_plus)) {
@@ -122,10 +117,7 @@ public class MypageActivity extends AppCompatActivity {
             if (ivGuideView == findViewById(R.id.iv_mypage_guide_plus)) guideVolume++;
             else if (ivGuideView == findViewById(R.id.iv_mypage_guide_minus)) guideVolume--;
 
-            SharedPreferences.Editor edit = preferences.edit();
-            edit.putString("guideVolume", String.valueOf(guideVolume));
-            edit.commit();
-
+            SharedPrefManager.write("guideVolume", guideVolume);
             tvGuideVolume.setText(String.valueOf(guideVolume));
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, guideVolume, AudioManager.FLAG_SHOW_UI);
 
@@ -148,11 +140,7 @@ public class MypageActivity extends AppCompatActivity {
             @Override
             public void onSeeking(SeekParams seekParams) {
                 float speed = (float) seekParams.progress / 100;
-
-                SharedPreferences.Editor edit = preferences.edit();
-                edit.putString("voiceSpeed", String.valueOf(speed));
-                edit.commit();
-
+                SharedPrefManager.write("voiceSpeed", speed);
                 tts.setSpeechRate(speed);
                 tts.speak(speed + " 배속으로 설정되었습니다", QUEUE_FLUSH, null, null);
             }
@@ -175,12 +163,11 @@ public class MypageActivity extends AppCompatActivity {
         // 자동로그인 됨->MypageFavoritesActivity(즐겨찾기 목록)으로 이동  ||  자동로그인 안됨->LoginActivity로 이동
         RelativeLayout rlFavorites = findViewById(R.id.rl_mypage_favorites);
         rlFavorites.setOnClickListener(view -> {
-            String token = preferences.getString("token", "");
+            String token = SharedPrefManager.read("token", "");
             if (!token.equals(""))
                 startActivity(new Intent(this, MypageFavoritesActivity.class));
             else {
-                //TODO: 문장이 너무 길어서 음성이 너무 오래 들림
-                tts.speak("즐겨찾기 기능은 로그인이 필요해 카카오 로그인 화면으로 넘어갑니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+                tts.speak("즐겨찾기 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
 
                 Intent loginIntent = new Intent(this, LoginActivity.class);
                 loginIntent.putExtra("from", 'f');
@@ -191,12 +178,11 @@ public class MypageActivity extends AppCompatActivity {
         // 자동로그인 됨->MypageAlarmActivity(알림 목록)으로 이동  ||  자동로그인 안됨->LoginActivity로 이동
         RelativeLayout rlAlarm = findViewById(R.id.rl_mypage_alarm);
         rlAlarm.setOnClickListener(view -> {
-            String token = preferences.getString("token", "");
+            String token = SharedPrefManager.read("token", "");
             if (!token.equals(""))
                 startActivity(new Intent(this, MypageAlarmActivity.class));
             else {
-                //TODO: 문장이 너무 길어서 음성이 너무 오래 들림
-                tts.speak("알림 기능은 로그인이 필요해 카카오 로그인 화면으로 넘어갑니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+                tts.speak("알림 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
                 
                 Intent loginIntent = new Intent(this, LoginActivity.class);
                 loginIntent.putExtra("from", 'a');
