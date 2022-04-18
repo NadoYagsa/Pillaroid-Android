@@ -14,9 +14,12 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -29,33 +32,42 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class MypageActivity extends AppCompatActivity {
-    private AudioManager mAudioManager;
-    private SharedPreferences preferences;
-    private TextToSpeech tts;
+    private boolean isToken = false;
 
+    private AudioManager mAudioManager;
+    private LinearLayout llLogout;
+    private SharedPreferences preferences;
     private IndicatorSeekBar isbVoiceSpeed;
+    private TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mypage);
 
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String token = preferences.getString("token", "");
+        if (!token.equals(""))
+            isToken = true;
+
         Toolbar toolbar = findViewById(R.id.tb_mypage_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-            Objects.requireNonNull(actionBar).setDisplayShowCustomEnabled(true);
-            actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(false);
+        Objects.requireNonNull(actionBar).setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(false);
         View customView = View.inflate(this, R.layout.actionbar_mypage, null);
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
 
+        llLogout = toolbar.findViewById(R.id.ll_ab_mypage_logout);
+        setToolbarListener(llLogout);
+
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String voiceSpeed = preferences.getString("voiceSpeed", "1");
-
         isbVoiceSpeed = findViewById(R.id.isb_mypage_voice_speed);
         isbVoiceSpeed.setProgress(Float.parseFloat(voiceSpeed) * 100);
 
@@ -73,6 +85,25 @@ public class MypageActivity extends AppCompatActivity {
         });
 
         setListener();
+    }
+
+    private void setToolbarListener(LinearLayout llLogout) {
+        if (isToken)
+            llLogout.setVisibility(View.VISIBLE);
+        else
+            llLogout.setVisibility(View.INVISIBLE);
+
+        llLogout.setOnClickListener(view -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.remove("token");
+            editor.commit();
+
+            isToken = false;
+            llLogout.setVisibility(View.INVISIBLE);
+
+            //TODO: 위에서 tts 객체 생성하는 것보다 아래의 코드가 더 빠름! 위의 코드 수정 요망!
+            tts.speak("로그아웃이 완료되었습니다.", QUEUE_FLUSH, null, null);
+        });
     }
 
     private void setListener() {
@@ -131,11 +162,47 @@ public class MypageActivity extends AppCompatActivity {
             public void onStopTrackingTouch(IndicatorSeekBar seekBar) { }
         });
 
-        RelativeLayout rlFavorites = findViewById(R.id.rl_mypage_favorites);
-        rlFavorites.setOnClickListener(v -> startActivity(new Intent(this, MypageFavoritesActivity.class)));
+        //로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
+        ActivityResultLauncher<Intent> startActivityResultLogin = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        isToken = true;
+                        llLogout.setVisibility(View.VISIBLE);
+                    }
+                });
 
+        // 자동로그인 됨->MypageFavoritesActivity(즐겨찾기 목록)으로 이동  ||  자동로그인 안됨->LoginActivity로 이동
+        RelativeLayout rlFavorites = findViewById(R.id.rl_mypage_favorites);
+        rlFavorites.setOnClickListener(view -> {
+            String token = preferences.getString("token", "");
+            if (!token.equals(""))
+                startActivity(new Intent(this, MypageFavoritesActivity.class));
+            else {
+                //TODO: 문장이 너무 길어서 음성이 너무 오래 들림
+                tts.speak("즐겨찾기 기능은 로그인이 필요해 카카오 로그인 화면으로 넘어갑니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+
+                Intent loginIntent = new Intent(this, LoginActivity.class);
+                loginIntent.putExtra("from", 'f');
+                startActivityResultLogin.launch(loginIntent);
+            }
+        });
+
+        // 자동로그인 됨->MypageAlarmActivity(알림 목록)으로 이동  ||  자동로그인 안됨->LoginActivity로 이동
         RelativeLayout rlAlarm = findViewById(R.id.rl_mypage_alarm);
-        rlAlarm.setOnClickListener(v -> startActivity(new Intent(this, MypageAlarmActivity.class)));
+        rlAlarm.setOnClickListener(view -> {
+            String token = preferences.getString("token", "");
+            if (!token.equals(""))
+                startActivity(new Intent(this, MypageAlarmActivity.class));
+            else {
+                //TODO: 문장이 너무 길어서 음성이 너무 오래 들림
+                tts.speak("알림 기능은 로그인이 필요해 카카오 로그인 화면으로 넘어갑니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+                
+                Intent loginIntent = new Intent(this, LoginActivity.class);
+                loginIntent.putExtra("from", 'a');
+                startActivityResultLogin.launch(loginIntent);
+            }
+        });
     }
 
     @Override
