@@ -57,7 +57,10 @@ public class SearchVoiceActivity extends AppCompatActivity {
         });
 
         AppCompatButton btResult = findViewById(R.id.bt_voicesearch_result);
-        btResult.setOnClickListener(v -> startActivity(new Intent(this, VoiceResultsActivity.class)));
+        btResult.setOnClickListener(v -> {
+            tts.stop(); //진행중이던 tts speak가 있다면 멈춤
+            startActivity(new Intent(this, VoiceResultsActivity.class));
+        });
     }
 
     private void initActionBar(Toolbar toolbar) {
