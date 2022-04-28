@@ -66,13 +66,14 @@
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_voiceresults_results"
+    <ListView
+        android:id="@+id/lv_voiceresults_results"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginHorizontal="40dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="50dp"
+        android:scrollbars="vertical"
         app:layout_constraintTop_toBottomOf="@id/ll_voiceresults_idx"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
