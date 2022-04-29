@@ -231,6 +231,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
                     speechRecognizer.startListening(intent);
                 else {              // 인식 종료 버튼이 눌렸을 때, 종료 시점 이후에 결과가 반환이 되는 경우
                     temporaryQuery = "";
+                    etQuery.setText(etQuery.getText().toString().replaceAll("\\s", ""));
                     tts.speak("음성 인식 종료", TextToSpeech.QUEUE_FLUSH, null, null);
                 }
 
@@ -260,6 +261,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
         // 인식 결과가 모두 출력되었을 경우
         if (isResultEnd) {
             temporaryQuery = "";
+            etQuery.setText(etQuery.getText().toString().replaceAll("\\s", ""));
             tts.speak("음성 인식 종료", TextToSpeech.QUEUE_FLUSH, null, null);
         }
     }
