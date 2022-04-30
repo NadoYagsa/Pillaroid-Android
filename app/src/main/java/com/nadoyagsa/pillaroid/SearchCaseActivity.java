@@ -4,10 +4,15 @@ import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.media.Image;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.Surface;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,16 +20,25 @@ import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.Text;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.TextRecognizer;
+import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
 
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class SearchCaseActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_PERMISSIONS = 1001;
@@ -35,6 +49,10 @@ public class SearchCaseActivity extends AppCompatActivity {
     private TextToSpeech tts;
 
     private PreviewView pvCaseCamera;
+    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+    private Executor caseExecutor;
+    private CaseAnalyzer caseAnalyzer;
+    private TextRecognizer recognizer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +75,9 @@ public class SearchCaseActivity extends AppCompatActivity {
         });
 
         pvCaseCamera = findViewById(R.id.pv_search_case);
+        caseExecutor = Executors.newSingleThreadExecutor();
+        caseAnalyzer = new CaseAnalyzer();
+        recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
 
         if(allPermissionsGranted()){
             startCamera();  //카메라 실행
@@ -69,7 +90,7 @@ public class SearchCaseActivity extends AppCompatActivity {
     }
 
     private void startCamera() {
-        final ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
 
         cameraProviderFuture.addListener(() -> {
             try {
@@ -88,31 +109,66 @@ public class SearchCaseActivity extends AppCompatActivity {
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
-        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder().build();
+        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
+                .setTargetRotation(Surface.ROTATION_270)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)   //ImageProxy.close()시 그때의 최신 이미지를 전달함
+                .build();
+        imageAnalysis.setAnalyzer(caseExecutor, caseAnalyzer);
 
-        ImageCapture.Builder builder = new ImageCapture.Builder();
-
-        final ImageCapture imageCapture = builder
+        final ImageCapture imageCapture = new ImageCapture.Builder()
                 .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())
                 .build();
+
         preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());
+
+        cameraProvider.unbindAll();
         Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis, imageCapture);
 
         //TODO: 볼륨 버튼 리스너 (imageCapture.takePicture로 캡처)
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            //tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    private class CaseAnalyzer implements ImageAnalysis.Analyzer {
+        @Override
+        public void analyze(ImageProxy imageProxy) {
+            detectText(imageProxy);
+            //scanBarcode(imageProxy);
+        }
+    }
+
+    private void detectText(ImageProxy imageProxy) {
+        @SuppressLint("UnsafeOptInUsageError")
+        Image mediaImage = imageProxy.getImage();
+        if (mediaImage != null) {
+            InputImage inputImage =
+                    InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
+            Task<Text> result = recognizer.process(inputImage)
+                    .addOnSuccessListener(text -> {
+                        Log.d("ML TEXT - success", "!!");
+                        //Task completed successfully
+                        String resultText = text.getText();
+                        for (Text.TextBlock block : text.getTextBlocks()) {
+                            String blockText = block.getText(); //block 별 인식되는 텍스트
+                            Point[] blockCornerPoints = block.getCornerPoints();    //block 별 인식되는 영역 경계 좌표
+                            Rect blockFrame = block.getBoundingBox();
+                            Log.d("ML Text - block", blockText);
+                            for (Text.Line line : block.getLines()) {
+                                String lineText = line.getText();   //line 별 인식되는 텍스트
+                                Point[] lineCornerPoints = line.getCornerPoints();  //line 별 인식되는 영역 경계 좌표
+                                Rect lineFrame = line.getBoundingBox();
+                                Log.d("ML Text - line", lineText);
+                                for (Text.Element element : line.getElements()) {
+                                    String elementText = element.getText();     //element 별 인식되는 텍스트
+                                    Point[] elementCornerPoints = element.getCornerPoints();    //element 별 인식되는 영역 경계 좌표
+                                    Rect elementFrame = element.getBoundingBox();
+                                    Log.d("ML Text - element", elementText);
+                                }
+                            }
+                        }
+                        imageProxy.close(); //CameraX 사용시 반드시 해줘야 함
+                    })
+                    .addOnFailureListener(e -> {
+                        //Task failed with an exception
+                    });
         }
     }
 
@@ -136,6 +192,43 @@ public class SearchCaseActivity extends AppCompatActivity {
                 tts.speak("카메라 권한이 승인되지 않아 기능을 사용할 수 없습니다.", QUEUE_FLUSH, null, null);
                 this.finish();
             }
+        }
+    }
+
+    private void closeCamera() {
+        if (cameraProviderFuture != null && caseExecutor != null){
+            cameraProviderFuture.cancel(true);
+            cameraProviderFuture = null;
+            //caseExecutor.shutdown();
+            caseExecutor = null;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startCamera();  //카메라 실행
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        closeCamera();  //카메라 자원 해제
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            //tts 자원 해제
+            if (tts != null) {
+                tts.stop();
+                tts.shutdown();
+                tts = null;
+            }
+            closeCamera();  //카메라 자원 해제
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
