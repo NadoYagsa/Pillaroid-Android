@@ -77,15 +77,17 @@ public class SearchVoiceActivity extends AppCompatActivity {
 
         AppCompatButton btResult = findViewById(R.id.bt_voicesearch_result);
         btResult.setOnClickListener(v -> {
-            //TODO: edittext의 약품 이름이 없다면 넘어가지 않게 해야 함
             tts.stop();     //진행중이던 tts speak가 있다면 멈춤
-            if (isRecording)
-                speechRecognizer.cancel();
-            startActivity(new Intent(this, VoiceResultsActivity.class));
+            if (etQuery.getText().length() > 0) {
+                if (isRecording)
+                    speechRecognizer.cancel();
+                startActivity(new Intent(this, VoiceResultsActivity.class));
+            }
+            else
+                tts.speak("검색할 단어가 없습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
         });
     }
 
-    //TODO: 계속해서 설명을 읽어줄 것인가? -> 버튼 클릭? 혹은 skip 기눙 필요
     private void checkRecordPermission() {
         //TODO: layout text들 string.xml에 넣으면 getString(R.string._)로 바꾸기
         if (Build.VERSION.SDK_INT >= 23) {
@@ -273,8 +275,10 @@ public class SearchVoiceActivity extends AppCompatActivity {
             case KeyEvent.KEYCODE_VOLUME_UP: {      // 음성 인식 시작 및 종료
                 if (isRecording)
                     endRecord();
-                else
+                else {
+                    tts.stop();
                     startRecord();
+                }
                 return true;
             }
             case KeyEvent.KEYCODE_VOLUME_DOWN: {    // 음성 인식 취소
