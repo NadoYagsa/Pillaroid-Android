@@ -32,8 +32,9 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class SearchVoiceActivity extends AppCompatActivity {
-    private boolean isRecording = false;    // 볼륨 버튼을 위함
-    private boolean isResultEnd = false;    // 음성에 대한 결과를 반환하기 전에 인식을 종료하는 경우(isResultEnd = false) 대비
+    private boolean isRecording = false;        // 볼륨 버튼을 위함
+    private boolean isResultEnd = false;        // 음성 결과 반환 여부 확인 (음성 결과를 반환하기 전에 인식을 종료함 방지)
+    private boolean isResultBtClicked = false;  // 결과 확인하기 버튼이 클릭되었는지 확인 (isResultEnd 시 넘어감 방지)
     private String temporaryQuery = "";
 
     private EditText etQuery;
@@ -79,13 +80,31 @@ public class SearchVoiceActivity extends AppCompatActivity {
         btResult.setOnClickListener(v -> {
             tts.stop();     //진행중이던 tts speak가 있다면 멈춤
             if (etQuery.getText().length() > 0) {
+                isResultBtClicked = true;
+                
                 if (isRecording)
                     speechRecognizer.cancel();
-                startActivity(new Intent(this, VoiceResultsActivity.class));
+
+                if (isResultEnd) {
+                    isResultBtClicked = false;
+
+                    Intent resultIntent = new Intent(this, VoiceResultsActivity.class);
+                    resultIntent.putExtra("query", etQuery.getText().toString());
+                    startActivity(resultIntent);
+                }
+                // isResultEnd == false일 때는 recognitionListener에서 처리함
             }
             else
                 tts.speak("검색할 단어가 없습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
         });
+    }
+
+    private void speakRecordMethod() {
+        tts.speak("검색할 의약품 이름을 볼륨 버튼을 누르고 말해주세요.", TextToSpeech.QUEUE_FLUSH, null, null);
+        tts.playSilentUtterance(500, TextToSpeech.QUEUE_ADD, null);
+        tts.speak("녹음 시작 시 '띵똥' 소리가 들립니다.", TextToSpeech.QUEUE_ADD, null, null);
+        tts.speak("말하기를 완료하셨다면 볼륨 버튼을 다시 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
+        tts.speak("재녹음도 동일한 방법으로 진행됩니다.", TextToSpeech.QUEUE_ADD, null, null);
     }
 
     private void checkRecordPermission() {
@@ -99,21 +118,11 @@ public class SearchVoiceActivity extends AppCompatActivity {
 
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1000);
             }
-            else {
-                tts.speak("검색할 의약품 이름을 볼륨 버튼을 누르고 말해주세요.", TextToSpeech.QUEUE_FLUSH, null, null);
-                tts.playSilentUtterance(500, TextToSpeech.QUEUE_ADD, null);
-                tts.speak("녹음 시작 시 '띵똥' 소리가 들립니다.", TextToSpeech.QUEUE_ADD, null, null);
-                tts.speak("말하기를 완료하셨다면 볼륨 버튼을 다시 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-                tts.speak("재녹음도 동일한 방법으로 진행됩니다.", TextToSpeech.QUEUE_ADD, null, null);
-            }
+            else
+                speakRecordMethod();
         }
-        else {
-            tts.speak("검색할 의약품 이름을 볼륨 버튼을 누르고 말해주세요.", TextToSpeech.QUEUE_FLUSH, null, null);
-            tts.playSilentUtterance(500, TextToSpeech.QUEUE_ADD, null);
-            tts.speak("녹음 시작 시 '띵똥' 소리가 들립니다.", TextToSpeech.QUEUE_ADD, null, null);
-            tts.speak("말하기를 완료하셨다면 볼륨 버튼을 다시 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-            tts.speak("재녹음도 동일한 방법으로 진행됩니다.", TextToSpeech.QUEUE_ADD, null, null);
-        }
+        else
+            speakRecordMethod();
     }
 
     @Override
@@ -121,13 +130,8 @@ public class SearchVoiceActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode==1000 && grantResults.length>0) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                tts.speak("검색할 의약품 이름을 볼륨 버튼을 누르고 말해주세요.", TextToSpeech.QUEUE_FLUSH, null, null);
-                tts.playSilentUtterance(500, TextToSpeech.QUEUE_ADD, null);
-                tts.speak("녹음 시작 시 '띵똥' 소리가 들립니다.", TextToSpeech.QUEUE_ADD, null, null);
-                tts.speak("말하기를 완료하셨다면 볼륨 버튼을 다시 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-                tts.speak("재녹음도 동일한 방법으로 진행됩니다.", TextToSpeech.QUEUE_ADD, null, null);
-            }
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                speakRecordMethod();
             else
                 finish();
         }
@@ -237,6 +241,13 @@ public class SearchVoiceActivity extends AppCompatActivity {
                     tts.speak("음성 인식 종료", TextToSpeech.QUEUE_FLUSH, null, null);
                 }
 
+                if (isResultBtClicked) {
+                    isResultBtClicked = false;
+
+                    Intent resultIntent = new Intent(SearchVoiceActivity.this, VoiceResultsActivity.class);
+                    resultIntent.putExtra("query", etQuery.getText().toString());
+                    startActivity(resultIntent);
+                }
             }
 
             @Override

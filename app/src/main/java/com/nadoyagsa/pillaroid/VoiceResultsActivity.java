@@ -17,14 +17,17 @@ import com.nadoyagsa.pillaroid.data.VoiceResultInfo;
 import java.util.ArrayList;
 
 public class VoiceResultsActivity extends AppCompatActivity {
+    private String voiceQuery = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voice_results);
 
+        voiceQuery = getIntent().getStringExtra("query");   //검색 의약품명
+
         //의약품 결과 샘플
-        ArrayList<VoiceResultInfo> voiceResults = new ArrayList<VoiceResultInfo>();
+        ArrayList<VoiceResultInfo> voiceResults = new ArrayList<>();
         voiceResults.add(new VoiceResultInfo(202005623L, "어린이타이레놀산160밀리그램"));
         voiceResults.add(new VoiceResultInfo(202106092L, "타이레놀정500밀리그람"));
         voiceResults.add(new VoiceResultInfo(202106954L, "타이레놀콜드-에스정"));
