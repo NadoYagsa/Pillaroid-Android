@@ -12,7 +12,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.view.Surface;
+import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,6 +50,8 @@ public class SearchCaseActivity extends AppCompatActivity {
 
     private PreviewView pvCaseCamera;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+    private ImageCapture imageCapture;
+    private ImageAnalysis imageAnalysis;
     private Executor caseExecutor;
     private CaseAnalyzer caseAnalyzer;
     private TextRecognizer recognizer;
@@ -102,29 +104,47 @@ public class SearchCaseActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
+    private void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
+        cameraProvider.unbindAll();
+
+        //camera preview로 보여줄 view finder 설정
         Preview preview = new Preview.Builder().build();
 
+        //카메라 선택 (렌즈 앞/뒤)
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
-        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
-                .setTargetRotation(Surface.ROTATION_270)
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)   //ImageProxy.close()시 그때의 최신 이미지를 전달함
+        //촬영시 이미지 분석 관련 설정(TextRecognizer, ScanBarcode)
+        imageAnalysis = new ImageAnalysis.Builder().build();
+
+        //사진 캡쳐 관련 설정
+        imageCapture = new ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY) //화질을 기준으로 최적화
+                .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())   //rotation은 디바이스의 기본 설정에 따름
                 .build();
-        imageAnalysis.setAnalyzer(caseExecutor, caseAnalyzer);
 
-        final ImageCapture imageCapture = new ImageCapture.Builder()
-                .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())
-                .build();
+        //위에서 만든 설정 객체들로 카메라 객체 생성
+        Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis, imageCapture); //이미지 분석, 이미미 캡쳐
 
-        preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());
+        preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());  //preview를 PreviewView에 연결
+    }
 
-        cameraProvider.unbindAll();
-        Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis, imageCapture);
-
-        //TODO: 볼륨 버튼 리스너 (imageCapture.takePicture로 캡처)
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            //사진 찍기
+            imageCapture.takePicture(caseExecutor, new ImageCapture.OnImageCapturedCallback() {
+                @Override
+                public void onCaptureSuccess(@NonNull ImageProxy image) {
+                    //사진 분석 초기화
+                    imageAnalysis.clearAnalyzer();
+                    imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(SearchCaseActivity.this), caseAnalyzer);
+                }
+            });
+            return true;    //볼륨 UP 기능 없앰
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     private class CaseAnalyzer implements ImageAnalysis.Analyzer {
@@ -139,6 +159,7 @@ public class SearchCaseActivity extends AppCompatActivity {
         @SuppressLint("UnsafeOptInUsageError")
         Image mediaImage = imageProxy.getImage();
         if (mediaImage != null) {
+            //InputImage 객체에 분석할 이미지 받기
             InputImage inputImage =
                     InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
             Task<Text> result = recognizer.process(inputImage)
@@ -164,7 +185,7 @@ public class SearchCaseActivity extends AppCompatActivity {
                                 }
                             }
                         }
-                        imageProxy.close(); //CameraX 사용시 반드시 해줘야 함
+//                        imageProxy.close(); //이미지 캡쳐시에는 필요 X (연속적으로 분석하는 경우 필요)
                     })
                     .addOnFailureListener(e -> {
                         //Task failed with an exception
@@ -199,7 +220,6 @@ public class SearchCaseActivity extends AppCompatActivity {
         if (cameraProviderFuture != null && caseExecutor != null){
             cameraProviderFuture.cancel(true);
             cameraProviderFuture = null;
-            //caseExecutor.shutdown();
             caseExecutor = null;
         }
     }
