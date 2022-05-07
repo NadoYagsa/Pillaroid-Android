@@ -20,8 +20,8 @@
         app:layout_constraintWidth_percent="0.85"
         app:layout_constraintVertical_bias="0.03"/>
 
-    <SurfaceView
-        android:id="@+id/sf_search_prescription"
+    <androidx.camera.view.PreviewView
+        android:id="@+id/pv_search_prescription"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
