@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class VoiceResultsActivity extends AppCompatActivity {
+    private String voiceQuery = null;
 
     private TextToSpeech tts;
     private int currentIdx = -1;
@@ -37,6 +38,8 @@ public class VoiceResultsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voice_results);
+
+        voiceQuery = getIntent().getStringExtra("query");   //검색 의약품명
 
         //의약품 결과 샘플
         ArrayList<VoiceResultInfo> voiceResults = new ArrayList<>();
