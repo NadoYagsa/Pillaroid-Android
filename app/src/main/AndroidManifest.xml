@@ -49,6 +49,11 @@
         <activity android:name=".MypageFavoritesActivity"/>
         <activity android:name=".MypageAlarmActivity"/>
         <activity android:name=".TimeSettingActivity"/>
+
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="ocr"/>
+
     </application>
 
 </manifest>
