@@ -22,6 +22,7 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
+import androidx.camera.core.UseCaseGroup;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
@@ -51,10 +52,12 @@ public class SearchCaseActivity extends AppCompatActivity {
     private PreviewView pvCaseCamera;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ImageCapture imageCapture;
-    private ImageAnalysis imageAnalysis;
     private Executor caseExecutor;
     private CaseAnalyzer caseAnalyzer;
     private TextRecognizer recognizer;
+
+    private boolean isReadyCamera = false;
+    private boolean isAnalyzing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +73,9 @@ public class SearchCaseActivity extends AppCompatActivity {
                 }
                 tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
 
-                tts.speak("후면 카메라가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+                if (isReadyCamera) {
+                    tts.speak("후면 카메라가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+                }
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
             }
@@ -86,8 +91,9 @@ public class SearchCaseActivity extends AppCompatActivity {
     }
 
     private void startCamera() {
-        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+        isReadyCamera = true;
 
+        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
@@ -109,33 +115,44 @@ public class SearchCaseActivity extends AppCompatActivity {
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
-        //촬영시 이미지 분석 관련 설정(TextRecognizer, ScanBarcode)
-        imageAnalysis = new ImageAnalysis.Builder().build();
-
         //사진 캡쳐 관련 설정
         imageCapture = new ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY) //화질을 기준으로 최적화
                 .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())   //rotation은 디바이스의 기본 설정에 따름
                 .build();
 
-        //위에서 만든 설정 객체들로 카메라 객체 생성
-        Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis, imageCapture); //이미지 분석, 이미미 캡쳐
+        //위에서 만든 설정 객체들로 useCaseGroup 만들기
+        UseCaseGroup useCaseGroup = new UseCaseGroup.Builder()
+                .addUseCase(preview)
+                .addUseCase(imageCapture)
+                .build();
 
-        preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());  //preview를 PreviewView에 연결
+        //useGroup으로 카메라 객체 생성
+        Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, useCaseGroup);
+
+        preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());  //영상(preview)을 PreviewView에 연결
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            //사진 찍기
-            imageCapture.takePicture(caseExecutor, new ImageCapture.OnImageCapturedCallback() {
-                @Override
-                public void onCaptureSuccess(@NonNull ImageProxy image) {
-                    //사진 분석 초기화
-                    imageAnalysis.clearAnalyzer();
-                    imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(SearchCaseActivity.this), caseAnalyzer);
-                }
-            });
+            if (isAnalyzing == true) {
+                tts.speak("아직 이전 사진을 분석 중입니다. 조금 뒤에 시도해주세요.", QUEUE_FLUSH, null, null);
+            } else {
+                //사진 찍기
+                imageCapture.takePicture(caseExecutor, new ImageCapture.OnImageCapturedCallback() {
+                    @Override
+                    public void onCaptureSuccess(@NonNull ImageProxy imageProxy) {
+                        isAnalyzing = true;
+                        tts.speak("사진이 찍혔습니다. 이미지를 분석합니다.", QUEUE_FLUSH, null, null);
+
+                        //이미지 분석
+                        caseAnalyzer.analyze(imageProxy);
+
+                        isAnalyzing = false;
+                    }
+                });
+            }
             return true;    //볼륨 UP 기능 없앰
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             return true;    //볼륨 DOWN 기능 없앰
@@ -181,7 +198,7 @@ public class SearchCaseActivity extends AppCompatActivity {
                                 }
                             }
                         }
-//                        imageProxy.close(); //이미지 캡쳐시에는 필요 X (연속적으로 분석하는 경우 필요)
+                        imageProxy.close();  //CameraX는 필수
                     })
                     .addOnFailureListener(e -> {
                         //Task failed with an exception
@@ -213,6 +230,7 @@ public class SearchCaseActivity extends AppCompatActivity {
     }
 
     private void closeCamera() {
+        isReadyCamera = false;
         if (cameraProviderFuture != null && caseExecutor != null){
             cameraProviderFuture.cancel(true);
             cameraProviderFuture = null;
