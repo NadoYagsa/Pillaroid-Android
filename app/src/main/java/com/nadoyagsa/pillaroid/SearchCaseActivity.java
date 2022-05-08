@@ -81,12 +81,6 @@ public class SearchCaseActivity extends AppCompatActivity {
         caseAnalyzer = new CaseAnalyzer();
         recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
 
-        if(allPermissionsGranted()){
-            startCamera();  //카메라 실행
-        } else{ //모든 권한이 허가되지 않았다면 요청
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
-        }
-
         /* TODO: 용기를 인식 후 검색 결과 확인 */
         //startActivity(new Intent(this, MedicineResultActivity.class));
     }
@@ -143,6 +137,8 @@ public class SearchCaseActivity extends AppCompatActivity {
                 }
             });
             return true;    //볼륨 UP 기능 없앰
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            return true;    //볼륨 DOWN 기능 없앰
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -227,7 +223,13 @@ public class SearchCaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        startCamera();  //카메라 실행
+
+        //모든 퍼미션이 있을 때에만 카메라가 켜짐
+        if(allPermissionsGranted()){
+            startCamera();  //카메라 실행
+        } else{ //모든 권한이 허가되지 않았다면 요청
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        }
     }
 
     @Override
