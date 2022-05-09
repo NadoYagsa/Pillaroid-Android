@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,7 +27,6 @@ import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.core.UseCaseGroup;
-import androidx.camera.core.ViewPort;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
@@ -45,7 +46,10 @@ import java.util.concurrent.ExecutionException;
 
 public class SearchPrescriptionActivity extends AppCompatActivity {
     private boolean canUseCamera = false;
+    private boolean isSearching = false;
+
     private TextToSpeech tts;
+    private TextView tvGuide;
 
     private ImageCapture imageCapture;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -75,6 +79,8 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                 Log.e("TTS", "Initialization Failed");
             }
         });
+
+        tvGuide = findViewById(R.id.tv_search_prescription_guide);
 
         /* TODO: 처방전 인식 후 검색 결과 확인 */
         //startActivity(new Intent(this, PrescriptionResultActivity.class));
@@ -135,14 +141,13 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                 */
 
                 imageCapture = new ImageCapture.Builder()
+                        .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())
                         .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)     // 사진 캡처를 지연 시간을 기준으로 최적화 (cf. 화질 기준: CAPTURE_MODE_MAXIMIZE_QUALITY)
                         .build();
 
                 CameraSelector cameraSelector = new CameraSelector.Builder()
                         .requireLensFacing(CameraSelector.LENS_FACING_BACK)             // 후면 카메라 사용
                         .build();
-                
-                ViewPort viewPort = pvPrescriptionCamera.getViewPort();                 // 실제 화면의 촬영 부분과 동일하게 사진을 인식함
 
                 cameraProvider.unbindAll();
 
@@ -150,7 +155,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                         .addUseCase(preview)
                         //.addUseCase(imageAnalysis)
                         .addUseCase(imageCapture)
-                        .setViewPort(viewPort)
                         .build();
 
                 Camera camera = cameraProvider.bindToLifecycle(((LifecycleOwner) this), cameraSelector, useCaseGroup);
@@ -171,21 +175,22 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
 
                 Task<Text> result = recognizer.process(image)
                         .addOnSuccessListener(text -> {
-                            Log.i("텍스트 OCR - success", "!!");
+                            Log.i("텍스트 OCR - success", "성공적");
 
                             String resultText = text.getText();
                             Log.i("텍스트 OCR - text", resultText);
+                            Toast.makeText(SearchPrescriptionActivity.this, resultText, Toast.LENGTH_LONG).show();
                             for (Text.TextBlock block : text.getTextBlocks()) {         // block 별
                                 String blockText = block.getText();
                                 Point[] blockCornerPoints = block.getCornerPoints();
                                 Rect blockFrame = block.getBoundingBox();
-                                Log.i("텍스트 OCR - block", blockText);
+                                //Log.i("텍스트 OCR - block", blockText);
 
                                 for (Text.Line line : block.getLines()) {               // line 별
                                     String lineText = line.getText();
                                     Point[] lineCornerPoints = line.getCornerPoints();
                                     Rect lineFrame = line.getBoundingBox();
-                                    Log.i("텍스트 OCR - line", lineText);
+                                    //Log.i("텍스트 OCR - line", lineText);
 
                                     for (Text.Element element : line.getElements()) {   // element 별
                                         String elementText = element.getText();
@@ -195,10 +200,15 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                                     }
                                 }
                             }
-
                             imageProxy.close();
+
+                            isSearching = false;
                         })
-                        .addOnFailureListener(Throwable::printStackTrace);
+                        .addOnFailureListener(e -> {
+                            Log.i("Failure", "사진 속 텍스트 인식 오류");
+                            tts.speak("처방전의 텍스트를 읽는데 오류가 발생했습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                            tvGuide.setText("텍스트 인식 오류가 발생했습니다.");
+                        });
             }
         }
     }
@@ -208,19 +218,27 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP: {      // 촬영 버튼 클릭
-                imageCapture.takePicture(ContextCompat.getMainExecutor(SearchPrescriptionActivity.this), new ImageCapture.OnImageCapturedCallback() {
-                    @Override
-                    public void onCaptureSuccess(@NonNull ImageProxy image) {
-                        // 처방전 사진에서 텍스트 인식 요망
-                        prescriptionAnalyzer.analyze(image);
-                        super.onCaptureSuccess(image);
-                    }
+                if (!isSearching) {
+                    isSearching = true;
+                    tts.speak("사진이 찍혔습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                    tvGuide.setText("처방전 사진 속 약품명 인식 중");
 
-                    @Override
-                    public void onError(@NonNull ImageCaptureException exception) {
-                        super.onError(exception);
-                    }
-                });
+                    imageCapture.takePicture(ContextCompat.getMainExecutor(SearchPrescriptionActivity.this), new ImageCapture.OnImageCapturedCallback() {
+                        @Override
+                        public void onCaptureSuccess(@NonNull ImageProxy image) {
+                            super.onCaptureSuccess(image);
+
+                            // 처방전 사진에서 텍스트 인식
+                            prescriptionAnalyzer.analyze(image);
+                        }
+
+                        @Override
+                        public void onError(@NonNull ImageCaptureException exception) {
+                            super.onError(exception);
+                            isSearching = false;
+                        }
+                    });
+                }
 
                 return true;
             }
@@ -266,8 +284,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                 cameraProviderFuture.cancel(true);
                 cameraProviderFuture = null;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 }

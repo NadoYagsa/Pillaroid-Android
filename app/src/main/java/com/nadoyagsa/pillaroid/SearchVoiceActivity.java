@@ -308,6 +308,16 @@ public class SearchVoiceActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+            speechRecognizer = null;
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         try {
@@ -318,7 +328,6 @@ public class SearchVoiceActivity extends AppCompatActivity {
                 tts = null;
             }
             if (speechRecognizer != null) {
-                speechRecognizer.cancel();
                 speechRecognizer.destroy();
                 speechRecognizer = null;
             }
