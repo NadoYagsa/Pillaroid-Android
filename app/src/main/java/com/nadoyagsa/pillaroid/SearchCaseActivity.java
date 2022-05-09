@@ -6,7 +6,6 @@ import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.media.Image;
 import android.os.Bundle;
@@ -177,26 +176,27 @@ public class SearchCaseActivity extends AppCompatActivity {
                     InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
             Task<Text> result = recognizer.process(inputImage)
                     .addOnSuccessListener(text -> {
-                        Log.d("ML TEXT - success", "!!");
                         //Task completed successfully
-                        String resultText = text.getText();
+                        int maxHeight = 0;
+                        Text.TextBlock findMaxHeightBlock = null;
+
+                        String resultText = text.getText(); //TODO: 삭제
+                        Log.d("resultText", resultText);    //TODO: 삭제
                         for (Text.TextBlock block : text.getTextBlocks()) {
                             String blockText = block.getText(); //block 별 인식되는 텍스트
-                            Point[] blockCornerPoints = block.getCornerPoints();    //block 별 인식되는 영역 경계 좌표
                             Rect blockFrame = block.getBoundingBox();
-                            Log.d("ML Text - block", blockText);
-                            for (Text.Line line : block.getLines()) {
-                                String lineText = line.getText();   //line 별 인식되는 텍스트
-                                Point[] lineCornerPoints = line.getCornerPoints();  //line 별 인식되는 영역 경계 좌표
-                                Rect lineFrame = line.getBoundingBox();
-                                Log.d("ML Text - line", lineText);
-                                for (Text.Element element : line.getElements()) {
-                                    String elementText = element.getText();     //element 별 인식되는 텍스트
-                                    Point[] elementCornerPoints = element.getCornerPoints();    //element 별 인식되는 영역 경계 좌표
-                                    Rect elementFrame = element.getBoundingBox();
-                                    Log.d("ML Text - element", elementText);
-                                }
+
+                            assert blockFrame != null;
+                            int height = blockFrame.height();
+                            if (height > maxHeight) {
+                                maxHeight = height;
+                                findMaxHeightBlock = block;
                             }
+                        }
+
+                        if (findMaxHeightBlock != null) {
+                            tts.speak("인식된 의약품 이름은 " + findMaxHeightBlock.getText() + "입니다.", QUEUE_FLUSH, null, null);
+                            //TODO: 추가 작업 필요 (height만으로 판단하면 X(정방향이 아니게 찍을 경우, 세로형 텍스트가 있을 경우..), 폰트 특이한건 인식 X)
                         }
                         imageProxy.close();  //CameraX는 필수
                     })
