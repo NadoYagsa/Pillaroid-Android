@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -24,22 +25,40 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.nadoyagsa.pillaroid.data.MedicineInfo;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Locale;
 import java.util.Objects;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MedicineResultActivity extends AppCompatActivity {
-    private MedicineInfo result;
+    private Long medicineIdx = 0L;
+    private MedicineInfo medicine;
 
-    private TextToSpeech tts;
+    private View selectedCategoryView;
 
-    private AppCompatImageButton ivAlarm;
-    private View dialogView;
     private AlertDialog dialog;
+    private AppCompatImageButton ivAlarm;
+    private TextToSpeech tts;
+    private TextView tvTitle, tvCategory, tvContent;
+    private View dialogView;
+
+    //TODO: 1. 카테고리 수평방향으로 스크롤 가능하게 해야함
+    //TODO: 2. 즐겨찾기
+    //TODO: 3. 알람
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medicine_result);
+
+        //TODO: if문으로 idx, name 구분하시오!
+        if (getIntent().hasExtra("medicineIdx"))
+            medicineIdx = getIntent().getLongExtra("medicineIdx", 0L);   //검색 의약품 idx
 
         Toolbar toolbar = findViewById(R.id.tb_medicineresult_toolbar);
         setSupportActionBar(toolbar);
@@ -60,6 +79,8 @@ public class MedicineResultActivity extends AppCompatActivity {
                     Log.e("TTS", "Language is not supported");
                 }
                 tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
+
+                getMedicineResult();
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
             }
@@ -72,14 +93,11 @@ public class MedicineResultActivity extends AppCompatActivity {
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        //임시 데이터
-        result = new MedicineInfo(
-                199303108L,
-                "타이레놀정500밀리그람",
-                "1.주효능·효과\n감기로인한발열및동통(통증),두통,신경통,근육통,월경통,염좌통(삔통증)\n2.다음질환에도사용할수있다.\n치통,관절통,류마티양동통(통증)",
-                "만12세이상소아및성인:\n1회1~2정씩1일3-4회(4-6시간마다)필요시복용한다.\n1일최대4그램(8정)을초과하여복용하지않는다.\n이약은가능한최단기간동안최소유효용량으로복용한다.",
-                "1.다음과같은사람은이약을복용하지말것\n1)이약에과민증환자\n2)소화성궤양환자\n3)심한혈액이상환자\n4)심한간장애환자\n5)심한신장(콩팥)장애환자\n6)심한심장기능저하환자\n7)아스피린천식(비스테로이드성소염(항염)제에의한천식발작유발)또는그병력이있는환자\n8)다음의약물을복용한환자:바르비탈계약물,삼환계항우울제\n9)알코올을복용한사람\n2.다음과같은사람은이약을복용하기전에의사,치과의사,약사와상의할것\n1)간장애또는그병력이있는환자\n2)신장(콩팥)장애또는그병력이있는환자\n2)신장(콩팥)장애또는그병력이있는환자\n3)소화성궤양의병력이있는환자\n4)혈액이상또는그병력이있는환자\n5)출혈경향이있는환자(혈소판기능이상이나타날수있다.)\n6)심장기능이상이있는환자\n7)과민증의병력이있는환자\n8)기관지천식환자\n9)고령자(노인)\n10)임부또는수유부\n11)와파린을장기복용하는환자\n12)다음의약물을복용한환자:리튬,치아짓계이뇨제",
-                "밀폐용기, 실온보관(1-30℃)");
+        selectedCategoryView = findViewById(R.id.tv_medicineresult_efficacy);
+        tvCategory = findViewById(R.id.tv_medicineresult_category);
+        tvContent = findViewById(R.id.tv_medicineresult_content);
+
+        clickListener();
     }
 
     private void initActionBar(Toolbar toolbar) {
@@ -87,8 +105,8 @@ public class MedicineResultActivity extends AppCompatActivity {
         ivIcon.setImageResource(R.drawable.icon_info);
         ivIcon.setContentDescription("정보안내 아이콘");
 
-        TextView tvTitle = toolbar.findViewById(R.id.tv_ab_medicineresult_title);
-        tvTitle.setText("타이레놀정500밀리그람");
+        tvTitle = toolbar.findViewById(R.id.tv_ab_medicineresult_title);
+        tvTitle.setText("");
         tvTitle.setSelected(true);  //ellipsize="marquee" 실행되도록 selected 설정
 
         AppCompatImageButton ibtStar = toolbar.findViewById(R.id.ibt_ab_medicineresult_star);
@@ -104,7 +122,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         dialog.show();
 
         final EditText etLabel = dialogView.findViewById(R.id.et_dialog_addalarm_label);
-        etLabel.setHint(result.getMedicineName());
+        etLabel.setHint(medicine.getMedicineName());
 
         TextView tvCancel = dialogView.findViewById(R.id.tv_dialog_addalarm_cancel);
         if (ivAlarm.getTag().equals("on")) {
@@ -139,6 +157,132 @@ public class MedicineResultActivity extends AppCompatActivity {
             ((EditText) dialogView.findViewById(R.id.et_dialog_addalarm_days)).setText("");
             dialog.dismiss();
         });
+    }
+
+    private void clickListener() {
+        TextView tvEfficacy = findViewById(R.id.tv_medicineresult_efficacy);        // 효능 및 효과
+        tvEfficacy.setOnClickListener(view -> {
+            if (selectedCategoryView != view) {
+                ((TextView) selectedCategoryView).setTextColor(getColor(R.color.black));
+
+                selectedCategoryView = view;
+                tvEfficacy.setTextColor(getColor(R.color.main_color));
+
+                tvCategory.setText(getString(R.string.category_efficacy));
+                tvContent.setText(medicine.getEfficacy());
+            }
+        });
+        TextView tvUsage = findViewById(R.id.tv_medicineresult_usage);              // 용법 및 용량
+        tvUsage.setOnClickListener(view -> {
+            if (selectedCategoryView != view) {
+                ((TextView) selectedCategoryView).setTextColor(getColor(R.color.black));
+
+                selectedCategoryView = view;
+                tvUsage.setTextColor(getColor(R.color.main_color));
+
+                tvCategory.setText(getString(R.string.category_usage));
+                tvContent.setText(medicine.getUsage());
+            }
+        });
+        TextView tvPrecautions = findViewById(R.id.tv_medicineresult_precautions);   // 주의사항
+        tvPrecautions.setOnClickListener(view -> {
+            if (selectedCategoryView != view) {
+                ((TextView) selectedCategoryView).setTextColor(getColor(R.color.black));
+
+                selectedCategoryView = view;
+                tvPrecautions.setTextColor(getColor(R.color.main_color));
+
+                tvCategory.setText(getString(R.string.category_precautions));
+                tvContent.setText(medicine.getPrecautions());
+            }
+        });
+        TextView tvAppearance = findViewById(R.id.tv_medicineresult_appearance);    // 외형
+        tvAppearance.setOnClickListener(view -> {
+            if (selectedCategoryView != view) {
+                ((TextView) selectedCategoryView).setTextColor(getColor(R.color.black));
+
+                selectedCategoryView = view;
+                tvAppearance.setTextColor(getColor(R.color.main_color));
+
+                tvCategory.setText(getString(R.string.category_appearance));
+                tvContent.setText(medicine.getAppearance());
+            }
+        });
+        TextView tvIngredient = findViewById(R.id.tv_medicineresult_ingredient);    // 성분
+        tvIngredient.setOnClickListener(view -> {
+            if (selectedCategoryView != view) {
+                ((TextView) selectedCategoryView).setTextColor(getColor(R.color.black));
+
+                selectedCategoryView = view;
+                tvIngredient.setTextColor(getColor(R.color.main_color));
+
+                tvCategory.setText(getString(R.string.category_ingredient));
+                tvContent.setText(medicine.getIngredient());
+            }
+        });
+        TextView tvSave = findViewById(R.id.tv_medicineresult_save);                // 저장 방법
+        tvSave.setOnClickListener(view -> {
+            if (selectedCategoryView != view) {
+                ((TextView) selectedCategoryView).setTextColor(getColor(R.color.black));
+
+                selectedCategoryView = view;
+                tvSave.setTextColor(getColor(R.color.main_color));
+
+                tvCategory.setText(getString(R.string.category_save));
+                tvContent.setText(medicine.getSave());
+            }
+        });
+    }
+
+    private void showMedicineResult() {
+        tvTitle.setText(medicine.getMedicineName());
+        tvCategory.setText(getString(R.string.category_efficacy));
+        tvContent.setText(medicine.getEfficacy());
+    }
+
+    private void getMedicineResult() {
+        if (!medicineIdx.equals(0L)) {      // 의약품 번호로 정보 조회
+            PillaroidAPIImplementation.getApiService().getMedicineByIdx(medicineIdx).enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    if (response.code() == 200) {
+                        try {
+                            JSONObject medicineInfo = new JSONObject(Objects.requireNonNull(response.body()));
+                            JSONObject data = medicineInfo.getJSONObject("data");
+
+                            String name = data.getString("name");
+                            name = name.replace('[', '(')
+                                    .replace(']', ')')
+                                    .replaceAll("\\([^)]*\\)", "");
+
+                            medicine = new MedicineInfo(data.getLong("idx"), data.getLong("code"),
+                                    name, data.getString("efficacy"), data.getString("usage"),
+                                    data.getString("precautions"), data.getString("appearanceInfo"),
+                                    data.getString("ingredient"), data.getString("save"));
+
+                            showMedicineResult();
+                        } catch (JSONException e) { e.printStackTrace(); }
+                    }
+                    else if (response.code() == 404) {
+                        tts.speak("해당 의약품은 존재하지 않습니다.", QUEUE_FLUSH, null, null);
+                        tts.playSilentUtterance(5000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
+                        finish();
+                    }
+                    else {
+                        tts.speak("음성 결과 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                        tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
+                        finish();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                    tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                    tts.playSilentUtterance(2000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
+                    finish();
+                }
+            });
+        }
     }
 
     @Override

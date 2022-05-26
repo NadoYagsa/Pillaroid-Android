@@ -32,7 +32,7 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/iv_medicineresult_category1"
+                    android:id="@+id/iv_medicineresult_efficacy"
                     android:layout_width="5dp"
                     android:layout_height="5dp"
                     android:layout_gravity="center"
@@ -41,13 +41,14 @@
                     app:tint="@color/main_color" />
 
                 <TextView
-                    android:id="@+id/tv_medicineresult_category1"
+                    android:id="@+id/tv_medicineresult_efficacy"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:clickable="true"
                     android:paddingVertical="5dp"
-                    android:text="효능 및 효과"
+                    android:tag="efficacy"
+                    android:text="@string/category_efficacy"
                     android:textColor="@color/main_color"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -60,7 +61,7 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/iv_medicineresult_category2"
+                    android:id="@+id/iv_medicineresult_appearance"
                     android:layout_width="5dp"
                     android:layout_height="5dp"
                     android:layout_gravity="center"
@@ -68,13 +69,14 @@
                     android:src="@drawable/dot" />
 
                 <TextView
-                    android:id="@+id/tv_medicineresult_category2"
+                    android:id="@+id/tv_medicineresult_appearance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:clickable="true"
                     android:paddingVertical="5dp"
-                    android:text="상호작용"
+                    android:tag="appearance"
+                    android:text="@string/category_appearance"
                     android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>
@@ -93,7 +95,7 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/iv_medicineresult_category3"
+                    android:id="@+id/iv_medicineresult_usage"
                     android:layout_width="5dp"
                     android:layout_height="5dp"
                     android:layout_gravity="center"
@@ -101,13 +103,14 @@
                     android:src="@drawable/dot" />
 
                 <TextView
-                    android:id="@+id/tv_medicineresult_category3"
+                    android:id="@+id/tv_medicineresult_usage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:clickable="true"
                     android:paddingVertical="5dp"
-                    android:text="용법 및 용량"
+                    android:tag="usage"
+                    android:text="@string/category_usage"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -118,7 +121,7 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/iv_medicineresult_category4"
+                    android:id="@+id/iv_medicineresult_ingredient"
                     android:layout_width="5dp"
                     android:layout_height="5dp"
                     android:layout_gravity="center"
@@ -126,13 +129,14 @@
                     android:src="@drawable/dot" />
 
                 <TextView
-                    android:id="@+id/tv_medicineresult_category4"
+                    android:id="@+id/tv_medicineresult_ingredient"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:clickable="true"
                     android:paddingVertical="5dp"
-                    android:text="부작용"
+                    android:tag="ingredient"
+                    android:text="@string/category_ingredient"
                     android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>
@@ -151,7 +155,7 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/iv_medicineresult_category5"
+                    android:id="@+id/iv_medicineresult_precautions"
                     android:layout_width="5dp"
                     android:layout_height="5dp"
                     android:layout_gravity="center"
@@ -159,13 +163,14 @@
                     android:src="@drawable/dot" />
 
                 <TextView
-                    android:id="@+id/tv_medicineresult_category5"
+                    android:id="@+id/tv_medicineresult_precautions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:clickable="true"
                     android:paddingVertical="5dp"
-                    android:text="주의사항"
+                    android:tag="precautions"
+                    android:text="@string/category_precautions"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -176,7 +181,7 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/iv_medicineresult_category6"
+                    android:id="@+id/iv_medicineresult_save"
                     android:layout_width="5dp"
                     android:layout_height="5dp"
                     android:layout_gravity="center"
@@ -184,13 +189,14 @@
                     android:src="@drawable/dot" />
 
                 <TextView
-                    android:id="@+id/tv_medicineresult_category6"
+                    android:id="@+id/tv_medicineresult_save"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:clickable="true"
                     android:paddingVertical="5dp"
-                    android:text="보관법"
+                    android:tag="save"
+                    android:text="@string/category_save"
                     android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>
@@ -211,19 +217,20 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_medicineresult_title"
+                android:id="@+id/tv_medicineresult_category"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:text="효능 및 효과"
+                android:text="@string/category_efficacy"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tv_medicineresult_body"
+                android:id="@+id/tv_medicineresult_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="이 약은 심근경색, 뇌경색, 불안정형 협심증에서 혈전 생성 억제와 관상동맥 우회술(CABG) 또는 경피경관 관상동맥 성형술(PTCA) 후 혈전 생성 억제와 고위험군환자(허혈성 심장질환의 가족력, 고혈압, 고콜레스테롤혈증, 비만, 당뇨 등 복합적 위험인자를 가진 환자)에서 심혈관계 위험성 감소에 사용합니다."
+                android:lineSpacingExtra="5dp"
+                android:text=""
                 android:textSize="16sp" />
 
         </LinearLayout>
