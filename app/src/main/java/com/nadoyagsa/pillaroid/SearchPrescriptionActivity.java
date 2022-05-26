@@ -15,7 +15,6 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,7 +30,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.LifecycleOwner;
 
 import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -41,6 +39,7 @@ import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
@@ -157,7 +156,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                         .addUseCase(imageCapture)
                         .build();
 
-                Camera camera = cameraProvider.bindToLifecycle(((LifecycleOwner) this), cameraSelector, useCaseGroup);
+                Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, useCaseGroup);
 
                 preview.setSurfaceProvider(pvPrescriptionCamera.getSurfaceProvider());
             } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
@@ -179,27 +178,56 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
 
                             String resultText = text.getText();
                             Log.i("텍스트 OCR - text", resultText);
-                            Toast.makeText(SearchPrescriptionActivity.this, resultText, Toast.LENGTH_LONG).show();
+
+                            ArrayList<String> medicineList = new ArrayList<>();
+
+                            int medicineNameLeftX = -1;
+                            int medicineNameBottomY = -1;
                             for (Text.TextBlock block : text.getTextBlocks()) {         // block 별
                                 String blockText = block.getText();
-                                Point[] blockCornerPoints = block.getCornerPoints();
-                                Rect blockFrame = block.getBoundingBox();
-                                //Log.i("텍스트 OCR - block", blockText);
+                                Point[] blockCornerPoints = block.getCornerPoints();        // 왼위, 오위, 오아래, 왼아래
 
-                                for (Text.Line line : block.getLines()) {               // line 별
-                                    String lineText = line.getText();
-                                    Point[] lineCornerPoints = line.getCornerPoints();
-                                    Rect lineFrame = line.getBoundingBox();
-                                    //Log.i("텍스트 OCR - line", lineText);
+                                assert blockCornerPoints != null;
+                                if (blockText.replaceAll("\\s", "").contains("의약품의명칭")) {
+                                    medicineNameLeftX = blockCornerPoints[0].x;
+                                    medicineNameBottomY = blockCornerPoints[2].y;
+                                }
+                                else {
+                                    // 의약품의 명칭보다 아래 위치하며 왼쪽에 적힌 문장들
+                                    if (medicineNameBottomY != -1 && blockCornerPoints[0].x<=medicineNameLeftX && blockCornerPoints[0].y>=medicineNameBottomY) {
+                                        if (blockText.contains("주사제 처방내역"))             // 주사제 처방내역 위의 부분까지만 의약품 명칭임
+                                            break;
+                                        else if (blockText.contains("이하여백"))
+                                            break;
 
-                                    for (Text.Element element : line.getElements()) {   // element 별
-                                        String elementText = element.getText();
-                                        Point[] elementCornerPoints = element.getCornerPoints();
-                                        Rect elementFrame = element.getBoundingBox();
-                                        // Log.i("텍스트 OCR - element", elementText);
+                                        // blockText에서 실제 의약품 명칭만 빼냄
+                                        String medicine = blockText
+                                                .replaceAll("[^0-9a-zA-Z가-힣/()\\[\\]]", "")     // 숫자, 영소/대문자, 한글, /[]() 를 제외한 문자는 모두 제거
+                                                .replace('[', '(')
+                                                .replace(']', ')')
+                                                .replace("(약)", "")                             // (약) 문자 제거
+                                                .replaceAll("\\(?[비급여]{1,3}\\)", "")           // 급여 관련 키워드 제거  ex. 비), (비급여), (급여)
+                                                .replaceAll("\\(?[0-9]{9}\\)?", "");             // 보험 코드(ex. 661604420)
+                                        // TODO: 순번(ex. (3)) 제거
+
+                                        //TODO: 의약품 대신 보험 코드가 있을 때, 보험 코드를 쓰는 것이 나을지 고민해보자!
+                                        medicineList.add(medicine);
                                     }
                                 }
                             }
+                            if (medicineList.size() > 0) {
+                                tts.speak("처방 의약품은 ", TextToSpeech.QUEUE_FLUSH, null, null);
+                                for (String medicine: medicineList) {
+                                    tts.speak(medicine, TextToSpeech.QUEUE_ADD, null, null);
+                                    tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
+                                }
+                                tts.speak("로, 총 "+medicineList.size()+"개 입니다.", TextToSpeech.QUEUE_ADD, null, null);
+                                
+                                // TODO: 다음 화면으로 넘어감
+                            }
+                            else
+                                tts.speak("인식된 처방 의약품이 없습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+
                             imageProxy.close();
 
                             isSearching = false;
