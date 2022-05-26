@@ -26,23 +26,36 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintHorizontal_bias="0" />
 
-    <LinearLayout
-        android:id="@+id/ll_voiceresults_idx"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/tv_voiceresults_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
-        android:layout_marginTop="40dp"
-        android:orientation="horizontal"
+        android:layout_marginVertical="25dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textSize="24sp"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/tv_voiceresults_rule"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="1">
+        app:layout_constraintWidth_percent="0.8"/>
+
+    <LinearLayout
+        android:id="@+id/ll_voiceresults_idx"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        app:layout_constraintTop_toBottomOf="@id/tv_voiceresults_name"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintWidth_percent="0.85">
 
         <TextView
             android:id="@+id/tv_voiceresults_idx"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1"
+            android:text="-"
             android:textSize="16sp" />
 
         <TextView
@@ -55,7 +68,7 @@
             android:id="@+id/tv_voiceresults_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="4"
+            android:text="-"
             android:textSize="16sp" />
 
         <TextView
@@ -70,7 +83,6 @@
         android:id="@+id/lv_voiceresults_results"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="40dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="50dp"
         android:scrollbars="vertical"
@@ -78,5 +90,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintVertical_bias="0" />
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintWidth_percent="0.85"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
