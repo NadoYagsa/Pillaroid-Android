@@ -6,6 +6,7 @@ import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.media.Image;
 import android.os.Bundle;
@@ -29,12 +30,17 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
+import com.google.mlkit.vision.barcode.BarcodeScanning;
+import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -53,7 +59,6 @@ public class SearchCaseActivity extends AppCompatActivity {
     private ImageCapture imageCapture;
     private Executor caseExecutor;
     private CaseAnalyzer caseAnalyzer;
-    private TextRecognizer recognizer;
 
     private boolean isReadyCamera = false;
     private boolean isAnalyzing = false;
@@ -83,7 +88,6 @@ public class SearchCaseActivity extends AppCompatActivity {
         pvCaseCamera = findViewById(R.id.pv_search_case);
         caseExecutor = Executors.newSingleThreadExecutor();
         caseAnalyzer = new CaseAnalyzer();
-        recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
 
         /* TODO: 용기를 인식 후 검색 결과 확인 */
         //startActivity(new Intent(this, MedicineResultActivity.class));
@@ -162,8 +166,40 @@ public class SearchCaseActivity extends AppCompatActivity {
     private class CaseAnalyzer implements ImageAnalysis.Analyzer {
         @Override
         public void analyze(ImageProxy imageProxy) {
-            detectText(imageProxy);
-            //scanBarcode(imageProxy);
+            scanBarcode(imageProxy);
+        }
+    }
+
+    private void scanBarcode(ImageProxy imageProxy) {
+        @SuppressLint("UnsafeOptInUsageError")
+        Image mediaImage = imageProxy.getImage();
+        if (mediaImage != null) {
+            //InputImage 객체에 분석할 이미지 받기
+            InputImage inputImage =
+                    InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
+
+            BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
+                    .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+                    .build();
+            BarcodeScanner scanner = BarcodeScanning.getClient(options);
+            Task<List<Barcode>> result = scanner.process(inputImage)
+                    .addOnSuccessListener(barcodes -> {
+                        String code = null;
+                        for (Barcode barcode: barcodes) {
+                            int valueType = barcode.getValueType();
+                            if (valueType == Barcode.TYPE_PRODUCT) {
+                                code = barcode.getDisplayValue();
+                                tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, null);
+                                Log.d("resultBarcodeCode:", code);
+                                //TODO: api로 제품식별번호, 제품명 가져오기
+                            }
+                        }
+                        if (code == null) {
+                            detectText(imageProxy); //바코드 인식된 게 없다면 제품명 인식
+                        } else {
+                            imageProxy.close(); //바코드 인식되면 텍스트 인식하지 않고 imageProxy 닫음
+                        }
+                    });
         }
     }
 
@@ -174,6 +210,8 @@ public class SearchCaseActivity extends AppCompatActivity {
             //InputImage 객체에 분석할 이미지 받기
             InputImage inputImage =
                     InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
+
+            TextRecognizer recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
             Task<Text> result = recognizer.process(inputImage)
                     .addOnSuccessListener(text -> {
                         //Task completed successfully
@@ -197,12 +235,10 @@ public class SearchCaseActivity extends AppCompatActivity {
                         if (findMaxHeightBlock != null) {
                             tts.speak("인식된 의약품 이름은 " + findMaxHeightBlock.getText() + "입니다.", QUEUE_FLUSH, null, null);
                             //TODO: 추가 작업 필요 (height만으로 판단하면 X(정방향이 아니게 찍을 경우, 세로형 텍스트가 있을 경우..), 폰트 특이한건 인식 X)
+                            //TODO: 추출한 텍스트가 제품명이 아님을 알 수 있어야 함
                         }
-                        imageProxy.close();  //CameraX는 필수
                     })
-                    .addOnFailureListener(e -> {
-                        //Task failed with an exception
-                    });
+                    .addOnCompleteListener(task -> imageProxy.close()); //text 인식까지 모두 끝나면 imageProxy 닫기
         }
     }
 
