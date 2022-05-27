@@ -121,8 +121,10 @@ public class SearchVoiceActivity extends AppCompatActivity {
             else
                 speakRecordMethod();
         }
-        else
-            speakRecordMethod();
+        else {
+            tts.speak("SDK 버전이 낮아 음성 인식이 불가합니다.", TextToSpeech.QUEUE_ADD, null, null);
+            finish();
+        }
     }
 
     @Override
@@ -306,6 +308,16 @@ public class SearchVoiceActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+            speechRecognizer = null;
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         try {
@@ -316,7 +328,6 @@ public class SearchVoiceActivity extends AppCompatActivity {
                 tts = null;
             }
             if (speechRecognizer != null) {
-                speechRecognizer.cancel();
                 speechRecognizer.destroy();
                 speechRecognizer = null;
             }
