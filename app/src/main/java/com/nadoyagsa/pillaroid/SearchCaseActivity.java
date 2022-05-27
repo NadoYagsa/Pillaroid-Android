@@ -85,7 +85,6 @@ public class SearchCaseActivity extends AppCompatActivity {
         });
 
         pvCaseCamera = findViewById(R.id.pv_search_case);
-        caseExecutor = Executors.newSingleThreadExecutor();
         caseAnalyzer = new CaseAnalyzer();
     }
 
@@ -97,6 +96,7 @@ public class SearchCaseActivity extends AppCompatActivity {
 
     private void startCamera() {
         isReadyCamera = true;
+        caseExecutor = Executors.newSingleThreadExecutor(); //카메라 시작시 executor도 실행
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {

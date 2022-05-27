@@ -5,7 +5,6 @@ import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -296,10 +295,10 @@ public class MedicineResultActivity extends AppCompatActivity {
                         long errorIdx = medicineInfo.getLong("errorIdx");
 
                         if (errorIdx == RESPONSE_BARCODE_FORMAT_ERROR) {
-                            tts.speak("바코드의 형식이 올바르지 않아 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                            tts.speak("바코드에 대한 의약품 정보가 없습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                         } else {
                             Log.e("SERVER", "bad parameter");
-                            tts.speak("내부 오류가 생겨 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                            tts.speak("서비스 오류로 인해 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -310,7 +309,7 @@ public class MedicineResultActivity extends AppCompatActivity {
                         long errorIdx = medicineInfo.getLong("errorIdx");
 
                         if (errorIdx == RESPONSE_BARCODE_NOT_FOUND) {
-                            tts.speak("바코드에 대한 의약품 정보가 없어 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                            tts.speak("바코드에 대한 의약품 정보가 없습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                         } else if (errorIdx == RESPONSE_MEDICINE_NOT_FOUND) {
                             tts.speak("해당 의약품은 존재하지 않습니다.", QUEUE_FLUSH, null, null);
                             tts.playSilentUtterance(5000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
