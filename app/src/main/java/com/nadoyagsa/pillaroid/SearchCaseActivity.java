@@ -79,7 +79,7 @@ public class SearchCaseActivity extends AppCompatActivity {
                 tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
 
                 if (isReadyCamera) {
-                    tts.speak("후면 카메라가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+                    tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
                 }
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
@@ -89,14 +89,12 @@ public class SearchCaseActivity extends AppCompatActivity {
         pvCaseCamera = findViewById(R.id.pv_search_case);
         caseExecutor = Executors.newSingleThreadExecutor();
         caseAnalyzer = new CaseAnalyzer();
-
-        /* TODO: 용기를 인식 후 검색 결과 확인 */
-        //startActivity(new Intent(this, MedicineResultActivity.class));
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
     }
 
     private void startCamera() {
@@ -138,6 +136,7 @@ public class SearchCaseActivity extends AppCompatActivity {
 
         //useGroup으로 카메라 객체 생성
         Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, useCaseGroup);
+        camera.getCameraControl().enableTorch(true);    //flash
 
         preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());  //영상(preview)을 PreviewView에 연결
     }
