@@ -207,8 +207,9 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                                                 .replace(']', ')')
                                                 .replace("(약)", "")                             // (약) 문자 제거
                                                 .replaceAll("\\(?[비급여]{1,3}\\)", "")           // 급여 관련 키워드 제거  ex. 비), (비급여), (급여)
-                                                .replaceAll("\\(?[0-9]{9}\\)?", "");             // 보험 코드(ex. 661604420)
-                                        // TODO: 순번(ex. (3)) 제거
+                                                .replaceAll("\\(?[0-9]{9}\\)?", "")              // 보험 코드(ex. 661604420)
+                                                .replaceAll("^\\([0-9]*\\)", "")                 // 순번 제거
+                                                .trim();
 
                                         //TODO: 의약품 대신 보험 코드가 있을 때, 보험 코드를 쓰는 것이 나을지 고민해보자!
                                         medicineList.add(medicine);
@@ -283,6 +284,8 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
 
         if (canUseCamera)
             startCamera();      // 다시 카메라 실행
+        else
+            checkCameraPermission();
     }
 
     @Override
