@@ -5,6 +5,7 @@ import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -91,6 +92,11 @@ public class SearchCaseActivity extends AppCompatActivity {
 
         /* TODO: 용기를 인식 후 검색 결과 확인 */
         //startActivity(new Intent(this, MedicineResultActivity.class));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     private void startCamera() {
@@ -190,8 +196,13 @@ public class SearchCaseActivity extends AppCompatActivity {
                             if (valueType == Barcode.TYPE_PRODUCT) {
                                 code = barcode.getDisplayValue();
                                 tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, null);
-                                Log.d("resultBarcodeCode:", code);
-                                //TODO: api로 제품식별번호, 제품명 가져오기
+                                Log.d("resultBarcodeCode", code);
+
+                                tts.playSilentUtterance(5000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
+
+                                Intent medicineIntent = new Intent(this, MedicineResultActivity.class);
+                                medicineIntent.putExtra("barcode", code);
+                                startActivity(medicineIntent);
                             }
                         }
                         if (code == null) {
