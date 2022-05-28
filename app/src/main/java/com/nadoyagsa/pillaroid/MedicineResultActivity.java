@@ -29,6 +29,7 @@ import com.nadoyagsa.pillaroid.data.MedicineInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -291,39 +292,46 @@ public class MedicineResultActivity extends AppCompatActivity {
                     }
                 } else if (response.code() == 400) {
                     try {
-                        JSONObject medicineInfo = new JSONObject(Objects.requireNonNull(response.body()));
-                        long errorIdx = medicineInfo.getLong("errorIdx");
+                        String errorStr = response.errorBody().string();
+                        JSONObject errorBody = new JSONObject(errorStr);
+                        long errorIdx = errorBody.getLong("errorIdx");
 
                         if (errorIdx == RESPONSE_BARCODE_FORMAT_ERROR) {
+                            Log.e("api-response", "barcode format error");
                             tts.speak("바코드에 대한 의약품 정보가 없습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                         } else {
-                            Log.e("SERVER", "bad parameter");
+                            Log.e("api-response", "bad parameter");
                             tts.speak("서비스 오류로 인해 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                         }
-                    } catch (JSONException e) {
+                    } catch (JSONException | IOException e) {
                         e.printStackTrace();
                     }
                 } else if (response.code() == 404) {
                     try {
-                        JSONObject medicineInfo = new JSONObject(Objects.requireNonNull(response.body()));
-                        long errorIdx = medicineInfo.getLong("errorIdx");
+                        String errorStr = response.errorBody().string();
+                        JSONObject errorBody = new JSONObject(errorStr);
+                        long errorIdx = errorBody.getLong("errorIdx");
 
                         if (errorIdx == RESPONSE_BARCODE_NOT_FOUND) {
+                            Log.e("api-response", "barcode not found");
                             tts.speak("바코드에 대한 의약품 정보가 없습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                         } else if (errorIdx == RESPONSE_MEDICINE_NOT_FOUND) {
+                            Log.e("api-response", "medicine not found");
                             tts.speak("해당 의약품은 존재하지 않습니다.", QUEUE_FLUSH, null, null);
                             tts.playSilentUtterance(5000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
                         }
-                    } catch (JSONException e) {
+                    } catch (JSONException | IOException e) {
                         e.printStackTrace();
                     }
                 } else {
+                    Log.e("api-response", "service error");
                     tts.speak("음성 결과 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                Log.e("api-response", "no service");
                 tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
             }
         };
