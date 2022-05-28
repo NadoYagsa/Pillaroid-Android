@@ -7,18 +7,18 @@ public class MedicineInfo {
     private final String efficacy;          //효능효과
     private final String usage;             //용법용량
     private final String precautions;       //주의사항
-    private final String appearance;        //외형
+    private final AppearanceInfo appearanceInfo;        //외형
     private final String ingredient;        //성분
     private final String save;              //보관법
 
-    public MedicineInfo(Long medicineIdx, Long code, String medicineName, String efficacy, String usage, String precautions, String appearance, String ingredient, String save) {
+    public MedicineInfo(Long medicineIdx, Long code, String medicineName, String efficacy, String usage, String precautions, AppearanceInfo appearanceInfo, String ingredient, String save) {
         this.medicineIdx = medicineIdx;
         this.code = code;
         this.medicineName = medicineName;
         this.efficacy = efficacy;
         this.usage = usage;
         this.precautions = precautions;
-        this.appearance = appearance;
+        this.appearanceInfo = appearanceInfo;
         this.ingredient = ingredient;
         this.save = save;
     }
@@ -47,8 +47,8 @@ public class MedicineInfo {
         return precautions;
     }
 
-    public String getAppearance() {
-        return appearance;
+    public AppearanceInfo getAppearanceInfo() {
+        return appearanceInfo;
     }
 
     public String getIngredient() {
