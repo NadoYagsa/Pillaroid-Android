@@ -195,8 +195,8 @@ public class SearchCaseActivity extends AppCompatActivity {
                                 code = barcode.getDisplayValue();
                                 Log.d("resultBarcodeCode", code);
 
-                                tts.speak("바코드가 인식되었습니다. 조금만 기다려주세요.", QUEUE_FLUSH, null, null);
-                                tts.playSilentUtterance(5000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
+                                tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, null);
+                                tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, null);   // 0.4초 딜레이
 
                                 imageProxy.close(); //바코드 인식됐으므로 imageProxy 종료
                                 currentImageProxy = null;
