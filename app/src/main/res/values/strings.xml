@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Pillaroid</string>
+
+    <string name="category_efficacy">효능 및 효과</string>
+    <string name="category_usage">용법 및 용량</string>
+    <string name="category_precautions">주의사항</string>
+    <string name="category_appearance">외형</string>
+    <string name="category_ingredient">성분</string>
+    <string name="category_save">보관법</string>
 </resources>

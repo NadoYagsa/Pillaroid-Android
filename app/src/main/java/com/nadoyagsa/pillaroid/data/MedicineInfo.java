@@ -1,24 +1,34 @@
 package com.nadoyagsa.pillaroid.data;
 
 public class MedicineInfo {
-    private final Long medicineIdx;   //품목일련변호
-    private final String medicineName;//품목명
-    private final String efficacy;    //효능효과
-    private final String usage;       //용법용량
-    private final String precautions; //주의사항
-    private final String storageMethod;   //보관법
+    private final Long medicineIdx;         //의약품 idx
+    private final Long code;                //품목일련번호
+    private final String medicineName;      //품목명
+    private final String efficacy;          //효능효과
+    private final String usage;             //용법용량
+    private final String precautions;       //주의사항
+    private final AppearanceInfo appearanceInfo;        //외형
+    private final String ingredient;        //성분
+    private final String save;              //보관법
 
-    public MedicineInfo(Long medicineIdx, String medicineName, String efficacy, String usage, String precautions, String storageMethod) {
+    public MedicineInfo(Long medicineIdx, Long code, String medicineName, String efficacy, String usage, String precautions, AppearanceInfo appearanceInfo, String ingredient, String save) {
         this.medicineIdx = medicineIdx;
+        this.code = code;
         this.medicineName = medicineName;
         this.efficacy = efficacy;
         this.usage = usage;
         this.precautions = precautions;
-        this.storageMethod = storageMethod;
+        this.appearanceInfo = appearanceInfo;
+        this.ingredient = ingredient;
+        this.save = save;
     }
 
     public Long getMedicineIdx() {
         return medicineIdx;
+    }
+
+    public Long getCode() {
+        return code;
     }
 
     public String getMedicineName() {
@@ -37,7 +47,15 @@ public class MedicineInfo {
         return precautions;
     }
 
-    public String getStorageMethod() {
-        return storageMethod;
+    public AppearanceInfo getAppearanceInfo() {
+        return appearanceInfo;
+    }
+
+    public String getIngredient() {
+        return ingredient;
+    }
+
+    public String getSave() {
+        return save;
     }
 }

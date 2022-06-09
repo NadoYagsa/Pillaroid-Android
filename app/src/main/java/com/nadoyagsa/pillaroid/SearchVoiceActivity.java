@@ -66,8 +66,8 @@ public class SearchVoiceActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.tb_voicesearch_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-            Objects.requireNonNull(actionBar).setDisplayShowCustomEnabled(true);
-            actionBar.setDisplayShowTitleEnabled(false);
+        Objects.requireNonNull(actionBar).setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
         View customView = View.inflate(this, R.layout.actionbar_icon_text, null);
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
@@ -81,7 +81,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
             tts.stop();     //진행중이던 tts speak가 있다면 멈춤
             if (etQuery.getText().length() > 0) {
                 isResultBtClicked = true;
-                
+
                 if (isRecording)
                     speechRecognizer.cancel();
 
@@ -147,7 +147,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
         TextView tvTitle = toolbar.findViewById(R.id.tv_ab_icontext_title);
         tvTitle.setText("의약품 음성으로 검색");
     }
-    
+
     private void settingForSTT() {
         intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,getPackageName());
@@ -234,7 +234,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
 
                 temporaryQuery = temporaryQuery.concat(newText.toString());
                 etQuery.setText(temporaryQuery);
-                
+
                 if (isRecording)    // 인식 종료 버튼이 아직 눌리지 않음 (녹음 재개)
                     speechRecognizer.startListening(intent);
                 else {              // 인식 종료 버튼이 눌렸을 때, 종료 시점 이후에 결과가 반환이 되는 경우

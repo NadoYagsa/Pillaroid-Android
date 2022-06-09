@@ -5,8 +5,8 @@ import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.media.Image;
 import android.os.Bundle;
@@ -28,7 +28,6 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
@@ -40,7 +39,6 @@ import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -59,6 +57,7 @@ public class SearchCaseActivity extends AppCompatActivity {
     private ImageCapture imageCapture;
     private Executor caseExecutor;
     private CaseAnalyzer caseAnalyzer;
+    private ImageProxy currentImageProxy = null;
 
     private boolean isReadyCamera = false;
     private boolean isAnalyzing = false;
@@ -78,7 +77,7 @@ public class SearchCaseActivity extends AppCompatActivity {
                 tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
 
                 if (isReadyCamera) {
-                    tts.speak("후면 카메라가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+                    tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
                 }
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
@@ -86,15 +85,18 @@ public class SearchCaseActivity extends AppCompatActivity {
         });
 
         pvCaseCamera = findViewById(R.id.pv_search_case);
-        caseExecutor = Executors.newSingleThreadExecutor();
         caseAnalyzer = new CaseAnalyzer();
+    }
 
-        /* TODO: 용기를 인식 후 검색 결과 확인 */
-        //startActivity(new Intent(this, MedicineResultActivity.class));
+    @Override
+    protected void onStart() {
+        super.onStart();
+        tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
     }
 
     private void startCamera() {
         isReadyCamera = true;
+        caseExecutor = Executors.newSingleThreadExecutor(); //카메라 시작시 executor도 실행
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
@@ -132,6 +134,7 @@ public class SearchCaseActivity extends AppCompatActivity {
 
         //useGroup으로 카메라 객체 생성
         Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, useCaseGroup);
+        camera.getCameraControl().enableTorch(true);    //flash
 
         preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());  //영상(preview)을 PreviewView에 연결
     }
@@ -139,7 +142,7 @@ public class SearchCaseActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            if (isAnalyzing == true) {
+            if (isAnalyzing) {
                 tts.speak("아직 이전 사진을 분석 중입니다. 조금 뒤에 시도해주세요.", QUEUE_FLUSH, null, null);
             } else {
                 //사진 찍기
@@ -147,6 +150,7 @@ public class SearchCaseActivity extends AppCompatActivity {
                     @Override
                     public void onCaptureSuccess(@NonNull ImageProxy imageProxy) {
                         isAnalyzing = true;
+                        currentImageProxy = imageProxy;
                         tts.speak("사진이 찍혔습니다. 이미지를 분석합니다.", QUEUE_FLUSH, null, null);
 
                         //이미지 분석
@@ -165,7 +169,7 @@ public class SearchCaseActivity extends AppCompatActivity {
 
     private class CaseAnalyzer implements ImageAnalysis.Analyzer {
         @Override
-        public void analyze(ImageProxy imageProxy) {
+        public void analyze(@NonNull ImageProxy imageProxy) {
             scanBarcode(imageProxy);
         }
     }
@@ -182,22 +186,31 @@ public class SearchCaseActivity extends AppCompatActivity {
                     .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
                     .build();
             BarcodeScanner scanner = BarcodeScanning.getClient(options);
-            Task<List<Barcode>> result = scanner.process(inputImage)
+            scanner.process(inputImage)
                     .addOnSuccessListener(barcodes -> {
                         String code = null;
                         for (Barcode barcode: barcodes) {
                             int valueType = barcode.getValueType();
                             if (valueType == Barcode.TYPE_PRODUCT) {
                                 code = barcode.getDisplayValue();
+                                Log.d("resultBarcodeCode", code);
+
                                 tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, null);
-                                Log.d("resultBarcodeCode:", code);
-                                //TODO: api로 제품식별번호, 제품명 가져오기
+                                tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, null);   // 0.4초 딜레이
+
+                                imageProxy.close(); //바코드 인식됐으므로 imageProxy 종료
+                                currentImageProxy = null;
+
+                                Intent medicineIntent = new Intent(this, MedicineResultActivity.class);
+                                medicineIntent.putExtra("barcode", code);
+                                startActivity(medicineIntent);
                             }
                         }
                         if (code == null) {
                             detectText(imageProxy); //바코드 인식된 게 없다면 제품명 인식
                         } else {
                             imageProxy.close(); //바코드 인식되면 텍스트 인식하지 않고 imageProxy 닫음
+                            currentImageProxy = null;
                         }
                     });
         }
@@ -212,7 +225,7 @@ public class SearchCaseActivity extends AppCompatActivity {
                     InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
 
             TextRecognizer recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
-            Task<Text> result = recognizer.process(inputImage)
+            recognizer.process(inputImage)
                     .addOnSuccessListener(text -> {
                         //Task completed successfully
                         int maxHeight = 0;
@@ -221,7 +234,6 @@ public class SearchCaseActivity extends AppCompatActivity {
                         String resultText = text.getText(); //TODO: 삭제
                         Log.d("resultText", resultText);    //TODO: 삭제
                         for (Text.TextBlock block : text.getTextBlocks()) {
-                            String blockText = block.getText(); //block 별 인식되는 텍스트
                             Rect blockFrame = block.getBoundingBox();
 
                             assert blockFrame != null;
@@ -238,7 +250,10 @@ public class SearchCaseActivity extends AppCompatActivity {
                             //TODO: 추출한 텍스트가 제품명이 아님을 알 수 있어야 함
                         }
                     })
-                    .addOnCompleteListener(task -> imageProxy.close()); //text 인식까지 모두 끝나면 imageProxy 닫기
+                    .addOnCompleteListener(task -> {
+                        imageProxy.close(); //text 인식까지 모두 끝나면 imageProxy 닫기
+                        currentImageProxy = null;
+                    });
         }
     }
 
@@ -271,6 +286,10 @@ public class SearchCaseActivity extends AppCompatActivity {
             cameraProviderFuture.cancel(true);
             cameraProviderFuture = null;
             caseExecutor = null;
+            if (currentImageProxy != null) {
+                currentImageProxy.close();
+                currentImageProxy = null;
+            }
         }
     }
 

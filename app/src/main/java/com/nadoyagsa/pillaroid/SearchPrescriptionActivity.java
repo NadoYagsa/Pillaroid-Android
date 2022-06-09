@@ -5,9 +5,9 @@ import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
@@ -69,7 +69,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                 }
                 tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
 
-                pvPrescriptionCamera = findViewById(R.id.pv_search_prescription);
                 recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
                 prescriptionAnalyzer = new PrescriptionAnalyzer();
 
@@ -80,9 +79,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
         });
 
         tvGuide = findViewById(R.id.tv_search_prescription_guide);
-
-        /* TODO: 처방전 인식 후 검색 결과 확인 */
-        //startActivity(new Intent(this, PrescriptionResultActivity.class));
+        pvPrescriptionCamera = findViewById(R.id.pv_search_prescription);
     }
 
     private void checkCameraPermission() {
@@ -177,12 +174,12 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                             Log.i("텍스트 OCR - success", "성공적");
 
                             String resultText = text.getText();
-                            Log.i("텍스트 OCR - text", resultText);
-
-                            ArrayList<String> medicineList = new ArrayList<>();
+                            ArrayList<PrescriptionPosition> itemList = new ArrayList<>();
 
                             int medicineNameLeftX = -1;
                             int medicineNameBottomY = -1;
+                            int medicineFinishBottomY = -1;
+
                             for (Text.TextBlock block : text.getTextBlocks()) {         // block 별
                                 String blockText = block.getText();
                                 Point[] blockCornerPoints = block.getCornerPoints();        // 왼위, 오위, 오아래, 왼아래
@@ -195,11 +192,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                                 else {
                                     // 의약품의 명칭보다 아래 위치하며 왼쪽에 적힌 문장들
                                     if (medicineNameBottomY != -1 && blockCornerPoints[0].x<=medicineNameLeftX && blockCornerPoints[0].y>=medicineNameBottomY) {
-                                        if (blockText.contains("주사제 처방내역"))             // 주사제 처방내역 위의 부분까지만 의약품 명칭임
-                                            break;
-                                        else if (blockText.contains("이하여백"))
-                                            break;
-
                                         // blockText에서 실제 의약품 명칭만 빼냄
                                         String medicine = blockText
                                                 .replaceAll("[^0-9a-zA-Z가-힣/()\\[\\]]", "")     // 숫자, 영소/대문자, 한글, /[]() 를 제외한 문자는 모두 제거
@@ -209,22 +201,51 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                                                 .replaceAll("\\(?[비급여]{1,3}\\)", "")           // 급여 관련 키워드 제거  ex. 비), (비급여), (급여)
                                                 .replaceAll("\\(?[0-9]{9}\\)?", "")              // 보험 코드(ex. 661604420)
                                                 .replaceAll("^\\([0-9]*\\)", "")                 // 순번 제거
+                                                .replaceAll("\\([^)]*\\)?", "")                   // 모든 괄호 내용 제거
                                                 .trim();
 
                                         //TODO: 의약품 대신 보험 코드가 있을 때, 보험 코드를 쓰는 것이 나을지 고민해보자!
-                                        medicineList.add(medicine);
+                                        itemList.add(new PrescriptionPosition(blockCornerPoints[0].y, medicine));
+                                    }
+                                    // 의약품의 명칭보다 아래 위치하며 오른쪽에 적힌 문장들
+                                    else if (medicineNameBottomY != -1 && blockCornerPoints[0].x>medicineNameLeftX && blockCornerPoints[0].y>=medicineNameBottomY) {
+                                        if (blockText.contains("주사제 처방내역") || blockText.contains("처방내역") || blockText.contains("원내조제")) {            // 주사제 처방내역 위의 부분까지만 의약품 명칭임
+                                            medicineFinishBottomY = blockCornerPoints[2].y;
+                                            break;
+                                        }
+                                        else if (blockText.contains("이하여백") || blockText.contains("이하 여백") ) {
+                                            medicineFinishBottomY = blockCornerPoints[2].y;
+                                            break;
+                                        }
                                     }
                                 }
                             }
+
+                            // 의약품 명칭만 추출함
+                            ArrayList<String> medicineList = new ArrayList<>();
+                            for (PrescriptionPosition item : itemList) {
+                                if (medicineFinishBottomY > item.topY)
+                                    medicineList.add(item.medicineName);
+                            }
+
                             if (medicineList.size() > 0) {
-                                tts.speak("처방 의약품은 ", TextToSpeech.QUEUE_FLUSH, null, null);
+                                /*
+                                tts.speak("조회할 처방 의약품은 ", TextToSpeech.QUEUE_FLUSH, null, null);
                                 for (String medicine: medicineList) {
                                     tts.speak(medicine, TextToSpeech.QUEUE_ADD, null, null);
                                     tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
                                 }
                                 tts.speak("로, 총 "+medicineList.size()+"개 입니다.", TextToSpeech.QUEUE_ADD, null, null);
-                                
-                                // TODO: 다음 화면으로 넘어감
+                                tts.playSilentUtterance(5000, TextToSpeech.QUEUE_ADD, null);
+                                 */
+
+                                imageProxy.close();
+
+                                /* 처방전 인식 후 검색 결과 확인 */
+                                Intent resultIntent = new Intent(SearchPrescriptionActivity.this, PrescriptionResultActivity.class);
+                                resultIntent.putStringArrayListExtra("medicineList", medicineList);
+                                tts.stop();
+                                startActivity(resultIntent);
                             }
                             else
                                 tts.speak("인식된 처방 의약품이 없습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -316,5 +337,15 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                 cameraProviderFuture = null;
             }
         } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private static class PrescriptionPosition {
+        private final int topY;
+        private final String medicineName;
+
+        public PrescriptionPosition(int topY, String medicineName) {
+            this.topY = topY;
+            this.medicineName = medicineName;
+        }
     }
 }

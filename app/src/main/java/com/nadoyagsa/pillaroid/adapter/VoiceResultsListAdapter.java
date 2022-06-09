@@ -17,10 +17,9 @@ import com.nadoyagsa.pillaroid.data.VoiceResultInfo;
 import java.util.ArrayList;
 
 public class VoiceResultsListAdapter extends ArrayAdapter<ArrayList<VoiceResultInfo>> {
-
-    Context context;
+    private Context context;
     private final ArrayList<VoiceResultInfo> voiceResultsList;
-    int selectedPosition = -1;
+    private int selectedPosition = -1;
 
     public VoiceResultsListAdapter(@NonNull Context context, int resource, ArrayList<VoiceResultInfo> voiceResultsList) {
         super(context, resource);
@@ -39,7 +38,7 @@ public class VoiceResultsListAdapter extends ArrayAdapter<ArrayList<VoiceResultI
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         convertView = inflater.inflate(R.layout.item_voice_results, parent, false);
 
-        TextView tvName = (TextView) convertView.findViewById(R.id.tv_item_voiceresults_name);
+        TextView tvName = convertView.findViewById(R.id.tv_item_voiceresults_name);
         tvName.setText(voiceResultsList.get(position).getMedicineName());
 
         if (position == selectedPosition) {
