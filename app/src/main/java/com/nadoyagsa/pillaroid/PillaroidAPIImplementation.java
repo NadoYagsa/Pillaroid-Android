@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class PillaroidAPIImplementation {
-    private static final String BASE_URL = "http://ec2-13-209-8-46.ap-northeast-2.compute.amazonaws.com:8080/";
+    private static final String BASE_URL = "http://ec2-15-165-205-12.ap-northeast-2.compute.amazonaws.com:8080/";
 
     public static PillaroidAPI getApiService() {
         return getInstance().create(PillaroidAPI.class);
