@@ -95,7 +95,7 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/iv_medicineresult_usage"
+                    android:id="@+id/iv_medicineresult_dosage"
                     android:layout_width="5dp"
                     android:layout_height="5dp"
                     android:layout_gravity="center"
@@ -103,14 +103,14 @@
                     android:src="@drawable/dot" />
 
                 <TextView
-                    android:id="@+id/tv_medicineresult_usage"
+                    android:id="@+id/tv_medicineresult_dosage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:clickable="true"
                     android:paddingVertical="5dp"
                     android:tag="1"
-                    android:text="@string/category_usage"
+                    android:text="@string/category_dosage"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -155,7 +155,7 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/iv_medicineresult_precautions"
+                    android:id="@+id/iv_medicineresult_precaution"
                     android:layout_width="5dp"
                     android:layout_height="5dp"
                     android:layout_gravity="center"
@@ -163,14 +163,14 @@
                     android:src="@drawable/dot" />
 
                 <TextView
-                    android:id="@+id/tv_medicineresult_precautions"
+                    android:id="@+id/tv_medicineresult_precaution"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:clickable="true"
                     android:paddingVertical="5dp"
                     android:tag="2"
-                    android:text="@string/category_precautions"
+                    android:text="@string/category_precaution"
                     android:textSize="16sp" />
             </LinearLayout>
 

@@ -1,27 +1,27 @@
 package com.nadoyagsa.pillaroid.data;
 
 public class PrescriptionInfo {
-    private Long medicineIdx;
-    private String medicineName;
+    private final int medicineIdx;
+    private final String name;
     private boolean isFavorites = false;
-    private AppearanceInfo appearanceInfo;
-    private String efficacy;    // 효능 및 효과
-    private String usage;       // 용법 및 용량
+    private final AppearanceInfo appearanceInfo;      // 외형 정보
+    private final String efficacy;        // 효능 및 효과
+    private final String dosage;          // 용법 및 용량
 
-    public PrescriptionInfo(Long medicineIdx, String medicineName, AppearanceInfo appearanceInfo, String efficacy, String usage) {
+    public PrescriptionInfo(int medicineIdx, String name, AppearanceInfo appearanceInfo, String efficacy, String dosage) {
         this.medicineIdx = medicineIdx;
-        this.medicineName = medicineName;
+        this.name = name;
         this.appearanceInfo = appearanceInfo;
         this.efficacy = efficacy;
-        this.usage = usage;
+        this.dosage = dosage;
     }
 
-    public Long getMedicineIdx() {
+    public int getMedicineIdx() {
         return medicineIdx;
     }
 
-    public String getMedicineName() {
-        return medicineName;
+    public String getName() {
+        return name;
     }
 
     public boolean isFavorites() {
@@ -36,7 +36,7 @@ public class PrescriptionInfo {
         return efficacy;
     }
 
-    public String getUsage() {
-        return usage;
+    public String getDosage() {
+        return dosage;
     }
 }

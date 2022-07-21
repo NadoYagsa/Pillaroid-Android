@@ -1,50 +1,45 @@
 package com.nadoyagsa.pillaroid.data;
 
 public class MedicineInfo {
-    private final Long medicineIdx;         //의약품 idx
-    private final Long code;                //품목일련번호
-    private final String medicineName;      //품목명
-    private final String efficacy;          //효능효과
-    private final String usage;             //용법용량
-    private final String precautions;       //주의사항
-    private final AppearanceInfo appearanceInfo;        //외형
-    private final String ingredient;        //성분
-    private final String save;              //보관법
+    private final int medicineIdx;          // 의약품 idx
+    private final String name;              // 품목명
+    private final String efficacy;          // 효능효과
+    private final String dosage;            // 용법용량
+    private final String precaution;        // 주의사항
+    private final AppearanceInfo appearanceInfo;        // 외형
+    private final String ingredient;        // 성분
+    private final String save;              // 보관법
 
-    public MedicineInfo(Long medicineIdx, Long code, String medicineName, String efficacy, String usage, String precautions, AppearanceInfo appearanceInfo, String ingredient, String save) {
+    // 처방전 용으로 외형정보가 있음
+    public MedicineInfo(int medicineIdx, String name, String efficacy, String dosage, String precaution, AppearanceInfo appearanceInfo, String ingredient, String save) {
         this.medicineIdx = medicineIdx;
-        this.code = code;
-        this.medicineName = medicineName;
+        this.name = name;
         this.efficacy = efficacy;
-        this.usage = usage;
-        this.precautions = precautions;
+        this.dosage = dosage;
+        this.precaution = precaution;
         this.appearanceInfo = appearanceInfo;
         this.ingredient = ingredient;
         this.save = save;
     }
 
-    public Long getMedicineIdx() {
+    public int getMedicineIdx() {
         return medicineIdx;
     }
 
-    public Long getCode() {
-        return code;
-    }
-
-    public String getMedicineName() {
-        return medicineName;
+    public String getName() {
+        return name;
     }
 
     public String getEfficacy() {
         return efficacy;
     }
 
-    public String getUsage() {
-        return usage;
+    public String getDosage() {
+        return dosage;
     }
 
-    public String getPrecautions() {
-        return precautions;
+    public String getPrecaution() {
+        return precaution;
     }
 
     public AppearanceInfo getAppearanceInfo() {

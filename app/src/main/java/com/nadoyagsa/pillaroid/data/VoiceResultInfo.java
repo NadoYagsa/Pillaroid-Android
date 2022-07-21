@@ -1,15 +1,15 @@
 package com.nadoyagsa.pillaroid.data;
 
 public class VoiceResultInfo {
-    private final Long medicineIdx;   //품목일련변호
-    private final String medicineName;//품목명
+    private final int medicineIdx;      // 의약품 DB 내 고유 번호
+    private final String medicineName;  // 품목명
 
-    public VoiceResultInfo(Long medicineIdx, String medicineName) {
+    public VoiceResultInfo(int medicineIdx, String medicineName) {
         this.medicineIdx = medicineIdx;
         this.medicineName = medicineName;
     }
 
-    public Long getMedicineIdx() {
+    public int getMedicineIdx() {
         return medicineIdx;
     }
 

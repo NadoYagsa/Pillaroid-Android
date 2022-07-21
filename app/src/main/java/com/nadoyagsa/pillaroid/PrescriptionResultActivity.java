@@ -84,7 +84,7 @@ public class PrescriptionResultActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 tts.speak(position+1+"번째 약품", QUEUE_FLUSH, null, null);
                 tts.playSilentUtterance(500, TextToSpeech.QUEUE_ADD, null);
-                tts.speak(prescriptionInfos.get(position).getMedicineName(), QUEUE_ADD, null, null);
+                tts.speak(prescriptionInfos.get(position).getName(), QUEUE_ADD, null, null);
 
                 tvCurrentNum.setText(String.valueOf(position+1));
                 super.onPageSelected(position);
@@ -116,32 +116,36 @@ public class PrescriptionResultActivity extends AppCompatActivity {
                                         .replace(']', ')')
                                         .replaceAll("\\([^)]*\\)", "");
 
-                                JSONObject jsonObject = new JSONObject(medicine.getString("appearanceInfo"));
-                                String appearance = null, formulation = null, shape = null, color = null, dividingLine = null, identificationMark = null;
+                                JSONObject appearance = medicine.getJSONObject("appearance");
+                                String feature = null, formulation = null, shape = null, color = null, dividingLine = null, identificationMark = null;
 
-                                if (jsonObject.has("appearance"))
-                                    appearance = jsonObject.getString("appearance");
-                                if (jsonObject.has("formulation"))
-                                    formulation = jsonObject.getString("formulation");
-                                if (jsonObject.has("shape"))
-                                    shape = jsonObject.getString("shape");
-                                if (jsonObject.has("color"))
-                                    color = jsonObject.getString("color");
-                                if (jsonObject.has("dividingLine"))
-                                    dividingLine = jsonObject.getString("dividingLine");
-                                if (jsonObject.has("identificationMark"))
-                                    identificationMark = jsonObject.getString("identificationMark");
+                                boolean isAppearanceNull = appearance.isNull("feature") && appearance.isNull("formulation") && appearance.isNull("shape")
+                                        && appearance.isNull("color") && appearance.isNull("dividingLine") && appearance.isNull("identificationMark");
 
-                                AppearanceInfo appearanceInfo = new AppearanceInfo(appearance, formulation, shape, color, dividingLine, identificationMark);
+                                if (!appearance.isNull("feature"))
+                                    feature = appearance.getString("feature");
+                                if (!appearance.isNull("formulation"))
+                                    formulation = appearance.getString("formulation");
+                                if (!appearance.isNull("shape"))
+                                    shape = appearance.getString("shape");
+                                if (!appearance.isNull("color"))
+                                    color = appearance.getString("color");
+                                if (!appearance.isNull("dividingLine"))
+                                    dividingLine = appearance.getString("dividingLine");
+                                if (!appearance.isNull("identificationMark"))
+                                    identificationMark = appearance.getString("identificationMark");
 
-                                prescriptionInfos.add(new PrescriptionInfo(medicine.getLong("idx"), name,
-                                        appearanceInfo, medicine.getString("efficacy"), medicine.getString("usage")));
+                                AppearanceInfo appearanceInfo = new AppearanceInfo(feature, formulation, shape, color, dividingLine, identificationMark);
+                                appearanceInfo.setIsNull(isAppearanceNull);
+
+                                prescriptionInfos.add(new PrescriptionInfo(medicine.getInt("medicineIdx"), name,
+                                        appearanceInfo, medicine.getString("efficacy"), medicine.getString("dosage")));
                             }
                             prescriptionPagerAdapter.notifyDataSetChanged();
 
                             tts.speak("조회된 처방 의약품은 ", TextToSpeech.QUEUE_FLUSH, null, null);
                             for (PrescriptionInfo prescriptionInfo: prescriptionInfos) {
-                                tts.speak(prescriptionInfo.getMedicineName(), TextToSpeech.QUEUE_ADD, null, null);
+                                tts.speak(prescriptionInfo.getName(), TextToSpeech.QUEUE_ADD, null, null);
                                 tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
                             }
                             tts.speak("로, 총 "+prescriptionInfos.size()+"개 입니다.", TextToSpeech.QUEUE_ADD, null, null);

@@ -48,7 +48,7 @@ public class MedicineResultActivity extends AppCompatActivity {
     private final long RESPONSE_MEDICINE_NOT_FOUND = 40402L;
     private final String API_FAILED = "api-failed";
 
-    private Long medicineIdx = 0L;
+    private int medicineIdx = 0;
     private String barcode = "";
     private MedicineInfo medicine;
     private HashMap<Integer,View> categories;
@@ -71,7 +71,7 @@ public class MedicineResultActivity extends AppCompatActivity {
 
         //TODO: if문으로 idx, name 구분하시오!
         if (getIntent().hasExtra("medicineIdx"))
-            medicineIdx = getIntent().getLongExtra("medicineIdx", 0L);   //검색 의약품 idx
+            medicineIdx = getIntent().getIntExtra("medicineIdx", 0);   //검색 의약품 idx
         else if (getIntent().hasExtra("barcode"))
             barcode = getIntent().getStringExtra("barcode");    //검색할 바코드
 
@@ -126,7 +126,7 @@ public class MedicineResultActivity extends AppCompatActivity {
 
         clickListener();
 
-        medicine = new MedicineInfo(-1L, -1L, "", "", "", "", null, "", "");
+        medicine = new MedicineInfo(-1, "", "", "", "", null, "", "");
         vpResult = findViewById(R.id.vp_medicineresult_result);
         medicinePagerAdapter = new MedicinePagerAdapter(medicine);
         vpResult.setAdapter(medicinePagerAdapter);
@@ -170,7 +170,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         dialog.show();
 
         final EditText etLabel = dialogView.findViewById(R.id.et_dialog_addalarm_label);
-        etLabel.setHint(medicine.getMedicineName());
+        etLabel.setHint(medicine.getName());
 
         TextView tvCancel = dialogView.findViewById(R.id.tv_dialog_addalarm_cancel);
         if (ivAlarm.getTag().equals("on")) {
@@ -211,11 +211,11 @@ public class MedicineResultActivity extends AppCompatActivity {
         TextView tvEfficacy = findViewById(R.id.tv_medicineresult_efficacy);        // 효능 및 효과
         tvEfficacy.setOnClickListener(view -> vpResult.setCurrentItem(0));
 
-        TextView tvUsage = findViewById(R.id.tv_medicineresult_usage);              // 용법 및 용량
-        tvUsage.setOnClickListener(view -> vpResult.setCurrentItem(1));
+        TextView tvDosage = findViewById(R.id.tv_medicineresult_dosage);            // 용법 및 용량
+        tvDosage.setOnClickListener(view -> vpResult.setCurrentItem(1));
 
-        TextView tvPrecautions = findViewById(R.id.tv_medicineresult_precautions);   // 주의사항
-        tvPrecautions.setOnClickListener(view -> vpResult.setCurrentItem(2));
+        TextView tvPrecaution = findViewById(R.id.tv_medicineresult_precaution);    // 주의사항
+        tvPrecaution.setOnClickListener(view -> vpResult.setCurrentItem(2));
 
         TextView tvAppearance = findViewById(R.id.tv_medicineresult_appearance);    // 외형
         tvAppearance.setOnClickListener(view -> vpResult.setCurrentItem(3));
@@ -229,8 +229,8 @@ public class MedicineResultActivity extends AppCompatActivity {
         categories = new HashMap<Integer,View>(){
             {
                 put(0, tvEfficacy);
-                put(1, tvUsage);
-                put(2, tvPrecautions);
+                put(1, tvDosage);
+                put(2, tvPrecaution);
                 put(3, tvAppearance);
                 put(4, tvIngredient);
                 put(5, tvSave);
@@ -254,30 +254,34 @@ public class MedicineResultActivity extends AppCompatActivity {
 
                         tts.speak("검색된 의약품은 " + name + "입니다.", QUEUE_FLUSH, null, null);
 
-                        JSONObject jsonObject = new JSONObject(data.getString("appearanceInfo"));
-                        String appearance = null, formulation = null, shape = null, color = null, dividingLine = null, identificationMark = null;
+                        JSONObject appearance = data.getJSONObject("appearance");
+                        String feature = null, formulation = null, shape = null, color = null, dividingLine = null, identificationMark = null;
 
-                        if (jsonObject.has("appearance"))
-                            appearance = jsonObject.getString("appearance");
-                        if (jsonObject.has("formulation"))
-                            formulation = jsonObject.getString("formulation");
-                        if (jsonObject.has("shape"))
-                            shape = jsonObject.getString("shape");
-                        if (jsonObject.has("color"))
-                            color = jsonObject.getString("color");
-                        if (jsonObject.has("dividingLine"))
-                            dividingLine = jsonObject.getString("dividingLine");
-                        if (jsonObject.has("identificationMark"))
-                            identificationMark = jsonObject.getString("identificationMark");
+                        boolean isAppearanceNull = appearance.isNull("feature") && appearance.isNull("formulation") && appearance.isNull("shape")
+                                && appearance.isNull("color") && appearance.isNull("dividingLine") && appearance.isNull("identificationMark");
 
-                        AppearanceInfo appearanceInfo = new AppearanceInfo(appearance, formulation, shape, color, dividingLine, identificationMark);
+                        if (!appearance.isNull("feature"))
+                            feature = appearance.getString("feature");
+                        if (!appearance.isNull("formulation"))
+                            formulation = appearance.getString("formulation");
+                        if (!appearance.isNull("shape"))
+                            shape = appearance.getString("shape");
+                        if (!appearance.isNull("color"))
+                            color = appearance.getString("color");
+                        if (!appearance.isNull("dividingLine"))
+                            dividingLine = appearance.getString("dividingLine");
+                        if (!appearance.isNull("identificationMark"))
+                            identificationMark = appearance.getString("identificationMark");
 
-                        medicine = new MedicineInfo(data.getLong("idx"), data.getLong("code"),
-                                name, data.getString("efficacy"), data.getString("usage"),
-                                data.getString("precautions"), appearanceInfo,
+                        AppearanceInfo appearanceInfo = new AppearanceInfo(feature, formulation, shape, color, dividingLine, identificationMark);
+                        appearanceInfo.setIsNull(isAppearanceNull);
+
+                        medicine = new MedicineInfo(data.getInt("medicineIdx"), name,
+                                data.getString("efficacy"), data.getString("dosage"),
+                                data.getString("precaution"), appearanceInfo,
                                 data.getString("ingredient"), data.getString("save"));
 
-                        tvTitle.setText(medicine.getMedicineName());
+                        tvTitle.setText(medicine.getName());
 
                         medicinePagerAdapter.setMedicineInfo(medicine);
                         vpResult.setCurrentItem(0);
@@ -331,9 +335,9 @@ public class MedicineResultActivity extends AppCompatActivity {
             }
         };
 
-        if (!medicineIdx.equals(0L)) {      // 의약품 번호로 정보 조회
+        if (medicineIdx != 0) {          // 의약품 번호로 정보 조회
             PillaroidAPIImplementation.getApiService().getMedicineByIdx(medicineIdx).enqueue(medicineCallback);
-        } else if (!barcode.equals("")) {      // 바코드로 정보 조회
+        } else if (!barcode.equals("")) {       // 바코드로 정보 조회
             PillaroidAPIImplementation.getApiService().getMedicineByBarcode(barcode).enqueue(medicineCallback);
         }
     }
