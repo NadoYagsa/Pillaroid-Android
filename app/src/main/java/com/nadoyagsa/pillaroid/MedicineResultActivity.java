@@ -69,7 +69,6 @@ public class MedicineResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medicine_result);
 
-        //TODO: if문으로 idx, name 구분하시오!
         if (getIntent().hasExtra("medicineIdx"))
             medicineIdx = getIntent().getIntExtra("medicineIdx", 0);   //검색 의약품 idx
         else if (getIntent().hasExtra("barcode"))
@@ -139,6 +138,7 @@ public class MedicineResultActivity extends AppCompatActivity {
                 ((TextView)selectedCategoryView).setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
 
                 selectedCategoryView = categories.get(position);
+                assert selectedCategoryView != null;
                 ((TextView)selectedCategoryView).setTextColor(getColor(R.color.main_color));
                 ((TextView)selectedCategoryView).setTypeface(Typeface.DEFAULT_BOLD);
 
@@ -291,6 +291,7 @@ public class MedicineResultActivity extends AppCompatActivity {
                     }
                 } else if (response.code() == 400) {
                     try {
+                        assert response.errorBody() != null;
                         String errorStr = response.errorBody().string();
                         JSONObject errorBody = new JSONObject(errorStr);
                         long errorIdx = errorBody.getLong("errorIdx");
@@ -307,6 +308,7 @@ public class MedicineResultActivity extends AppCompatActivity {
                     }
                 } else if (response.code() == 404) {
                     try {
+                        assert response.errorBody() != null;
                         String errorStr = response.errorBody().string();
                         JSONObject errorBody = new JSONObject(errorStr);
                         long errorIdx = errorBody.getLong("errorIdx");

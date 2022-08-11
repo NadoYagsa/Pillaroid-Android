@@ -17,9 +17,6 @@ public interface PillaroidAPI {
     Call<String> getMedicineByIdx(@Query("idx") int medicineIdx);                       // 의약품 idx로 의약품 정보 조회
 
     @GET("/medicine/case")
-    Call<String> getMedicineByCaseName(@Query("name") String name);                     // 제품명으로 의약품 정보 조회
-
-    @GET("/medicine/case")
     Call<String> getMedicineByBarcode(@Query("barcode") String barcode);                // 바코드 정보로 의약품 정보 조회
 
     @GET("/medicine/voice")
