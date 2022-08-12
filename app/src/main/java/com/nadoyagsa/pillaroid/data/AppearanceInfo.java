@@ -1,15 +1,17 @@
 package com.nadoyagsa.pillaroid.data;
 
 public class AppearanceInfo {
-    private String appearance;          // 성상
+    private String feature;             // 성상
     private String formulation;         // 제형
     private String shape;               // 모양
     private String color;               // 색상
     private String dividingLine;        // 분할선
     private String identificationMark;  // 식별표기
 
-    public AppearanceInfo(String appearance, String formulation, String shape, String color, String dividingLine, String identificationMark) {
-        this.appearance = appearance;
+    private boolean isNull = false;
+
+    public AppearanceInfo(String feature, String formulation, String shape, String color, String dividingLine, String identificationMark) {
+        this.feature = feature;
         this.formulation = formulation;
         this.shape = shape;
         this.color = color;
@@ -17,8 +19,8 @@ public class AppearanceInfo {
         this.identificationMark = identificationMark;
     }
 
-    public String getAppearance() {
-        return appearance;
+    public String getFeature() {
+        return feature;
     }
 
     public String getFormulation() {
@@ -39,5 +41,12 @@ public class AppearanceInfo {
 
     public String getIdentificationMark() {
         return identificationMark;
+    }
+
+    public void setIsNull(boolean isNull) {
+        this.isNull = isNull;
+    }
+    public boolean isNull() {
+        return isNull;
     }
 }

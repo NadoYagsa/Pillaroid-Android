@@ -7,7 +7,6 @@ import static android.speech.tts.TextToSpeech.SUCCESS;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Rect;
 import android.media.Image;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -34,10 +33,6 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.text.Text;
-import com.google.mlkit.vision.text.TextRecognition;
-import com.google.mlkit.vision.text.TextRecognizer;
-import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
 
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -96,7 +91,7 @@ public class SearchCaseActivity extends AppCompatActivity {
 
     private void startCamera() {
         isReadyCamera = true;
-        caseExecutor = Executors.newSingleThreadExecutor(); //카메라 시작시 executor도 실행
+        caseExecutor = Executors.newSingleThreadExecutor(); // 카메라 시작시 executor도 실행
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
@@ -112,31 +107,31 @@ public class SearchCaseActivity extends AppCompatActivity {
     private void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
         cameraProvider.unbindAll();
 
-        //camera preview로 보여줄 view finder 설정
+        // camera preview로 보여줄 view finder 설정
         Preview preview = new Preview.Builder().build();
 
-        //카메라 선택 (렌즈 앞/뒤)
+        // 카메라 선택 (렌즈 앞/뒤)
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
-        //사진 캡쳐 관련 설정
+        // 사진 캡쳐 관련 설정
         imageCapture = new ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY) //화질을 기준으로 최적화
-                .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())   //rotation은 디바이스의 기본 설정에 따름
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY) // 화질을 기준으로 최적화
+                .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())   // rotation은 디바이스의 기본 설정에 따름
                 .build();
 
-        //위에서 만든 설정 객체들로 useCaseGroup 만들기
+        // 위에서 만든 설정 객체들로 useCaseGroup 만들기
         UseCaseGroup useCaseGroup = new UseCaseGroup.Builder()
                 .addUseCase(preview)
                 .addUseCase(imageCapture)
                 .build();
 
-        //useGroup으로 카메라 객체 생성
+        // useGroup으로 카메라 객체 생성
         Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, useCaseGroup);
-        camera.getCameraControl().enableTorch(true);    //flash
+        camera.getCameraControl().enableTorch(true);    // flash
 
-        preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());  //영상(preview)을 PreviewView에 연결
+        preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());  // 영상(preview)을 PreviewView에 연결
     }
 
     @Override
@@ -145,7 +140,7 @@ public class SearchCaseActivity extends AppCompatActivity {
             if (isAnalyzing) {
                 tts.speak("아직 이전 사진을 분석 중입니다. 조금 뒤에 시도해주세요.", QUEUE_FLUSH, null, null);
             } else {
-                //사진 찍기
+                // 사진 찍기
                 imageCapture.takePicture(caseExecutor, new ImageCapture.OnImageCapturedCallback() {
                     @Override
                     public void onCaptureSuccess(@NonNull ImageProxy imageProxy) {
@@ -153,16 +148,16 @@ public class SearchCaseActivity extends AppCompatActivity {
                         currentImageProxy = imageProxy;
                         tts.speak("사진이 찍혔습니다. 이미지를 분석합니다.", QUEUE_FLUSH, null, null);
 
-                        //이미지 분석
+                        // 이미지 분석
                         caseAnalyzer.analyze(imageProxy);
 
                         isAnalyzing = false;
                     }
                 });
             }
-            return true;    //볼륨 UP 기능 없앰
+            return true;    // 볼륨 UP 기능 없앰
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            return true;    //볼륨 DOWN 기능 없앰
+            return true;    // 볼륨 DOWN 기능 없앰
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -178,10 +173,9 @@ public class SearchCaseActivity extends AppCompatActivity {
         @SuppressLint("UnsafeOptInUsageError")
         Image mediaImage = imageProxy.getImage();
         if (mediaImage != null) {
-            //InputImage 객체에 분석할 이미지 받기
+            // InputImage 객체에 분석할 이미지 받기
             InputImage inputImage =
                     InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
-
             BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
                     .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
                     .build();
@@ -196,9 +190,9 @@ public class SearchCaseActivity extends AppCompatActivity {
                                 Log.d("resultBarcodeCode", code);
 
                                 tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, null);
-                                tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, null);   // 0.4초 딜레이
+                                tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, null);
 
-                                imageProxy.close(); //바코드 인식됐으므로 imageProxy 종료
+                                imageProxy.close(); // 바코드 인식됐으므로 imageProxy 종료
                                 currentImageProxy = null;
 
                                 Intent medicineIntent = new Intent(this, MedicineResultActivity.class);
@@ -207,51 +201,10 @@ public class SearchCaseActivity extends AppCompatActivity {
                             }
                         }
                         if (code == null) {
-                            detectText(imageProxy); //바코드 인식된 게 없다면 제품명 인식
-                        } else {
-                            imageProxy.close(); //바코드 인식되면 텍스트 인식하지 않고 imageProxy 닫음
-                            currentImageProxy = null;
+                            // 인식된 바코드가 없을 경우
+                            tts.speak("바코드가 인식되지 않았습니다. 다시 촬영을 진행합니다.", QUEUE_FLUSH, null, null);
                         }
-                    });
-        }
-    }
-
-    private void detectText(ImageProxy imageProxy) {
-        @SuppressLint("UnsafeOptInUsageError")
-        Image mediaImage = imageProxy.getImage();
-        if (mediaImage != null) {
-            //InputImage 객체에 분석할 이미지 받기
-            InputImage inputImage =
-                    InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
-
-            TextRecognizer recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
-            recognizer.process(inputImage)
-                    .addOnSuccessListener(text -> {
-                        //Task completed successfully
-                        int maxHeight = 0;
-                        Text.TextBlock findMaxHeightBlock = null;
-
-                        String resultText = text.getText(); //TODO: 삭제
-                        Log.d("resultText", resultText);    //TODO: 삭제
-                        for (Text.TextBlock block : text.getTextBlocks()) {
-                            Rect blockFrame = block.getBoundingBox();
-
-                            assert blockFrame != null;
-                            int height = blockFrame.height();
-                            if (height > maxHeight) {
-                                maxHeight = height;
-                                findMaxHeightBlock = block;
-                            }
-                        }
-
-                        if (findMaxHeightBlock != null) {
-                            tts.speak("인식된 의약품 이름은 " + findMaxHeightBlock.getText() + "입니다.", QUEUE_FLUSH, null, null);
-                            //TODO: 추가 작업 필요 (height만으로 판단하면 X(정방향이 아니게 찍을 경우, 세로형 텍스트가 있을 경우..), 폰트 특이한건 인식 X)
-                            //TODO: 추출한 텍스트가 제품명이 아님을 알 수 있어야 함
-                        }
-                    })
-                    .addOnCompleteListener(task -> {
-                        imageProxy.close(); //text 인식까지 모두 끝나면 imageProxy 닫기
+                        imageProxy.close(); // 바코드 인식되면 imageProxy 닫음
                         currentImageProxy = null;
                     });
         }
@@ -271,7 +224,7 @@ public class SearchCaseActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                startCamera();  //권한 모두 허가되면 startCamera 실행
+                startCamera();  // 권한 모두 허가되면 startCamera 실행
             } else {
                 Log.e("Camera", "Permissions not granted by the user");
                 tts.speak("카메라 권한이 승인되지 않아 기능을 사용할 수 없습니다.", QUEUE_FLUSH, null, null);
@@ -296,11 +249,10 @@ public class SearchCaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        //모든 퍼미션이 있을 때에만 카메라가 켜짐
+        // 모든 퍼미션이 있을 때에만 카메라가 켜짐
         if(allPermissionsGranted()){
-            startCamera();  //카메라 실행
-        } else{ //모든 권한이 허가되지 않았다면 요청
+            startCamera();  // 카메라 실행
+        } else{ // 모든 권한이 허가되지 않았다면 요청
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
     }
@@ -308,20 +260,20 @@ public class SearchCaseActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        closeCamera();  //카메라 자원 해제
+        closeCamera();  // 카메라 자원 해제
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         try {
-            //tts 자원 해제
+            // tts 자원 해제
             if (tts != null) {
                 tts.stop();
                 tts.shutdown();
                 tts = null;
             }
-            closeCamera();  //카메라 자원 해제
+            closeCamera();  // 카메라 자원 해제
         } catch (Exception e) {
             e.printStackTrace();
         }

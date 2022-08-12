@@ -195,7 +195,7 @@ public class VoiceResultsActivity extends AppCompatActivity {
                                         .replace(']', ')')
                                         .replaceAll("\\([^)]*\\)", "");
 
-                                voiceResults.add(new VoiceResultInfo(medicine.getLong("idx"), name));
+                                voiceResults.add(new VoiceResultInfo(medicine.getInt("medicineIdx"), name));
                             }
                             showVoiceResults();
                         }
