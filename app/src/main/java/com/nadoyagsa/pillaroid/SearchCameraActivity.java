@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class SearchCameraActivity extends AppCompatActivity {
-    public static final int RESULT_PERMISSION_DENIED = -1000;
+    public static final int RESULT_PERMISSION_DENIED = -1;
     private static final int REQUEST_CAMERA_ACTIVITY = 1;
 
     private TextToSpeech tts;
@@ -63,7 +63,9 @@ public class SearchCameraActivity extends AppCompatActivity {
         llSearchCase.setOnClickListener(v -> startActivityForResult(new Intent(this, SearchCaseActivity.class), REQUEST_CAMERA_ACTIVITY));
 
         LinearLayout llSearchPill = findViewById(R.id.ll_search_camera_pill);
-        llSearchPill.setOnClickListener(v -> startActivity(new Intent(this, SearchPillActivity.class)));
+//        llSearchPill.setOnClickListener(v -> startActivity(new Intent(this, SearchPillActivity.class)));
+        llSearchPill.setOnClickListener(v -> startActivityForResult(new Intent(this, PillDetectorActivity.class), REQUEST_CAMERA_ACTIVITY));    // 알약 사물인식 Activity로 전환
+
     }
 
     @Override
