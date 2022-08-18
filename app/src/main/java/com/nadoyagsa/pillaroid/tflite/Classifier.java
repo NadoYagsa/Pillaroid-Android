@@ -26,8 +26,6 @@ import java.util.List;
 public interface Classifier {
     List<Recognition> recognizeImage(Bitmap bitmap);
 
-    void enableStatLogging(final boolean debug);
-
     String getStatString();
 
     void close();
@@ -41,7 +39,7 @@ public interface Classifier {
     /**
      * An immutable result returned by a Classifier describing what was recognized.
      */
-    public class Recognition {
+    public class Recognition implements Comparable<Recognition> {
         /**
          * A unique identifier for what has been recognized. Specific to the class, not the instance of
          * the object.
@@ -129,6 +127,11 @@ public interface Classifier {
             }
 
             return resultString.trim();
+        }
+
+        @Override
+        public int compareTo(Recognition r) {
+            return (int) (r.getConfidence() - getConfidence()) * 100;
         }
     }
 }

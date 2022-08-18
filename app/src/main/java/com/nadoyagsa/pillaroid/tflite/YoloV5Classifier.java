@@ -150,9 +150,6 @@ public class YoloV5Classifier implements Classifier {
     public int getInputSize() {
         return INPUT_SIZE;
     }
-    @Override
-    public void enableStatLogging(final boolean logStats) {
-    }
 
     @Override
     public String getStatString() {

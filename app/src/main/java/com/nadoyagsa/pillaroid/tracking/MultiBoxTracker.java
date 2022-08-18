@@ -58,7 +58,6 @@ public class MultiBoxTracker {
           Color.parseColor("#AA33AA"),
           Color.parseColor("#0D0068")
   };
-  final List<Pair<Float, RectF>> screenRects = new LinkedList<>();
   public final List<TrackedRecognition> trackedObjects = new LinkedList<>();
   private final Paint boxPaint = new Paint();
   private final BorderedText borderedText;
@@ -87,30 +86,51 @@ public class MultiBoxTracker {
     this.sensorOrientation = sensorOrientation;
   }
 
-  public synchronized void drawDebug(final Canvas canvas) {
-    final Paint textPaint = new Paint();
-    textPaint.setColor(Color.WHITE);
-    textPaint.setTextSize(60.0f);
+  public synchronized void trackResults(final List<Recognition> results, final long timestamp) {
+    Log.i("Object-Detection", String.format("Processing %d results from %d", results.size(), timestamp));
 
-    final Paint boxPaint = new Paint();
-    boxPaint.setColor(Color.RED);
-    boxPaint.setAlpha(200);
-    boxPaint.setStyle(Style.STROKE);
+    final List<Pair<Float, Recognition>> rectsToTrack = new LinkedList<>();
 
-    for (final Pair<Float, RectF> detection : screenRects) {
-      final RectF rect = detection.second;
-      canvas.drawRect(rect, boxPaint);
-      canvas.drawText("" + detection.first, rect.left, rect.top, textPaint);
-      borderedText.drawText(canvas, rect.centerX(), rect.centerY(), "" + detection.first);
+    final Matrix rgbFrameToScreen = new Matrix(getFrameToCanvasMatrix());
+
+    for (final Recognition result : results) {
+      if (result.getLocation() == null) {
+        continue;
+      }
+      final RectF detectionFrameRect = new RectF(result.getLocation());
+
+      final RectF detectionScreenRect = new RectF();
+      rgbFrameToScreen.mapRect(detectionScreenRect, detectionFrameRect);
+
+      Log.v("Object-Detection",
+              "Result! Frame: " + result.getLocation() + " mapped to screen:" + detectionScreenRect);
+
+      if (detectionFrameRect.width() < MIN_SIZE || detectionFrameRect.height() < MIN_SIZE) {
+        Log.w("Object-Detection", "Degenerate rectangle! " + detectionFrameRect);
+        continue;
+      }
+
+      rectsToTrack.add(new Pair<>(result.getConfidence(), result));
+    }
+
+    trackedObjects.clear();
+    if (rectsToTrack.isEmpty()) {
+      Log.v("Object-Detection", "Nothing to track, aborting.");
+      // TODO: tts로 말해주어야 할까요?
+      return;
+    }
+
+    for (final Pair<Float, Recognition> potential : rectsToTrack) {
+      final TrackedRecognition trackedRecognition = new TrackedRecognition(); // TODO: SOEUN 왜 굳이 trackedRecognition 객체를 만들어준걸까..?
+      trackedRecognition.detectionConfidence = potential.first;
+      trackedRecognition.location = new RectF(potential.second.getLocation());
+      trackedRecognition.title = potential.second.getTitle();
+      trackedRecognition.color = COLORS[potential.second.getDetectedClass() % COLORS.length];
+      trackedObjects.add(trackedRecognition);
     }
   }
 
-  public synchronized void trackResults(final List<Recognition> results, final long timestamp) {
-    Log.i("Object-Detection", String.format("Processing %d results from %d", results.size(), timestamp));
-    processResults(results);
-  }
-
-  private Matrix getFrameToCanvasMatrix() {
+  public Matrix getFrameToCanvasMatrix() {
     return frameToCanvasMatrix;
   }
 
@@ -131,8 +151,9 @@ public class MultiBoxTracker {
                     false);
     for (final TrackedRecognition recognition : trackedObjects) {
       final RectF trackedPos = new RectF(recognition.location);
-
+      
       getFrameToCanvasMatrix().mapRect(trackedPos);
+      
       boxPaint.setColor(recognition.color);
 
       float cornerSize = Math.min(trackedPos.width(), trackedPos.height()) / 8.0f;
@@ -148,53 +169,8 @@ public class MultiBoxTracker {
     }
   }
 
-  private void processResults(final List<Recognition> results) {
-    final List<Pair<Float, Recognition>> rectsToTrack = new LinkedList<>();
-
-    screenRects.clear();
-    final Matrix rgbFrameToScreen = new Matrix(getFrameToCanvasMatrix());
-
-    for (final Recognition result : results) {
-      if (result.getLocation() == null) {
-        continue;
-      }
-      final RectF detectionFrameRect = new RectF(result.getLocation());
-
-      final RectF detectionScreenRect = new RectF();
-      rgbFrameToScreen.mapRect(detectionScreenRect, detectionFrameRect);
-
-      Log.v("Object-Detection",
-              "Result! Frame: " + result.getLocation() + " mapped to screen:" + detectionScreenRect);
-
-      screenRects.add(new Pair<>(result.getConfidence(), detectionScreenRect));
-
-
-      if (detectionFrameRect.width() < MIN_SIZE || detectionFrameRect.height() < MIN_SIZE) {
-        Log.w("Object-Detection", "Degenerate rectangle! " + detectionFrameRect);
-        continue;
-      }
-
-      rectsToTrack.add(new Pair<>(result.getConfidence(), result));
-    }
-
-    trackedObjects.clear();
-    if (rectsToTrack.isEmpty()) {
-      Log.v("Object-Detection", "Nothing to track, aborting.");
-      return;
-    }
-
-    for (final Pair<Float, Recognition> potential : rectsToTrack) {
-      final TrackedRecognition trackedRecognition = new TrackedRecognition();
-      trackedRecognition.detectionConfidence = potential.first;
-      trackedRecognition.location = new RectF(potential.second.getLocation());
-      trackedRecognition.title = potential.second.getTitle();
-      trackedRecognition.color = COLORS[potential.second.getDetectedClass() % COLORS.length];
-      trackedObjects.add(trackedRecognition);
-    }
-  }
-
   public static class TrackedRecognition {
-    RectF location;
+    public RectF location;
     float detectionConfidence;
     int color;
     public String title;
