@@ -34,7 +34,7 @@
             android:layout_gravity="center_horizontal"
             android:contentDescription="로고"
             android:scaleType="fitCenter"
-            android:src="@drawable/icon_logo" />
+            android:src="@mipmap/pillaroid_logo_round" />
 
         <ImageView
             android:layout_width="wrap_content"
