@@ -56,7 +56,7 @@
                     android:id="@+id/tv_item_prescription_noAppearance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="외형 정보가 없습니다."
+                    android:text="@string/text_medicine_result_no_appearance"
                     android:textSize="16sp"/>
 
                 <LinearLayout
@@ -74,14 +74,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
-                            android:text="- 성상:"
+                            android:text="@string/appearance_feature"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/tv_item_prescription_feature"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=""
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -95,14 +94,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
-                            android:text="- 제형:"
+                            android:text="@string/appearance_formulation"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/tv_item_prescription_formulation"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=""
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -116,14 +114,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
-                            android:text="- 모양:"
+                            android:text="@string/appearance_shape"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/tv_item_prescription_shape"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=""
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -137,14 +134,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
-                            android:text="- 색상:"
+                            android:text="@string/appearance_color"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/tv_item_prescription_color"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=""
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -158,14 +154,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
-                            android:text="- 분할선:"
+                            android:text="@string/appearance_dividing_line"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/tv_item_prescription_dividingline"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=""
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -178,14 +173,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
-                            android:text="- 식별표기:"
+                            android:text="@string/appearance_identification_mark"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                         <TextView
                             android:id="@+id/tv_item_prescription_identification"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=""
                             android:textSize="16sp" />
                     </LinearLayout>
                 </LinearLayout>

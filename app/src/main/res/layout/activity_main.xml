@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/tb_main_toolbar"
         android:layout_width="match_parent"
@@ -31,7 +31,7 @@
             android:layout_marginVertical="2dp"
             android:layout_weight="1"
             android:background="@drawable/bg_r7white_shadow"
-            android:backgroundTint="#220BE6"
+            android:backgroundTint="@color/sub_color_blue"
             android:clickable="true"
             android:gravity="center"
             android:orientation="horizontal"
@@ -41,14 +41,16 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:contentDescription="@string/icon_camera"
                 android:src="@drawable/icon_camera"
-                app:tint="@color/white" />
+                app:tint="@color/white"
+                tools:ignore="NestedWeights" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3.8"
-                android:text="의약품 촬영으로 검색"
+                android:text="@string/page_search_camera"
                 android:textColor="@color/white"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -61,7 +63,7 @@
             android:layout_marginVertical="2dp"
             android:layout_weight="1"
             android:background="@drawable/bg_r7white_shadow"
-            android:backgroundTint="#620CF0"
+            android:backgroundTint="@color/sub_color_violet"
             android:clickable="true"
             android:gravity="center"
             android:orientation="horizontal"
@@ -71,14 +73,16 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:contentDescription="@string/icon_voice"
                 android:src="@drawable/icon_voice"
-                app:tint="@color/white" />
+                app:tint="@color/white"
+                tools:ignore="NestedWeights" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3.8"
-                android:text="의약품 음성으로 검색"
+                android:text="@string/page_search_voice"
                 android:textColor="@color/white"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -91,7 +95,7 @@
             android:layout_marginVertical="2dp"
             android:layout_weight="1"
             android:background="@drawable/bg_r7white_shadow"
-            android:backgroundTint="#AF19FF"
+            android:backgroundTint="@color/sub_color_purple"
             android:clickable="true"
             android:gravity="center"
             android:orientation="horizontal"
@@ -101,14 +105,16 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:contentDescription="@string/icon_prescription"
                 android:src="@drawable/icon_prescription"
-                app:tint="@color/white" />
+                app:tint="@color/white"
+                tools:ignore="NestedWeights" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3.8"
-                android:text="처방전으로 검색"
+                android:text="@string/page_search_prescription"
                 android:textColor="@color/white"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -121,7 +127,7 @@
             android:layout_marginVertical="2dp"
             android:layout_weight="1"
             android:background="@drawable/bg_r7white_shadow"
-            android:backgroundTint="#DE0CF0"
+            android:backgroundTint="@color/sub_color_red_violet"
             android:clickable="true"
             android:gravity="center"
             android:orientation="horizontal"
@@ -131,14 +137,16 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:contentDescription="@string/icon_mypage"
                 android:src="@drawable/icon_user"
-                app:tint="@color/white" />
+                app:tint="@color/white"
+                tools:ignore="NestedWeights" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3.8"
-                android:text="마이페이지"
+                android:text="@string/page_mypage"
                 android:textColor="@color/white"
                 android:textSize="24sp"
                 android:textStyle="bold" />

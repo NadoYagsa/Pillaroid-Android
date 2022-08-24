@@ -6,7 +6,20 @@
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
+    <color name="black_transparent_aa">#AA000000</color>
+    <color name="gray_a5">#FFA5A5A5</color>
+    <color name="gray_c4">#FFC4C4C4</color>
+    <color name="gray_cc_transparent_00">#00CCCCCC</color>
+    <color name="gray_cc_transparent_10">#10CCCCCC</color>
+    <color name="gray_cc_transparent_20">#20CCCCCC</color>
+    <color name="gray_cc_transparent_30">#30CCCCCC</color>
     <color name="white">#FFFFFFFF</color>
     
     <color name="main_color">#FF8E00D8</color>
+    <color name="sub_color_blue">#FF220BE6</color>
+    <color name="sub_color_violet">#FF620CF0</color>
+    <color name="sub_color_purple">#FFAF19FF</color>
+    <color name="sub_color_red_violet">#FFDE0CF0</color>
+
+    <color name="yellow">#FFFEE500</color>
 </resources>

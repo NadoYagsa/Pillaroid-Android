@@ -3,14 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="60dp"
     android:background="@drawable/bg_border2_grey">
-
     <TextView
         android:id="@+id/tv_item_voiceresults_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginHorizontal="20dp"
-        android:text="예시 텍스트"
+        android:text="@string/text_medicine_name"
         android:textSize="20sp" />
-
 </LinearLayout>

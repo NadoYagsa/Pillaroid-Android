@@ -9,8 +9,7 @@
         android:layout_width="110dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:contentDescription="필라로이드 텍스트 로고"
+        android:contentDescription="@string/logo"
         android:scaleType="fitCenter"
         android:src="@drawable/icon_text_logo" />
-
 </LinearLayout>

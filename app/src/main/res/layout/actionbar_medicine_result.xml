@@ -11,7 +11,9 @@
         android:layout_height="40dp"
         android:layout_gravity="center"
         android:layout_weight="0"
-        android:scaleType="fitCenter" />
+        android:contentDescription="@string/icon_information"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_information" />
 
     <TextView
         android:id="@+id/tv_ab_medicineresult_title"
@@ -22,7 +24,7 @@
         android:ellipsize="marquee"
         android:paddingHorizontal="15dp"
         android:singleLine="true"
-        android:text="타이틀"
+        android:text="@string/title"
         android:textSize="24sp"
         android:textStyle="bold" />
 

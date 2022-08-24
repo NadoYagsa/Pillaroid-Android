@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_r10white"
     android:orientation="vertical">
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@drawable/bg_r10white_top"
         android:backgroundTint="@color/main_color"
         android:gravity="center"
-        android:text="알림 생성"
+        android:text="@string/text_add_alarm_title"
         android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -27,15 +27,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="레이블: "
+            android:layout_marginEnd="5dp"
+            android:text="@string/text_add_alarm_label"
             android:textSize="16sp" />
 
         <EditText
             android:id="@+id/et_dialog_addalarm_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="타이레놀정 160mg"
-            android:textSize="16sp" />
+            android:inputType="text"
+            android:textSize="16sp"
+            tools:ignore="Autofill,LabelFor" />
     </LinearLayout>
 
     <LinearLayout
@@ -49,7 +51,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="복용 기간: "
+            android:layout_marginEnd="5dp"
+            android:text="@string/text_add_alarm_period"
             android:textSize="16sp" />
 
         <EditText
@@ -58,12 +61,13 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:inputType="number"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            tools:ignore="Autofill,LabelFor" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="일"
+            android:text="@string/text_add_alarm_day"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -80,9 +84,9 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/bg_r10white_bottomleft"
-            android:backgroundTint="#C4C4C4"
+            android:backgroundTint="@color/gray_c4"
             android:gravity="center"
-            android:text="취소"
+            android:text="@string/text_cancel"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -94,11 +98,9 @@
             android:background="@drawable/bg_r10white_bottomright"
             android:backgroundTint="@color/main_color"
             android:gravity="center"
-            android:text="확인"
+            android:text="@string/text_ok"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
-
     </LinearLayout>
-
 </LinearLayout>

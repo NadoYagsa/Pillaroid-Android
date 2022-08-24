@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -149,10 +148,6 @@ public class MedicineResultActivity extends AppCompatActivity {
     }
 
     private void initActionBar(Toolbar toolbar) {
-        ImageView ivIcon = toolbar.findViewById(R.id.iv_ab_medicineresult_icon);
-        ivIcon.setImageResource(R.drawable.icon_info);
-        ivIcon.setContentDescription("정보안내 아이콘");
-
         tvTitle = toolbar.findViewById(R.id.tv_ab_medicineresult_title);
         tvTitle.setText("");
         tvTitle.setSelected(true);  //ellipsize="marquee" 실행되도록 selected 설정
