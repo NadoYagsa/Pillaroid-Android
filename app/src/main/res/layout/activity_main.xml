@@ -33,21 +33,21 @@
             android:background="@drawable/bg_r7white_shadow"
             android:backgroundTint="#220BE6"
             android:clickable="true"
-            android:orientation="horizontal">
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="5">
 
             <ImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="50dp"
+                android:layout_weight="1"
                 android:src="@drawable/icon_camera"
                 app:tint="@color/white" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="40dp"
+                android:layout_weight="3.8"
                 android:text="의약품 촬영으로 검색"
                 android:textColor="@color/white"
                 android:textSize="24sp"
@@ -63,21 +63,21 @@
             android:background="@drawable/bg_r7white_shadow"
             android:backgroundTint="#620CF0"
             android:clickable="true"
-            android:orientation="horizontal">
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="5">
 
             <ImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="50dp"
+                android:layout_weight="1"
                 android:src="@drawable/icon_voice"
                 app:tint="@color/white" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="40dp"
+                android:layout_weight="3.8"
                 android:text="의약품 음성으로 검색"
                 android:textColor="@color/white"
                 android:textSize="24sp"
@@ -93,21 +93,21 @@
             android:background="@drawable/bg_r7white_shadow"
             android:backgroundTint="#AF19FF"
             android:clickable="true"
-            android:orientation="horizontal">
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="5">
 
             <ImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="50dp"
+                android:layout_weight="1"
                 android:src="@drawable/icon_prescription"
                 app:tint="@color/white" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="40dp"
+                android:layout_weight="3.8"
                 android:text="처방전으로 검색"
                 android:textColor="@color/white"
                 android:textSize="24sp"
@@ -123,21 +123,21 @@
             android:background="@drawable/bg_r7white_shadow"
             android:backgroundTint="#DE0CF0"
             android:clickable="true"
-            android:orientation="horizontal">
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="5">
 
             <ImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="50dp"
+                android:layout_weight="1"
                 android:src="@drawable/icon_user"
                 app:tint="@color/white" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="40dp"
+                android:layout_weight="3.8"
                 android:text="마이페이지"
                 android:textColor="@color/white"
                 android:textSize="24sp"
