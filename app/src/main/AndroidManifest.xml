@@ -29,8 +29,7 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".SearchCameraActivity"/>
         <activity android:name=".SearchCaseActivity"/>
-<!--        <activity android:name=".SearchPillActivity"/>-->
-        <activity android:name=".PillDetectorActivity"/>
+        <activity android:name=".SearchPillActivity"/>
         <activity android:name=".SearchPrescriptionActivity"/>
         <activity android:name=".PrescriptionResultActivity"/>
         <activity android:name=".SearchVoiceActivity" />

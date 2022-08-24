@@ -21,7 +21,7 @@ import android.graphics.RectF;
 import android.os.Build;
 import android.util.Log;
 
-import com.nadoyagsa.pillaroid.PillDetectorActivity;
+import com.nadoyagsa.pillaroid.SearchPillActivity;
 import com.nadoyagsa.pillaroid.env.Utils;
 
 import org.tensorflow.lite.Interpreter;
@@ -207,7 +207,7 @@ public class YoloV5Classifier implements Classifier {
 
     @Override
     public float getObjThresh() {
-        return PillDetectorActivity.MINIMUM_CONFIDENCE_TF_OD_API;
+        return SearchPillActivity.MINIMUM_CONFIDENCE_TF_OD_API;
     }
 
     private final float IMAGE_STD = 255.0f;

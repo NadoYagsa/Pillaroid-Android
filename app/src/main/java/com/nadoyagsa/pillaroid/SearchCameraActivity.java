@@ -63,8 +63,7 @@ public class SearchCameraActivity extends AppCompatActivity {
         llSearchCase.setOnClickListener(v -> startActivityForResult(new Intent(this, SearchCaseActivity.class), REQUEST_CAMERA_ACTIVITY));
 
         LinearLayout llSearchPill = findViewById(R.id.ll_search_camera_pill);
-//        llSearchPill.setOnClickListener(v -> startActivity(new Intent(this, SearchPillActivity.class)));
-        llSearchPill.setOnClickListener(v -> startActivityForResult(new Intent(this, PillDetectorActivity.class), REQUEST_CAMERA_ACTIVITY));    // 알약 사물인식 Activity로 전환
+        llSearchPill.setOnClickListener(v -> startActivityForResult(new Intent(this, SearchPillActivity.class), REQUEST_CAMERA_ACTIVITY));    // 알약 사물인식 Activity로 전환
 
     }
 
