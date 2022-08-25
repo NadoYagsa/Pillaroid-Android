@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:letterSpacing="0.3"
-            android:text="Pillaroid"
+            android:text="@string/text_pillaroid"
             android:textAlignment="center"
             android:textSize="16sp"/>
     </LinearLayout>
@@ -55,6 +55,7 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:enabled="false"
+            android:contentDescription="@string/icon_kakao"
             android:scaleType="fitCenter"
             android:src="@drawable/icon_kakao" />
 
@@ -62,8 +63,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="카카오 로그인"
-            android:textColor="#AA000000"
+            android:text="@string/text_login_kakao"
+            android:textColor="@color/black_transparent_aa"
             android:textAlignment="center"
             android:textSize="16sp"
             android:textStyle="bold" />

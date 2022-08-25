@@ -1,10 +1,101 @@
 <resources>
     <string name="app_name">Pillaroid</string>
 
+    <string name="page_mypage">마이페이지</string>
+    <string name="page_notice">알림</string>
+    <string name="page_search_camera">의약품 촬영으로 검색</string>
+    <string name="page_search_case">포장용기로 검색</string>
+    <string name="page_search_pill">낱알로 검색</string>
+    <string name="page_search_voice">의약품 음성으로 검색</string>
+    <string name="page_search_prescription">처방전으로 검색</string>
+    <string name="page_medicine_favorites">의약품 즐겨찾기</string>
+    <string name="page_medicine_notice">약 복용 알림</string>
+
     <string name="category_efficacy">효능 및 효과</string>
     <string name="category_dosage">용법 및 용량</string>
     <string name="category_precaution">주의사항</string>
     <string name="category_appearance">외형</string>
     <string name="category_ingredient">성분</string>
     <string name="category_save">보관법</string>
+
+    <string name="appearance_feature">- 성상:</string>
+    <string name="appearance_formulation">- 제형:</string>
+    <string name="appearance_shape">- 모양:</string>
+    <string name="appearance_color">- 색상:</string>
+    <string name="appearance_dividing_line">- 분할선:</string>
+    <string name="appearance_identification_mark">- 식별표기:</string>
+
+    <string name="logo">필라로이드 로고</string>
+    <string name="title">타이틀</string>
+    <string name="icon">아이콘</string>
+
+    <string name="icon_information">정보안내 아이콘</string>
+    <string name="icon_camera">촬영 아이콘</string>
+    <string name="icon_pill">알약 아이콘</string>
+    <string name="icon_voice">음성 아이콘</string>
+    <string name="icon_prescription">처방전 아이콘</string>
+    <string name="icon_mypage">마이페이지 아이콘</string>
+    <string name="icon_notice">알림 아이콘</string>
+    <string name="icon_favorites">즐겨찾기 아이콘</string>
+    <string name="icon_search">검색 아이콘</string>
+    <string name="icon_kakao">카카오 아이콘</string>
+
+    <string name="icon_logout">로그아웃 아이콘</string>
+    <string name="icon_dot">글머리기호 아이콘</string>
+    <string name="icon_sound_minus">음량 줄임 아이콘</string>
+    <string name="icon_sound_plus">음량 높임 아이콘</string>
+    <string name="icon_next_page">페이지 이동 아이콘</string>
+
+    <string name="text_pillaroid">Pillaroid</string>
+    <string name="text_logout">로그아웃</string>
+    <string name="text_save">저장</string>
+    <string name="text_ok">확인</string>
+    <string name="text_cancel">취소</string>
+    <string name="text_time_setting">시간대 설정</string>
+    <string name="text_favorites_list">즐겨찾기 목록</string>
+    <string name="text_medicine_name">의약품명</string>
+    <string name="text_undefined_num">-</string>
+    <string name="text_slash">/</string>
+    <string name="text_one">1.</string>
+    <string name="text_two">2.</string>
+    <string name="text_three">3.</string>
+
+    <string name="text_intro_jump">건너뛰기</string>
+    <string name="text_intro_introduction">필라로이드는 약품 및 처방전을 검색할 수 있는 서비스 입니다.\n\n먼저 약품을 검색하는 방법은 약품을 촬영하거나, 약의 이름을 음성으로 말하시면 됩니다.\n\n처방전 내의 약품을 검색하는 방법은 처방전을 찍어주시면 됩니다.\n\n이제 한 번 앱을 사용해볼까요??</string>
+
+    <string name="text_login_kakao">카카오 로그인</string>
+
+    <string name="text_search_voice_guide1">검색할 의약품 이름을\n볼륨 버튼을 누르고 말해주세요.</string>
+    <string name="text_search_voice_guide2">녹음 시작 시, 띵똥 소리가 들립니다.</string>
+    <string name="text_search_voice_guide3">말하기를 완료하셨다면 볼륨 버튼을 다시 눌러주세요.</string>
+    <string name="text_search_voice_guide4">재녹음도 동일한 방법으로 진행됩니다.</string>
+    <string name="text_search_voice_result">검색 결과:</string>
+    <string name="text_search_voice_show">결과 확인하기</string>
+
+    <string name="text_medicine_result_no_appearance">외형 정보가 없습니다.</string>
+    <string name="text_voice_result_introduction">원하시는 결과가 나오면 볼륨 버튼을 눌러주세요.</string>
+    <string name="text_voice_result_unit">(개)</string>
+
+    <string name="text_prescription_title">검색 결과:&#160;&#160;총&#160;</string>
+    <string name="text_prescription_result">건</string>
+
+    <string name="text_mypage_guide_sound">가이드 음량 조절</string>
+    <string name="text_mypage_guide_sound_default">8</string>
+    <string name="text_mypage_guide_speed">보이스 속도 조절</string>
+
+    <string name="text_time_setting_introduction">* 설정한 시간대로 약 복용 알림이 갑니다.</string>
+    <string name="text_time_setting_hour">시</string>
+    <string name="text_time_setting_minute">분</string>
+    <string name="text_time_setting_morning">오전</string>
+    <string name="text_time_setting_afternoon">오후</string>
+    <string name="text_time_setting_time_morning">아침 시간</string>
+    <string name="text_time_setting_time_lunch">점심 시간</string>
+    <string name="text_time_setting_time_dinner">저녁 시간</string>
+
+    <string name="text_alarm_period">복용 기간</string>
+    <string name="text_alarm_delete">삭\n제</string>
+    <string name="text_add_alarm_title">알림 생성</string>
+    <string name="text_add_alarm_label">레이블:</string>
+    <string name="text_add_alarm_period">복용 기간:</string>
+    <string name="text_add_alarm_day">일</string>
 </resources>

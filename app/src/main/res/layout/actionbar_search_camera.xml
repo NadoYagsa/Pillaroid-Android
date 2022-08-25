@@ -3,12 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp">
+
     <ImageView
         android:id="@+id/iv_ab_search_camera_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
+        android:contentDescription="@string/icon_camera"
         android:scaleType="fitCenter"
         android:src="@drawable/icon_camera" />
 
@@ -20,7 +22,7 @@
         android:layout_centerVertical="true"
         android:layout_marginStart="15dp"
         android:layout_toEndOf="@id/iv_ab_search_camera_icon"
-        android:text="의약품 촬영으로 검색"
+        android:text="@string/page_search_camera"
         android:textSize="20sp"
         android:textStyle="bold" />
 </RelativeLayout>

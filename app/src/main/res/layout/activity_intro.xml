@@ -11,7 +11,7 @@
         android:layout_height="45dp"
         android:background="@drawable/bg_r7white_shadow"
         android:backgroundTint="@color/main_color"
-        android:text="건너뛰기"
+        android:text="@string/text_intro_jump"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -32,15 +32,15 @@
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_gravity="center_horizontal"
-            android:contentDescription="로고"
+            android:contentDescription="@string/logo"
             android:scaleType="fitCenter"
-            android:src="@drawable/icon_logo" />
+            android:src="@mipmap/pillaroid_logo_round" />
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_gravity="center_horizontal"
-            android:contentDescription="텍스트 로고"
+            android:contentDescription="@string/logo"
             android:scaleType="fitCenter"
             android:src="@drawable/icon_text_logo" />
     </LinearLayout>
@@ -49,12 +49,12 @@
         android:id="@+id/tv_intro_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
-        android:text="필라로이드는 약품 및 처방전을 검색할 수 있는 서비스 입니다.\n\n먼저 약품을 검색하는 방법은 약품을 촬영하거나, 약의 이름을 음성으로 말하시면 됩니다.\n\n처방전 내의 약품을 검색하는 방법은 처방전을 찍어주시면 됩니다.\n\n이제 한 번 앱을 사용해볼까요??"
+        android:text="@string/text_intro_introduction"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/ll_intro_logo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintWidth_percent="0.75" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
