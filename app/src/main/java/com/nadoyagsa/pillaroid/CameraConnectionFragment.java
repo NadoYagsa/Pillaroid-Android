@@ -64,7 +64,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * TODO 확인 필요한 것
- * 1. orientation (인식된 객체 box가 올바른 위치에 그려지는가?)
+ * 1. orientation (감지된 객체 box가 올바른 위치에 그려지는가?)
  * 2. flash (카메라가 켜졌을 때 자동으로 flash도 켜지는가?)
  */
 @SuppressLint("ValidFragment")

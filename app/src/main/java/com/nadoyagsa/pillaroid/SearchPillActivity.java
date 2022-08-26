@@ -7,9 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader;
@@ -176,7 +174,7 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
             if (!iswaitingAPI) {
                 if (mappedRecognitions.size() == 0) {
                     Log.e("Object-Detection-result", "no detection");
-                    tts.speak("알약이 인식되지 않습니다. 알약을 포착할 수 있도록 카메라를 더 멀리 이동해주세요.", QUEUE_ADD, null, null);
+                    tts.speak("알약이 감지되지 않습니다. 알약을 포착할 수 있도록 카메라를 더 멀리 이동해주세요.", QUEUE_ADD, null, null);
                 } else {
                     Collections.sort(mappedRecognitions);   // confidence 기준으로 정렬
 
@@ -236,11 +234,11 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
 
                     if (isNormal) {
                         Log.i("Object-Detection-result", "normal");
-                        tts.speak("알약이 잘 인식되었습니다. 인식 결과를 가져오는 중입니다. 조금만 기다려주세요.", QUEUE_ADD, null, null);
+                        tts.speak("알약이 잘 감지되었습니다. 인식 결과를 가져오는 중입니다.", QUEUE_FLUSH, null, API_SUCCESS);
 
                         // 서버에게 이미지 보내기
                         @SuppressLint("SimpleDateFormat")
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmSS");
                         String time = dateFormat.format(Calendar.getInstance().getTime());
 
                         byte[] resultBytes = bitmapToByteArray(rgbFrameBitmap);
@@ -267,17 +265,20 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
                                     startActivity(medicineIntent);
                                 } else if (response.code() == 400 || response.code() == 404) {    // 400: flask로 이미지가 전달되지 않음, 404: yolov5에 의해 crop된 알약이 없음
                                     iswaitingAPI = false;
+                                    Log.e("api-response", "bad image");
                                     tts.speak("알약 인식에 실패했습니다. 다시 시도해주세요.", QUEUE_FLUSH, null, null);
                                 } else if (response.code() == 500) {
+                                    Log.e("api-response", "service error");
                                     tts.speak("서비스 오류로 인해 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                                 } else {
                                     iswaitingAPI = false;
-                                    Log.e("pillaroid-debug", String.valueOf(response.code()));
+                                    Log.e("api-response", "case: " + response.code());
                                 }
                             }
 
                             @Override
                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                Log.e("api-response", "no service");
                                 tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                             }
                         });

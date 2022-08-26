@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Cap;
 import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
+import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.Log;
@@ -166,6 +167,10 @@ public class MultiBoxTracker {
       borderedText.drawText(
               canvas, trackedPos.left + cornerSize, trackedPos.top, labelString + "%", boxPaint);
     }
+  }
+
+  public synchronized void drawClear(final Canvas canvas) {
+    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
   }
 
   public static class TrackedRecognition {

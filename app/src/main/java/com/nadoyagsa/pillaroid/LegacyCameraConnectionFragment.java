@@ -73,7 +73,7 @@ public class LegacyCameraConnectionFragment extends Fragment {
           try {
             Camera.Parameters parameters = camera.getParameters();
 
-            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);  // 카메라 flash 켜기
+//            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);  // 카메라 flash 켜기
 
             List<String> focusModes = parameters.getSupportedFocusModes();
             if (focusModes != null
@@ -154,6 +154,11 @@ public class LegacyCameraConnectionFragment extends Fragment {
     // the SurfaceTextureListener).
 
     if (textureView.isAvailable()) {
+      // 콜백 함수 다시 설정
+      camera.setPreviewCallbackWithBuffer(imageListener);
+      Camera.Size s = camera.getParameters().getPreviewSize();
+      camera.addCallbackBuffer(new byte[ImageUtils.getYUVByteSize(s.height, s.width)]);
+
       camera.startPreview();
     } else {
       textureView.setSurfaceTextureListener(surfaceTextureListener);
@@ -162,9 +167,15 @@ public class LegacyCameraConnectionFragment extends Fragment {
 
   @Override
   public void onPause() {
-    stopCamera();
+    camera.stopPreview();
     stopBackgroundThread();
     super.onPause();
+  }
+
+  @Override
+  public void onDestroy() {
+    stopCamera();
+    super.onDestroy();
   }
 
   /** Starts a background thread and its {@link Handler}. */
@@ -179,7 +190,8 @@ public class LegacyCameraConnectionFragment extends Fragment {
     try {
       backgroundThread.join();
       backgroundThread = null;
-    } catch (final InterruptedException ignored) {
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
     }
   }
 

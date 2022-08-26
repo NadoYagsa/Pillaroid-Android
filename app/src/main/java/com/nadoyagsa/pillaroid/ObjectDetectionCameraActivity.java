@@ -8,7 +8,6 @@ import static com.nadoyagsa.pillaroid.SearchCameraActivity.RESULT_PERMISSION_DEN
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
@@ -42,9 +41,11 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
         implements ImageReader.OnImageAvailableListener, Camera.PreviewCallback, View.OnClickListener {
     private static final int REQUEST_CODE_PERMISSIONS = 1001;
     private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
+    protected final String API_SUCCESS = "api-success";
     protected final String API_FAILED = "api-failed";
 
     protected boolean iswaitingAPI = false;
+    private boolean canTtsStop = true;
 
     protected TextToSpeech tts;
     protected TextView tvSearchPillGuide;
@@ -93,13 +94,18 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
 
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
-            public void onStart(String utteranceId) { }
+            public void onStart(String utteranceId) {
+                if (utteranceId.equals(API_SUCCESS)) {
+                    canTtsStop = false;
+                }
+            }
 
             @Override
             public void onDone(String utteranceId) {
                 if (utteranceId.equals(API_FAILED)) {
-
                     finish();
+                } else if (utteranceId.equals(API_SUCCESS)) {
+                    canTtsStop = true;
                 }
             }
 
@@ -239,6 +245,8 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     public synchronized void onResume() {
         super.onResume();
 
+        // TODO: tts 로 카메라 켜짐 안내
+
         iswaitingAPI = false;
 
         handlerThread = new HandlerThread("inference");
@@ -248,8 +256,9 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
 
     @Override
     public synchronized void onPause() {
-        tts.stop();
-
+        if (canTtsStop)
+            tts.stop();
+        
         handlerThread.quitSafely();
         try {
             handlerThread.join();
