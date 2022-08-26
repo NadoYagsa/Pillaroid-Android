@@ -66,7 +66,6 @@ public class MedicineResultActivity extends AppCompatActivity {
     private View dialogView, selectedCategoryView;
     private ViewPager2 vpResult;
 
-    //TODO: 2. 즐겨찾기
     //TODO: 3. 알람
 
     @Override

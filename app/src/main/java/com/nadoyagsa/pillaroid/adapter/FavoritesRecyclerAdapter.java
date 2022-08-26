@@ -1,10 +1,19 @@
 package com.nadoyagsa.pillaroid.adapter;
 
+import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
+
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
+import android.speech.tts.TextToSpeech;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,16 +21,28 @@ import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.nadoyagsa.pillaroid.MedicineResultActivity;
+import com.nadoyagsa.pillaroid.PillaroidAPIImplementation;
 import com.nadoyagsa.pillaroid.R;
+import com.nadoyagsa.pillaroid.SharedPrefManager;
 import com.nadoyagsa.pillaroid.data.FavoritesInfo;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
-public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecyclerAdapter.FavoritesViewHolder> {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecyclerAdapter.FavoritesViewHolder> implements ItemTouchHelperListener {
     private Context context;
+    private final TextToSpeech tts;
     private ArrayList<FavoritesInfo> favoritesList;
 
-    public FavoritesRecyclerAdapter(ArrayList<FavoritesInfo> favoritesList) {
+    public FavoritesRecyclerAdapter(TextToSpeech tts, ArrayList<FavoritesInfo> favoritesList) {
+        this.tts = tts;
         this.favoritesList = favoritesList;
     }
 
@@ -40,12 +61,88 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
     @Override
     public void onBindViewHolder(@NonNull FavoritesRecyclerAdapter.FavoritesViewHolder holder, int position) {
         holder.tvMedicineName.setText(favoritesList.get(position).getMedicineName());
-        
-        //TODO: 즐겨찾기 이미지 슬라이드 시 즐겨찾기 해제됨(favoritesIdx 전달함)
     }
 
     @Override
     public int getItemCount() { return favoritesList.size(); }
+
+    @Override
+    public void onItemSwipe(int position) {     // 즐겨찾기 삭제
+        tts.speak(favoritesList.get(position).getMedicineName().concat("의 즐겨찾기를 삭제하시겠습니까?"), TextToSpeech.QUEUE_FLUSH, null, null);
+
+        View deleteFavoritesDialogView = View.inflate(context, R.layout.dialog_delete_favorites, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setView(deleteFavoritesDialogView);
+        AlertDialog alertDialog = builder.create();
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        alertDialog.show();
+
+        WindowManager.LayoutParams params = alertDialog.getWindow().getAttributes();
+        Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        Point size = new Point();
+        display.getRealSize(size);
+        int width = size.x;
+        params.width = (int) (width*0.75);
+        alertDialog.getWindow().setAttributes(params);
+
+        AppCompatImageButton ibtDeleteFavorites = deleteFavoritesDialogView.findViewById(R.id.ibt_dialog_deletefavorites_delete);
+        // 휴지통 이미지 버튼을 꾹 누르면 삭제, 클릭하면 취소
+        ibtDeleteFavorites.setOnLongClickListener(view -> {
+            PillaroidAPIImplementation.getApiService().deleteFavorites(SharedPrefManager.read("token", null), favoritesList.get(position).getFavoritesIdx()).enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    if (response.code() == 200) {
+                        tts.speak("즐겨찾기 삭제", TextToSpeech.QUEUE_FLUSH, null, null);
+
+                        favoritesList.remove(position);     // 스와이프한 객체 삭제
+                        notifyItemRemoved(position);
+
+                        return;
+                    }
+                    else if (response.code() == 401) {
+                        tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                    }
+                    else if (response.code() == 400) {
+                        if (response.errorBody() != null) {
+                            try {
+                                String errorStr = response.errorBody().string();
+                                JSONObject errorBody = new JSONObject(errorStr);
+                                long errorIdx = errorBody.getLong("errorIdx");
+
+                                if (errorIdx == 40001)  // 삭제 오류
+                                    tts.speak("즐겨찾기에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
+                            } catch (JSONException | IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        else
+                            tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                    }
+                    else {
+                        tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                    }
+                    notifyItemChanged(position);
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                    tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                    tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
+                    notifyItemChanged(position);
+                }
+            });
+            alertDialog.dismiss();
+
+            return true;
+        });
+        ibtDeleteFavorites.setOnClickListener(view -> {
+            tts.speak("즐겨찾기 삭제 취소", QUEUE_FLUSH, null, null);
+
+            notifyItemChanged(position);
+            alertDialog.dismiss();
+        });
+    }
 
     public class FavoritesViewHolder extends RecyclerView.ViewHolder {
         AppCompatImageButton ibtStar;

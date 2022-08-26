@@ -16,10 +16,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.nadoyagsa.pillaroid.adapter.FavoritesRecyclerAdapter;
+import com.nadoyagsa.pillaroid.adapter.ItemTouchHelperCallback;
 import com.nadoyagsa.pillaroid.data.FavoritesInfo;
 
 import org.json.JSONArray;
@@ -76,11 +78,14 @@ public class MypageFavoritesActivity extends AppCompatActivity {
         RecyclerView rvFavorites = findViewById(R.id.rv_favorites_list);
         LinearLayoutManager favoritesManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
         rvFavorites.setLayoutManager(favoritesManager);
-        favoritesAdapter = new FavoritesRecyclerAdapter(favoritesList);
+        favoritesAdapter = new FavoritesRecyclerAdapter(tts, favoritesList);
         rvFavorites.setAdapter(favoritesAdapter);
         DividerItemDecoration devider = new DividerItemDecoration(this, 1);
         devider.setDrawable(Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.item_divide_bar, null)));
         rvFavorites.addItemDecoration(devider);
+
+        ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelperCallback(favoritesAdapter));
+        helper.attachToRecyclerView(rvFavorites);
 
         tvFavoritesInfo = findViewById(R.id.tv_favorites_info);
     }
