@@ -116,12 +116,11 @@ public class MultiBoxTracker {
     trackedObjects.clear();
     if (rectsToTrack.isEmpty()) {
       Log.v("Object-Detection", "Nothing to track, aborting.");
-      // TODO: tts로 말해주어야 할까요?
       return;
     }
 
     for (final Pair<Float, Recognition> potential : rectsToTrack) {
-      final TrackedRecognition trackedRecognition = new TrackedRecognition(); // TODO: SOEUN 왜 굳이 trackedRecognition 객체를 만들어준걸까..?
+      final TrackedRecognition trackedRecognition = new TrackedRecognition();
       trackedRecognition.detectionConfidence = potential.first;
       trackedRecognition.location = new RectF(potential.second.getLocation());
       trackedRecognition.title = potential.second.getTitle();

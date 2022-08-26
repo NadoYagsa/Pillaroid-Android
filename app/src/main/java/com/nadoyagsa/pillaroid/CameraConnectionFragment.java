@@ -78,8 +78,6 @@ public class CameraConnectionFragment extends Fragment {
   /** Conversion from screen rotation to JPEG orientation. */
   private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
-  private static final String FRAGMENT_DIALOG = "dialog";
-
   static {
     ORIENTATIONS.append(Surface.ROTATION_0, 90);
     ORIENTATIONS.append(Surface.ROTATION_90, 0);
@@ -98,19 +96,21 @@ public class CameraConnectionFragment extends Fragment {
 
   private final ConnectionCallback cameraConnectionCallback;
   private final CameraCaptureSession.CaptureCallback captureCallback =
-      new CameraCaptureSession.CaptureCallback() {
-        @Override
-        public void onCaptureProgressed(
-            final CameraCaptureSession session,
-            final CaptureRequest request,
-            final CaptureResult partialResult) {}
+          new CameraCaptureSession.CaptureCallback() {
+            @Override
+            public void onCaptureProgressed(
+                    final CameraCaptureSession session,
+                    final CaptureRequest request,
+                    final CaptureResult partialResult) {
+            }
 
-        @Override
-        public void onCaptureCompleted(
-            final CameraCaptureSession session,
-            final CaptureRequest request,
-            final TotalCaptureResult result) {}
-      };
+            @Override
+            public void onCaptureCompleted(
+                    final CameraCaptureSession session,
+                    final CaptureRequest request,
+                    final TotalCaptureResult result) {
+            }
+          };
   /** ID of the current {@link CameraDevice}. */
   private String cameraId;
   /** An {@link AutoFitTextureView} for camera preview. */
@@ -135,65 +135,66 @@ public class CameraConnectionFragment extends Fragment {
   private CaptureRequest previewRequest;
   /** {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its state. */
   private final CameraDevice.StateCallback stateCallback =
-      new CameraDevice.StateCallback() {
-        @Override
-        public void onOpened(final CameraDevice cd) {
-          // This method is called when the camera is opened.  We start camera preview here.
-          cameraOpenCloseLock.release();
-          cameraDevice = cd;
-          createCameraPreviewSession();
-        }
+          new CameraDevice.StateCallback() {
+            @Override
+            public void onOpened(final CameraDevice cd) {
+              // This method is called when the camera is opened.  We start camera preview here.
+              cameraOpenCloseLock.release();
+              cameraDevice = cd;
+              createCameraPreviewSession();
+            }
 
-        @Override
-        public void onDisconnected(final CameraDevice cd) {
-          cameraOpenCloseLock.release();
-          cd.close();
-          cameraDevice = null;
-        }
+            @Override
+            public void onDisconnected(final CameraDevice cd) {
+              cameraOpenCloseLock.release();
+              cd.close();
+              cameraDevice = null;
+            }
 
-        @Override
-        public void onError(final CameraDevice cd, final int error) {
-          cameraOpenCloseLock.release();
-          cd.close();
-          cameraDevice = null;
-          final Activity activity = getActivity();
-          if (null != activity) {
-            activity.finish();
-          }
-        }
-      };
+            @Override
+            public void onError(final CameraDevice cd, final int error) {
+              cameraOpenCloseLock.release();
+              cd.close();
+              cameraDevice = null;
+              final Activity activity = getActivity();
+              if (null != activity) {
+                activity.finish();
+              }
+            }
+          };
   /**
    * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a {@link
    * TextureView}.
    */
   private final TextureView.SurfaceTextureListener surfaceTextureListener =
-      new TextureView.SurfaceTextureListener() {
-        @Override
-        public void onSurfaceTextureAvailable(
-            final SurfaceTexture texture, final int width, final int height) {
-          openCamera(width, height);
-        }
+          new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(
+                    final SurfaceTexture texture, final int width, final int height) {
+              openCamera(width, height);
+            }
 
-        @Override
-        public void onSurfaceTextureSizeChanged(
-            final SurfaceTexture texture, final int width, final int height) {
-          configureTransform(width, height);
-        }
+            @Override
+            public void onSurfaceTextureSizeChanged(
+                    final SurfaceTexture texture, final int width, final int height) {
+              configureTransform(width, height);
+            }
 
-        @Override
-        public boolean onSurfaceTextureDestroyed(final SurfaceTexture texture) {
-          return true;
-        }
+            @Override
+            public boolean onSurfaceTextureDestroyed(final SurfaceTexture texture) {
+              return true;
+            }
 
-        @Override
-        public void onSurfaceTextureUpdated(final SurfaceTexture texture) {}
-      };
+            @Override
+            public void onSurfaceTextureUpdated(final SurfaceTexture texture) {
+            }
+          };
 
   private CameraConnectionFragment(
-      final ConnectionCallback connectionCallback,
-      final OnImageAvailableListener imageListener,
-      final int layout,
-      final Size inputSize) {
+          final ConnectionCallback connectionCallback,
+          final OnImageAvailableListener imageListener,
+          final int layout,
+          final Size inputSize) {
     this.cameraConnectionCallback = connectionCallback;
     this.imageListener = imageListener;
     this.layout = layout;
@@ -246,22 +247,21 @@ public class CameraConnectionFragment extends Fragment {
       return chosenSize;
     } else {
       Log.e("Object-Detection", "Couldn't find any suitable preview size");
-      // TODO: tts로 설명 (스마트폰 화면이 미리보기를 보여줄 수 있는 크기 X)
       return choices[0];
     }
   }
 
   public static CameraConnectionFragment newInstance(
-      final ConnectionCallback callback,
-      final OnImageAvailableListener imageListener,
-      final int layout,
-      final Size inputSize) {
+          final ConnectionCallback callback,
+          final OnImageAvailableListener imageListener,
+          final int layout,
+          final Size inputSize) {
     return new CameraConnectionFragment(callback, imageListener, layout, inputSize);
   }
 
   @Override
   public View onCreateView(
-      final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+          final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
     return inflater.inflate(layout, container, false);
   }
 
@@ -310,7 +310,7 @@ public class CameraConnectionFragment extends Fragment {
       final CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
 
       final StreamConfigurationMap map =
-          characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+              characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
       sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
       Log.e("pillaroid-debug", "sensorOrientation: " + sensorOrientation);  // TODO: 값 확인해야 함
@@ -319,10 +319,10 @@ public class CameraConnectionFragment extends Fragment {
       // bus' bandwidth limitation, resulting in gorgeous previews but the storage of
       // garbage capture data.
       previewSize =
-          chooseOptimalSize(
-              map.getOutputSizes(SurfaceTexture.class),
-              inputSize.getWidth(),
-              inputSize.getHeight());
+              chooseOptimalSize(
+                      map.getOutputSizes(SurfaceTexture.class),
+                      inputSize.getWidth(),
+                      inputSize.getHeight());
 
       // We fit the aspect ratio of TextureView to the size of preview we picked.
       final int orientation = getResources().getConfiguration().orientation;
@@ -336,8 +336,6 @@ public class CameraConnectionFragment extends Fragment {
     } catch (final NullPointerException e) {
       // Currently an NPE is thrown when the Camera2API is used but not supported on the
       // device this code runs.
-      ErrorDialog.newInstance("This device doesn\\'t support Camera2 API.")
-          .show(getChildFragmentManager(), FRAGMENT_DIALOG);
       throw new IllegalStateException("This device doesn\\'t support Camera2 API.");
     }
 
@@ -345,7 +343,7 @@ public class CameraConnectionFragment extends Fragment {
   }
 
   /** Opens the camera specified by {@link CameraConnectionFragment#cameraId}. */
-  @SuppressLint("MissingPermission")
+  @SuppressLint("MissingPermission")  // ObjectDetectionCameraActivity에서 카메라 권한 체크 완료
   private void openCamera(final int width, final int height) {
     setUpCameraOutputs();
     configureTransform(width, height);
@@ -465,7 +463,7 @@ public class CameraConnectionFragment extends Fragment {
 
             @Override
             public void onConfigureFailed(final CameraCaptureSession cameraCaptureSession) {
-              // TODO: tts로 카메라 켜는 것 실패했다고 알리기
+
             }
           },
           null);
