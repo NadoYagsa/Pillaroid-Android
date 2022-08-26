@@ -5,6 +5,7 @@ import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -17,6 +18,8 @@ import android.view.Window;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,6 +28,7 @@ import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.gson.JsonObject;
 import com.nadoyagsa.pillaroid.adapter.MedicinePagerAdapter;
 import com.nadoyagsa.pillaroid.data.AppearanceInfo;
 import com.nadoyagsa.pillaroid.data.MedicineInfo;
@@ -45,6 +49,7 @@ public class MedicineResultActivity extends AppCompatActivity {
     private final long RESPONSE_BARCODE_FORMAT_ERROR = 40003L;
     private final long RESPONSE_BARCODE_NOT_FOUND = 40401L;
     private final long RESPONSE_MEDICINE_NOT_FOUND = 40402L;
+    private final long RESPONSE_DATA_NOT_FOUND = 40403L;
     private final String API_FAILED = "api-failed";
 
     private int medicineIdx = 0;
@@ -52,6 +57,7 @@ public class MedicineResultActivity extends AppCompatActivity {
     private MedicineInfo medicine;
     private HashMap<Integer,View> categories;
 
+    private ActivityResultLauncher<Intent> startActivityResultLogin;
     private AlertDialog dialog;
     private AppCompatImageButton ivAlarm, ibtStar;
     private MedicinePagerAdapter medicinePagerAdapter;
@@ -124,7 +130,7 @@ public class MedicineResultActivity extends AppCompatActivity {
 
         clickListener();
 
-        medicine = new MedicineInfo(-1, "", "", "", "", null, "", "", false);
+        medicine = new MedicineInfo(-1, "", "", "", "", null, "", "", null);
         vpResult = findViewById(R.id.vp_medicineresult_result);
         medicinePagerAdapter = new MedicinePagerAdapter(medicine);
         vpResult.setAdapter(medicinePagerAdapter);
@@ -145,6 +151,63 @@ public class MedicineResultActivity extends AppCompatActivity {
                 super.onPageSelected(position);
             }
         });
+
+        // 즐겨찾기 or 알람 기능 사용 시 로그인이 안되었을 때
+        startActivityResultLogin = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                PillaroidAPIImplementation.getApiService().getFavorites(SharedPrefManager.read("token", ""), medicine.getMedicineIdx()).enqueue(new Callback<String>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        if (response.code() == 200) {
+                            try {
+                                JSONObject responseJson = new JSONObject(Objects.requireNonNull(response.body()));
+                                JSONObject data = responseJson.getJSONObject("data");
+
+                                medicine.setFavoritesIdx(data.getLong("favoritesIdx"));
+                                tts.speak("로그인 되셨습니다. 이후부터 즐겨찾기 추가가 가능합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+
+                                setFavoritesIcon();     // 즐겨찾기 아이콘 설정
+                            } catch (JSONException e) { e.printStackTrace(); }
+                        }
+                        else if (response.code() == 401) {
+                            tts.speak("허가받지 않은 회원의 접근입니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                        }
+                        else if (response.code() == 404) {
+                            if (response.errorBody() != null) {
+                                try {
+                                    String errorStr = response.errorBody().string();
+                                    JSONObject errorBody = new JSONObject(errorStr);
+                                    long errorIdx = errorBody.getLong("errorIdx");
+
+                                    if (errorIdx == RESPONSE_DATA_NOT_FOUND) {  // 이전에 즐겨찾기로 추가하지 않음
+                                        tts.speak("로그인 되셨습니다. 이후부터 즐겨찾기 추가가 가능합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+
+                                        medicine.setFavoritesIdx(null);
+                                        setFavoritesIcon();     // 즐겨찾기 아이콘 설정
+                                    }
+                                } catch (JSONException | IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            else
+                                tts.speak("즐겨찾기 여부 조회에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                        }
+                        else {
+                            tts.speak("즐겨찾기 여부 조회에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                        tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
+                    }
+                });
+            }
+            else {
+                tts.speak("로그인에 문제가 발생해 즐겨찾기 기능 사용이 불가합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+        });
     }
 
     private void initActionBar(Toolbar toolbar) {
@@ -152,11 +215,95 @@ public class MedicineResultActivity extends AppCompatActivity {
         tvTitle.setText("");
         tvTitle.setSelected(true);  //ellipsize="marquee" 실행되도록 selected 설정
 
+        // 즐겨찾기
         ibtStar = toolbar.findViewById(R.id.ibt_ab_medicineresult_favorites);
-        ibtStar.setOnClickListener(v -> {
-            //TODO: 즐겨찾기 관리 (ibtStar.tag=on/off)
+        ibtStar.setOnClickListener(view -> {
+            if (SharedPrefManager.read("token", null) == null) {
+                tts.speak("즐겨찾기 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+
+                // 로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
+                Intent loginIntent = new Intent(this, LoginActivity.class);
+                loginIntent.putExtra("from", 'r');
+                startActivityResultLogin.launch(loginIntent);
+            }
+            else {  // 이미 로그인된 사용자
+                if (medicine.isFavoritesNull()) {   // 즐겨찾기 추가
+                    JsonObject request = new JsonObject();
+                    request.addProperty("medicineIdx", medicine.getMedicineIdx());
+                    PillaroidAPIImplementation.getApiService().postFavorites(SharedPrefManager.read("token", null), request).enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.code() == 201) {
+                                try {
+                                    JSONObject responseJson = new JSONObject(Objects.requireNonNull(response.body()));
+                                    JSONObject data = responseJson.getJSONObject("data");
+
+                                    medicine.setFavoritesIdx(data.getLong("favoritesIdx"));
+                                    tts.speak("즐겨찾기 추가", TextToSpeech.QUEUE_FLUSH, null, null);
+
+                                    ((AppCompatImageButton) view).setImageResource(R.drawable.icon_star_on);
+                                } catch (JSONException e) { e.printStackTrace(); }
+                            }
+                            else if (response.code() == 401) {
+                                tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                            }
+                            else {
+                                tts.speak("즐겨찾기 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                            tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
+                        }
+                    });
+                }
+                else {                                              // 즐겨찾기 해제
+                    PillaroidAPIImplementation.getApiService().deleteFavorites(SharedPrefManager.read("token", null), medicine.getFavoritesIdx()).enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.code() == 200) {
+                                medicine.setFavoritesIdx(null);
+                                tts.speak("즐겨찾기 삭제", TextToSpeech.QUEUE_FLUSH, null, null);
+
+                                ((AppCompatImageButton) view).setImageResource(R.drawable.icon_star_off);
+                            }
+                            else if (response.code() == 401) {
+                                tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                            }
+                            else if (response.code() == 400) {
+                                if (response.errorBody() != null) {
+                                    try {
+                                        String errorStr = response.errorBody().string();
+                                        JSONObject errorBody = new JSONObject(errorStr);
+                                        long errorIdx = errorBody.getLong("errorIdx");
+
+                                        if (errorIdx == 40001)  // 삭제 오류
+                                            tts.speak("즐겨찾기에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
+                                    } catch (JSONException | IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                else
+                                    tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                            }
+                            else {
+                                tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                            tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
+                        }
+                    });
+                }
+            }
         });
 
+        // 알람
         ivAlarm = toolbar.findViewById(R.id.ibt_ab_medicineresult_alarm);   //TODO: 시각장애인 모드일 때 description 읽어주는지 확인하기
         ivAlarm.setOnClickListener(v -> showAlarmDialog());
     }
@@ -233,6 +380,16 @@ public class MedicineResultActivity extends AppCompatActivity {
         };
     }
 
+    private void setFavoritesIcon() {
+        // 즐겨찾기 여부 설정
+        if (medicine.isFavoritesNull()) {
+            ibtStar.setImageResource(R.drawable.icon_star_off);
+        }
+        else {
+            ibtStar.setImageResource(R.drawable.icon_star_on);
+        }
+    }
+
     private void getMedicineResult() {
         Callback<String> medicineCallback = new Callback<String>() {
             @Override
@@ -271,20 +428,17 @@ public class MedicineResultActivity extends AppCompatActivity {
                         AppearanceInfo appearanceInfo = new AppearanceInfo(feature, formulation, shape, color, dividingLine, identificationMark);
                         appearanceInfo.setIsNull(isAppearanceNull);
 
+                        Long favoritesIdx = data.isNull("favoritesIdx") ? null : data.getLong("favoritesIdx");
+
                         medicine = new MedicineInfo(data.getInt("medicineIdx"), name,
                                 data.getString("efficacy"), data.getString("dosage"),
                                 data.getString("precaution"), appearanceInfo,
-                                data.getString("ingredient"), data.getString("save"), data.getBoolean("favorites"));
+                                data.getString("ingredient"), data.getString("save"), favoritesIdx);
 
                         tvTitle.setText(medicine.getName());
 
                         // 즐겨찾기 여부 설정
-                        if (medicine.isFavorites()) {
-                            ibtStar.setImageResource(R.drawable.icon_star_on);
-                        }
-                        else {
-                            ibtStar.setImageResource(R.drawable.icon_star_off);
-                        }
+                        setFavoritesIcon();
 
                         medicinePagerAdapter.setMedicineInfo(medicine);
                         vpResult.setCurrentItem(0);

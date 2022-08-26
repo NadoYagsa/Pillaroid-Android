@@ -6,15 +6,16 @@ public class PrescriptionInfo {
     private final AppearanceInfo appearanceInfo;      // 외형 정보
     private final String efficacy;          // 효능 및 효과
     private final String dosage;            // 용법 및 용량
-    private final boolean isFavorites;      // 즐겨찾기 여부
 
-    public PrescriptionInfo(int medicineIdx, String name, AppearanceInfo appearanceInfo, String efficacy, String dosage, boolean isFavorites) {
+    private Long favoritesIdx;              // 즐겨찾기 번호
+
+    public PrescriptionInfo(int medicineIdx, String name, AppearanceInfo appearanceInfo, String efficacy, String dosage, Long favoritesIdx) {
         this.medicineIdx = medicineIdx;
         this.name = name;
         this.appearanceInfo = appearanceInfo;
         this.efficacy = efficacy;
         this.dosage = dosage;
-        this.isFavorites = isFavorites;
+        this.favoritesIdx = favoritesIdx;
     }
 
     public int getMedicineIdx() {
@@ -37,7 +38,15 @@ public class PrescriptionInfo {
         return dosage;
     }
 
-    public boolean isFavorites() {
-        return isFavorites;
+    public boolean isFavoritesNull() {
+        return favoritesIdx == null;
+    }
+
+    public Long getFavoritesIdx() {
+        return favoritesIdx;
+    }
+
+    public void setFavoritesIdx(Long favoritesIdx) {
+        this.favoritesIdx = favoritesIdx;
     }
 }

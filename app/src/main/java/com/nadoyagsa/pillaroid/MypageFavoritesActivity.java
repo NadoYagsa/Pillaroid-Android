@@ -26,6 +26,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -120,9 +121,26 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                     tts.playSilentUtterance(7000, TextToSpeech.QUEUE_ADD, null);
                     finish();
                 }
-                else if (response.code() == 40403) {
-                    tts.speak("즐겨찾기를 설정한 의약품이 없습니다.", QUEUE_FLUSH, null, null);
-                    tvFavoritesInfo.setText(getString(R.string.text_favorites_no_result));
+                else if (response.code() == 404) {
+                    if (response.errorBody() != null) {
+                        try {
+                            String errorStr = response.errorBody().string();
+                            JSONObject errorBody = new JSONObject(errorStr);
+                            long errorIdx = errorBody.getLong("errorIdx");
+
+                            if (errorIdx == 40403) {
+                                tts.speak("즐겨찾기를 설정한 의약품이 없습니다.", QUEUE_FLUSH, null, null);
+                                tvFavoritesInfo.setText(getString(R.string.text_favorites_no_result));
+                            }
+                        } catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        tts.speak("즐겨찾기 목록 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                        tts.playSilentUtterance(7000, TextToSpeech.QUEUE_ADD, null);
+                        finish();
+                    }
                 }
                 else {
                     tts.speak("즐겨찾기 목록 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);

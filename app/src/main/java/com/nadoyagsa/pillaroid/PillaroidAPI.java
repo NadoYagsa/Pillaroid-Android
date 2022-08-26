@@ -30,5 +30,17 @@ public interface PillaroidAPI {
 
 
     @GET("/user/favorites")
+    Call<String> getFavorites(@Header("authorization") String jwt, @Query("medicineIdx") int medicineIdx);      // 의약품의 즐겨찾기 여부 조회
+
+    @GET("/user/favorites/list")
     Call<String> getFavoritesList(@Header("authorization") String jwt);                             // 회원의 즐겨찾기 목록 조회
+
+    @POST("/user/favorites")
+    Call<String> postFavorites(@Header("authorization") String jwt, @Body JsonObject request);                  // 의약품 즐겨찾기 추가
+
+    @DELETE("/user/favorites/{fid}")
+    Call<String> deleteFavorites(@Header("authorization") String jwt, @Path("fid") Long favoritesIdx);          // 의약품 즐겨찾기 삭제
+
+    @GET("/user/favorites/search")
+    Call<String> getFavoritesByKeyword(@Header("authorization") String jwt, @Query("keyword") String keyword);  // 회원의 즐겨찾기 목록 조회
 }

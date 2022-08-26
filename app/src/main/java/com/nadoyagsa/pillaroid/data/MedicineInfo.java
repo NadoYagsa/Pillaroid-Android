@@ -9,10 +9,11 @@ public class MedicineInfo {
     private final AppearanceInfo appearanceInfo;        // 외형
     private final String ingredient;        // 성분
     private final String save;              // 보관법
-    private final boolean isFavorites;
+
+    private Long favoritesIdx;              // 즐겨찾기 번호
 
     // 처방전 용으로 외형정보가 있음
-    public MedicineInfo(int medicineIdx, String name, String efficacy, String dosage, String precaution, AppearanceInfo appearanceInfo, String ingredient, String save, boolean isFavorites) {
+    public MedicineInfo(int medicineIdx, String name, String efficacy, String dosage, String precaution, AppearanceInfo appearanceInfo, String ingredient, String save, Long favoritesIdx) {
         this.medicineIdx = medicineIdx;
         this.name = name;
         this.efficacy = efficacy;
@@ -21,7 +22,7 @@ public class MedicineInfo {
         this.appearanceInfo = appearanceInfo;
         this.ingredient = ingredient;
         this.save = save;
-        this.isFavorites = isFavorites;
+        this.favoritesIdx = favoritesIdx;
     }
 
     public int getMedicineIdx() {
@@ -56,7 +57,15 @@ public class MedicineInfo {
         return save;
     }
 
-    public boolean isFavorites() {
-        return isFavorites;
+    public boolean isFavoritesNull() {
+        return favoritesIdx == null;
+    }
+
+    public Long getFavoritesIdx() {
+        return favoritesIdx;
+    }
+
+    public void setFavoritesIdx(Long favoritesIdx) {
+        this.favoritesIdx = favoritesIdx;
     }
 }
