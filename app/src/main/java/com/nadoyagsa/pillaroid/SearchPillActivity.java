@@ -1,7 +1,10 @@
 package com.nadoyagsa.pillaroid;
 
 import static android.speech.tts.TextToSpeech.QUEUE_ADD;
+import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -143,12 +146,12 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
             Log.i("Object-Detection", "Running detection on image " + currTimestamp);
             final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
 
-            cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
-            final Canvas canvas1 = new Canvas(cropCopyBitmap);
-            final Paint paint = new Paint();
-            paint.setColor(Color.RED);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(1.0f);
+//            cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
+//            final Canvas canvas1 = new Canvas(cropCopyBitmap);
+//            final Paint paint = new Paint();
+//            paint.setColor(Color.RED);
+//            paint.setStyle(Paint.Style.STROKE);
+//            paint.setStrokeWidth(1.0f);
 
             final List<Classifier.Recognition> mappedRecognitions =
                     new LinkedList<>();
@@ -156,7 +159,7 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
             for (final Classifier.Recognition result : results) {
                 final RectF location = result.getLocation();
                 if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
-                    canvas1.drawRect(location, paint);
+//                    canvas1.drawRect(location, paint);
 
                     cropToFrameTransform.mapRect(location);
 
@@ -170,75 +173,127 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
 
             computingDetection = false;
 
-            if (mappedRecognitions.size() != 0) {
-                Collections.sort(mappedRecognitions);   // confidence 기준으로 정렬
-                for (Classifier.Recognition recognition : mappedRecognitions) {
-                    if (recognition.getTitle().equals("pill")) {    // pill로 인식한 것 중 가장 신뢰율이 높은 결과에 대해 음성 가이드
-                        RectF location = recognition.getLocation();
-                        tracker.getFrameToCanvasMatrix().mapRect(location);
+            if (!iswaitingAPI) {
+                if (mappedRecognitions.size() == 0) {
+                    Log.e("Object-Detection-result", "no detection");
+                    tts.speak("알약이 인식되지 않습니다. 알약을 포착할 수 있도록 카메라를 더 멀리 이동해주세요.", QUEUE_ADD, null, null);
+                } else {
+                    Collections.sort(mappedRecognitions);   // confidence 기준으로 정렬
 
-                        boolean rotation = !(getScreenOrientation() % 180 == 0);
-                        int frameWidth = rotation ? previewHeight : previewWidth;
-                        int frameHeight = rotation ? previewWidth : previewHeight;
+                    // confidence가 가장 높은 pill Recognition 찾기
+                    Classifier.Recognition recognition = mappedRecognitions.stream()
+                            .filter(r -> r.getTitle().equals("pill"))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("detected object 중 pill이 없습니다."));
 
-                        Log.e("debug", String.format("box location (%f, %f) -> (%f, %f)", location.left, location.top, location.right, location.bottom));
-                        Log.e("debug", String.format("cameraLayout width x height: %d x %d", frameWidth, frameHeight));
-                        Log.e("debug", String.format("object width x height: %d x %d", (int) (location.right - location.left), (int) (location.bottom - location.top)));
+                    RectF location = recognition.getLocation();
+                    tracker.getFrameToCanvasMatrix().mapRect(location);
 
-                        float objectWidth = location.right - location.left;
-                        float objectHeight = location.bottom - location.top;
+                    boolean rotation = !(getScreenOrientation() % 180 == 0);
+                    int frameWidth = rotation ? previewHeight : previewWidth;
+                    int frameHeight = rotation ? previewWidth : previewHeight;
 
-                        int boundaryWidth = (int) (frameWidth * 0.05);
-                        int boundaryHeight = (int) (frameHeight * 0.05);
+                    float objectWidth = location.right - location.left;
+                    float objectHeight = location.bottom - location.top;
 
-                        boolean isNormal = true;
+                    int boundaryWidth = (int) (frameWidth * 0.05);
+                    int boundaryHeight = (int) (frameHeight * 0.05);
 
-                        // 위치 가이드
-                        if (location.top < boundaryHeight) {
-                            isNormal = false;
-                            Log.e("Object-Detection-result", "too over");
-                            tts.speak("알약이 너무 위에 있습니다. 손바닥을 조금만 아래로 내려주세요.", QUEUE_ADD, null, null);
-                        } else if (location.bottom > frameHeight - boundaryHeight) {
-                            isNormal = false;
-                            Log.e("Object-Detection-result", "too under");
-                            tts.speak("알약이 너무 아래에 있습니다. 손바닥을 조금만 위로 올려주세요.", QUEUE_ADD, null, null);
-                        } else if (location.left < boundaryWidth) {
-                            isNormal = false;
-                            Log.e("Object-Detection-result", "too left");
-                            tts.speak("알약이 너무 왼쪽에 있습니다. 손바닥을 조금만 오른쪽으로 이동해 주세요.", QUEUE_ADD, null, null);
-                        } else if (location.right > frameWidth - boundaryWidth) {
-                            isNormal = false;
-                            Log.e("Object-Detection-result", "too right");
-                            tts.speak("알약이 너무 오른쪽에 있습니다. 손바닥을 조금만 왼쪽으로 이동해 주세요.", QUEUE_ADD, null, null);
-                        }
+                    Log.e("pillaroid-debug", String.format("box location (%f, %f) -> (%f, %f)", location.left, location.top, location.right, location.bottom));
+                    Log.e("pillaroid-debug", String.format("cameraLayout width x height: %d x %d", frameWidth, frameHeight));
+                    Log.e("pillaroid-debug", String.format("object width x height: %d x %d", (int) objectWidth, (int) objectHeight));
 
-                        // 거리 가이드
-                        if (objectWidth < 30 || objectHeight < 30) {
-                            isNormal = false;
-                            Log.e("Object-Detection-result", "too far");
-                            tts.speak("알약이 너무 멀리 있습니다. 손바닥을 조금만 가까이 대주세요.", QUEUE_ADD, null, null);
-                        } else if (objectWidth > 300 || objectHeight > 300) {
-                            isNormal = false;
-                            Log.e("Object-Detection-result", "too close");
-                            tts.speak("알약이 너무 가까이에 있습니다. 손바닥을 조금만 멀리 대주세요.", QUEUE_ADD, null, null);
-                        }
+                    // 위치 가이드
+                    boolean isNormal = true;
+                    if (location.top < boundaryHeight) {
+                        isNormal = false;
+                        Log.e("Object-Detection-result", "too over");
+                        tts.speak("알약이 너무 위에 있습니다. 손바닥을 조금만 아래로 내려주세요.", QUEUE_ADD, null, null);
+                    } else if (location.bottom > frameHeight - boundaryHeight) {
+                        isNormal = false;
+                        Log.e("Object-Detection-result", "too under");
+                        tts.speak("알약이 너무 아래에 있습니다. 손바닥을 조금만 위로 올려주세요.", QUEUE_ADD, null, null);
+                    } else if (location.left < boundaryWidth) {
+                        isNormal = false;
+                        Log.e("Object-Detection-result", "too left");
+                        tts.speak("알약이 너무 왼쪽에 있습니다. 손바닥을 조금만 오른쪽으로 이동해 주세요.", QUEUE_ADD, null, null);
+                    } else if (location.right > frameWidth - boundaryWidth) {
+                        isNormal = false;
+                        Log.e("Object-Detection-result", "too right");
+                        tts.speak("알약이 너무 오른쪽에 있습니다. 손바닥을 조금만 왼쪽으로 이동해 주세요.", QUEUE_ADD, null, null);
+                    }
 
-                        if (isNormal == true) {
-                            Log.i("Object-Detection-result", "normal");
-                            tts.speak("알약이 잘 인식되었습니다. 인식 결과를 가져오는 중입니다. 조금만 기다려주세요.", QUEUE_ADD, null, null);
+                    // 거리 가이드
+                    if (objectWidth < 30 || objectHeight < 30) {
+                        isNormal = false;
+                        Log.e("Object-Detection-result", "too far");
+                        tts.speak("알약이 너무 멀리 있습니다. 손바닥을 조금만 가까이 대주세요.", QUEUE_ADD, null, null);
+                    } else if (objectWidth > 300 || objectHeight > 300) {
+                        isNormal = false;
+                        Log.e("Object-Detection-result", "too close");
+                        tts.speak("알약이 너무 가까이에 있습니다. 손바닥을 조금만 멀리 대주세요.", QUEUE_ADD, null, null);
+                    }
 
-                            // TODO: 이미지 서버에게 보내기
-                        }
+                    if (isNormal) {
+                        Log.i("Object-Detection-result", "normal");
+                        tts.speak("알약이 잘 인식되었습니다. 인식 결과를 가져오는 중입니다. 조금만 기다려주세요.", QUEUE_ADD, null, null);
 
-                        break;
+                        // 서버에게 이미지 보내기
+                        @SuppressLint("SimpleDateFormat")
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                        String time = dateFormat.format(Calendar.getInstance().getTime());
+
+                        byte[] resultBytes = bitmapToByteArray(rgbFrameBitmap);
+                        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), resultBytes);
+                        MultipartBody.Part pillImage = MultipartBody.Part.createFormData("pillImage", time + ".jpg", requestBody);
+
+                        iswaitingAPI = true;
+                        PillaroidAPIImplementation.getApiService().postPillByImage(pillImage).enqueue(new Callback<String>() {
+                            @Override
+                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                if (response.code() == 200) {
+                                    int idx = 0;
+                                    try {
+                                        JSONObject medicineJson = new JSONObject(Objects.requireNonNull(response.body()));
+                                        Log.i("detected-pill-serialNumber", medicineJson.toString());
+
+                                        idx = Integer.parseInt(medicineJson.getJSONObject("data")
+                                                .getString("medicineIdx"));
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Intent medicineIntent = new Intent(SearchPillActivity.this, MedicineResultActivity.class);
+                                    medicineIntent.putExtra("medicineIdx", idx);
+                                    startActivity(medicineIntent);
+                                } else if (response.code() == 400 || response.code() == 404) {    // 400: flask로 이미지가 전달되지 않음, 404: yolov5에 의해 crop된 알약이 없음
+                                    iswaitingAPI = false;
+                                    tts.speak("알약 인식에 실패했습니다. 다시 시도해주세요.", QUEUE_FLUSH, null, null);
+                                } else if (response.code() == 500) {
+                                    tts.speak("서비스 오류로 인해 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                                } else {
+                                    iswaitingAPI = false;
+                                    Log.e("pillaroid-debug", String.valueOf(response.code()));
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                            }
+                        });
                     }
                 }
-            } else {
-                Log.e("Object-Detection-result", "no detection");
-                tts.speak("알약이 인식되지 않습니다. 알약을 포착할 수 있도록 카메라를 더 멀리 이동해주세요.", QUEUE_ADD, null, null);
             }
         };
         runInBackground(runnable);
+    }
+
+    // Bitmap을 Byte로 변환
+    public byte[] bitmapToByteArray( Bitmap bitmap ) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream() ;
+        bitmap.compress( Bitmap.CompressFormat.JPEG, 100, stream) ;
+        byte[] byteArray = stream.toByteArray() ;
+        return byteArray ;
     }
 
     @Override
