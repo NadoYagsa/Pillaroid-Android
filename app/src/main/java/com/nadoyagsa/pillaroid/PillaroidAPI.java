@@ -4,8 +4,11 @@ import com.google.gson.JsonObject;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface PillaroidAPI {
@@ -20,8 +23,12 @@ public interface PillaroidAPI {
     Call<String> getMedicineByBarcode(@Query("barcode") String barcode);                // 바코드 정보로 의약품 정보 조회
 
     @GET("/medicine/voice")
-    Call<String> getMedicineVoice(@Query("name") String medicineName);                  // 음성 조회 의약품명 조회
+    Call<String> getMedicineVoice(@Query("name") String medicineName);                  // 음성으로 의약품명 조회
 
     @GET("/medicine/prescription")
-    Call<String> getMedicineByPrescription(@Query("names") String medicineList);        // 처방전 조회 의약품명 조회
+    Call<String> getMedicineByPrescription(@Query("names") String medicineList);        // 처방전으로 의약품명 조회
+
+
+    @GET("/user/favorites")
+    Call<String> getFavoritesList(@Header("authorization") String jwt);                 // 회원의 즐겨찾기 목록 조회
 }
