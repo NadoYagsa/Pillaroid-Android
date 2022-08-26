@@ -1,14 +1,13 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-import static android.speech.tts.TextToSpeech.SUCCESS;
+
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -26,14 +25,12 @@ import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
 import com.warkiz.widget.SeekParams;
 
-import java.util.Locale;
 import java.util.Objects;
 
 public class MypageActivity extends AppCompatActivity {
     private boolean isToken = false;
 
     private AudioManager mAudioManager;
-    private TextToSpeech tts;
 
     private IndicatorSeekBar isbVoiceSpeed;
     private LinearLayout llLogout;
@@ -47,19 +44,6 @@ public class MypageActivity extends AppCompatActivity {
         String token = SharedPrefManager.read("token", "");
         if (!token.equals(""))
             isToken = true;
-
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA
-                        || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
 
         Toolbar toolbar = findViewById(R.id.tb_mypage_toolbar);
         setSupportActionBar(toolbar);
@@ -189,20 +173,5 @@ public class MypageActivity extends AppCompatActivity {
                 startActivityResultLogin.launch(loginIntent);
             }
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            //tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

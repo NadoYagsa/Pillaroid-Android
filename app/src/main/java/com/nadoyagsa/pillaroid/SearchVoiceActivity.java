@@ -1,7 +1,6 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
-import static android.speech.tts.TextToSpeech.SUCCESS;
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.Manifest;
 import android.content.Intent;
@@ -12,7 +11,6 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -28,7 +26,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Objects;
 
 public class SearchVoiceActivity extends AppCompatActivity {
@@ -41,27 +38,13 @@ public class SearchVoiceActivity extends AppCompatActivity {
     private Intent intent;
     private RecognitionListener recognitionListener;
     private SpeechRecognizer speechRecognizer;
-    private TextToSpeech tts;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_voice);
 
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA
-                        || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-
-                checkRecordPermission();    // 음성 인식을 위한 녹음 퍼미션 체크
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
+        checkRecordPermission();    // 음성 인식을 위한 녹음 퍼미션 체크
 
         Toolbar toolbar = findViewById(R.id.tb_voicesearch_toolbar);
         setSupportActionBar(toolbar);
@@ -314,25 +297,6 @@ public class SearchVoiceActivity extends AppCompatActivity {
         if (speechRecognizer != null) {
             speechRecognizer.destroy();
             speechRecognizer = null;
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            //tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-            if (speechRecognizer != null) {
-                speechRecognizer.destroy();
-                speechRecognizer = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

@@ -1,7 +1,9 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
-import static android.speech.tts.TextToSpeech.SUCCESS;
+import static android.speech.tts.TextToSpeech.QUEUE_ADD;
+import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
+
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -11,7 +13,6 @@ import android.graphics.Point;
 import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.TextView;
@@ -40,14 +41,12 @@ import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public class SearchPrescriptionActivity extends AppCompatActivity {
     private boolean canUseCamera = false;
     private boolean isSearching = false;
 
-    private TextToSpeech tts;
     private TextView tvGuide;
 
     private ImageCapture imageCapture;
@@ -61,44 +60,32 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_prescription);
 
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-
-                recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
-                prescriptionAnalyzer = new PrescriptionAnalyzer();
-
-                checkCameraPermission();    // 카메라로 인식을 위한 카메라 퍼미션 체크
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
+        checkCameraPermission();    // 카메라로 인식을 위한 카메라 퍼미션 체크
 
         tvGuide = findViewById(R.id.tv_search_prescription_guide);
         pvPrescriptionCamera = findViewById(R.id.pv_search_prescription);
+
+        recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
+        prescriptionAnalyzer = new PrescriptionAnalyzer();
     }
 
     private void checkCameraPermission() {
         if (Build.VERSION.SDK_INT >= 21) {
             // 카메라 권한이 없으면 권한 요청
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
-                tts.speak("처방전 인식을 위해 카메라 권한이 필요합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
-                tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-                tts.speak("권한 거부 시에는 메인 화면으로 돌아갑니다.", TextToSpeech.QUEUE_ADD, null, null);
+                tts.speak("처방전 인식을 위해 카메라 권한이 필요합니다.", QUEUE_FLUSH, null, null);
+                tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", QUEUE_ADD, null, null);
+                tts.speak("권한 거부 시에는 메인 화면으로 돌아갑니다.", QUEUE_ADD, null, null);
 
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1000);
             } else {
                 canUseCamera = true;
 
-                tts.speak("후면 카메라가 켜졌습니다. 처방전을 카메라 뒤로 위치시켜주세요.", TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak("후면 카메라가 켜졌습니다. 처방전을 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
                 startCamera();  //카메라 실행
             }
         } else {
-            tts.speak("SDK 버전이 낮아 카메라 사용이 불가합니다.", TextToSpeech.QUEUE_ADD, null, null);
+            tts.speak("SDK 버전이 낮아 카메라 사용이 불가합니다.", QUEUE_ADD, null, null);
             finish();
         }
     }
@@ -111,7 +98,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 canUseCamera = true;
 
-                tts.speak("후면 카메라가 켜졌습니다. 처방전을 카메라 뒤로 위치시켜주세요.", TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak("후면 카메라가 켜졌습니다. 처방전을 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
                 startCamera();
             } else
                 finish();
@@ -248,7 +235,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                                 startActivity(resultIntent);
                             }
                             else
-                                tts.speak("인식된 처방 의약품이 없습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                                tts.speak("인식된 처방 의약품이 없습니다.", QUEUE_FLUSH, null, null);
 
                             imageProxy.close();
 
@@ -256,7 +243,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                         })
                         .addOnFailureListener(e -> {
                             Log.i("Failure", "사진 속 텍스트 인식 오류");
-                            tts.speak("처방전의 텍스트를 읽는데 오류가 발생했습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                            tts.speak("처방전의 텍스트를 읽는데 오류가 발생했습니다.", QUEUE_FLUSH, null, null);
                             tvGuide.setText("텍스트 인식 오류가 발생했습니다.");
                         });
             }
@@ -270,7 +257,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
             case KeyEvent.KEYCODE_VOLUME_UP: {      // 촬영 버튼 클릭
                 if (!isSearching) {
                     isSearching = true;
-                    tts.speak("사진이 찍혔습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                    tts.speak("사진이 찍혔습니다.", QUEUE_FLUSH, null, null);
                     tvGuide.setText("처방전 사진 속 약품명 인식 중");
 
                     imageCapture.takePicture(ContextCompat.getMainExecutor(SearchPrescriptionActivity.this), new ImageCapture.OnImageCapturedCallback() {
@@ -318,25 +305,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
             cameraProviderFuture.cancel(true);
             cameraProviderFuture = null;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            //tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-
-            // 카메라 자원 해제
-            if (cameraProviderFuture != null) {
-                cameraProviderFuture.cancel(true);
-                cameraProviderFuture = null;
-            }
-        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private static class PrescriptionPosition {
