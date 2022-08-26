@@ -1,9 +1,9 @@
 package com.nadoyagsa.pillaroid.data;
 
 public class FavoritesInfo {
-    private Long favoritesIdx;
-    private int medicineIdx;
-    private String medicineName;
+    private final Long favoritesIdx;
+    private final int medicineIdx;
+    private final String medicineName;
 
     public FavoritesInfo(Long favoritesIdx, int medicineIdx, String medicineName) {
         this.favoritesIdx = favoritesIdx;

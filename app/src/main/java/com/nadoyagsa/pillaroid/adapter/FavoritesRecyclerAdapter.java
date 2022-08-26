@@ -1,6 +1,7 @@
 package com.nadoyagsa.pillaroid.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.nadoyagsa.pillaroid.MedicineResultActivity;
 import com.nadoyagsa.pillaroid.R;
 import com.nadoyagsa.pillaroid.data.FavoritesInfo;
 
@@ -39,7 +41,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
     public void onBindViewHolder(@NonNull FavoritesRecyclerAdapter.FavoritesViewHolder holder, int position) {
         holder.tvMedicineName.setText(favoritesList.get(position).getMedicineName());
         
-        //TODO: 즐겨찾기 이미지 클릭 시 즐겨찾기 해제됨(favoritesIdx 전달함)
+        //TODO: 즐겨찾기 이미지 슬라이드 시 즐겨찾기 해제됨(favoritesIdx 전달함)
     }
 
     @Override
@@ -58,7 +60,9 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
             itemView.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION) {
-                    //TODO: 약의 세부 내용 보여줌
+                    Intent medicineIntent = new Intent(context, MedicineResultActivity.class);
+                    medicineIntent.putExtra("medicineIdx", favoritesList.get(pos).getMedicineIdx());
+                    context.startActivity(medicineIntent);
                 }
             });
         }
