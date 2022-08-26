@@ -153,8 +153,10 @@ public class PrescriptionResultActivity extends AppCompatActivity {
                                 AppearanceInfo appearanceInfo = new AppearanceInfo(feature, formulation, shape, color, dividingLine, identificationMark);
                                 appearanceInfo.setIsNull(isAppearanceNull);
 
+                                Long favoritesIdx = medicine.isNull("favoritesIdx") ? null : medicine.getLong("favoritesIdx");
+
                                 prescriptionInfos.add(new PrescriptionInfo(medicine.getInt("medicineIdx"), name,
-                                        appearanceInfo, medicine.getString("efficacy"), medicine.getString("dosage"), medicine.getLong("favoritesIdx")));
+                                        appearanceInfo, medicine.getString("efficacy"), medicine.getString("dosage"), favoritesIdx));
                             }
                             prescriptionPagerAdapter.notifyDataSetChanged();
 
