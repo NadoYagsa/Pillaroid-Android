@@ -53,7 +53,7 @@ public class MedicineResultActivity extends AppCompatActivity {
     private HashMap<Integer,View> categories;
 
     private AlertDialog dialog;
-    private AppCompatImageButton ivAlarm;
+    private AppCompatImageButton ivAlarm, ibtStar;
     private MedicinePagerAdapter medicinePagerAdapter;
     private TextToSpeech tts;
     private TextView tvTitle;
@@ -124,7 +124,7 @@ public class MedicineResultActivity extends AppCompatActivity {
 
         clickListener();
 
-        medicine = new MedicineInfo(-1, "", "", "", "", null, "", "");
+        medicine = new MedicineInfo(-1, "", "", "", "", null, "", "", false);
         vpResult = findViewById(R.id.vp_medicineresult_result);
         medicinePagerAdapter = new MedicinePagerAdapter(medicine);
         vpResult.setAdapter(medicinePagerAdapter);
@@ -152,7 +152,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         tvTitle.setText("");
         tvTitle.setSelected(true);  //ellipsize="marquee" 실행되도록 selected 설정
 
-        AppCompatImageButton ibtStar = toolbar.findViewById(R.id.ibt_ab_medicineresult_star);
+        ibtStar = toolbar.findViewById(R.id.ibt_ab_medicineresult_favorites);
         ibtStar.setOnClickListener(v -> {
             //TODO: 즐겨찾기 관리 (ibtStar.tag=on/off)
         });
@@ -274,9 +274,17 @@ public class MedicineResultActivity extends AppCompatActivity {
                         medicine = new MedicineInfo(data.getInt("medicineIdx"), name,
                                 data.getString("efficacy"), data.getString("dosage"),
                                 data.getString("precaution"), appearanceInfo,
-                                data.getString("ingredient"), data.getString("save"));
+                                data.getString("ingredient"), data.getString("save"), data.getBoolean("favorites"));
 
                         tvTitle.setText(medicine.getName());
+
+                        // 즐겨찾기 여부 설정
+                        if (medicine.isFavorites()) {
+                            ibtStar.setImageResource(R.drawable.icon_star_on);
+                        }
+                        else {
+                            ibtStar.setImageResource(R.drawable.icon_star_off);
+                        }
 
                         medicinePagerAdapter.setMedicineInfo(medicine);
                         vpResult.setCurrentItem(0);
@@ -332,10 +340,10 @@ public class MedicineResultActivity extends AppCompatActivity {
             }
         };
 
-        if (medicineIdx != 0) {          // 의약품 번호로 정보 조회
-            PillaroidAPIImplementation.getApiService().getMedicineByIdx(medicineIdx).enqueue(medicineCallback);
+        if (medicineIdx != 0) {                 // 의약품 번호로 정보 조회
+            PillaroidAPIImplementation.getApiService().getMedicineByIdx(SharedPrefManager.read("token", null), medicineIdx).enqueue(medicineCallback);
         } else if (!barcode.equals("")) {       // 바코드로 정보 조회
-            PillaroidAPIImplementation.getApiService().getMedicineByBarcode(barcode).enqueue(medicineCallback);
+            PillaroidAPIImplementation.getApiService().getMedicineByBarcode(SharedPrefManager.read("token", null), barcode).enqueue(medicineCallback);
         }
     }
 

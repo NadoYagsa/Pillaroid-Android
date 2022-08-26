@@ -94,7 +94,7 @@ public class PrescriptionResultActivity extends AppCompatActivity {
 
     private void getPrescriptionResult(String medicineList) {
         prescriptionInfos.clear();
-        PillaroidAPIImplementation.getApiService().getMedicineByPrescription(medicineList).enqueue(new Callback<String>() {
+        PillaroidAPIImplementation.getApiService().getMedicineByPrescription(SharedPrefManager.read("token", null), medicineList).enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.code() == 200) {
@@ -139,7 +139,7 @@ public class PrescriptionResultActivity extends AppCompatActivity {
                                 appearanceInfo.setIsNull(isAppearanceNull);
 
                                 prescriptionInfos.add(new PrescriptionInfo(medicine.getInt("medicineIdx"), name,
-                                        appearanceInfo, medicine.getString("efficacy"), medicine.getString("dosage")));
+                                        appearanceInfo, medicine.getString("efficacy"), medicine.getString("dosage"), medicine.getBoolean("favorites")));
                             }
                             prescriptionPagerAdapter.notifyDataSetChanged();
 
