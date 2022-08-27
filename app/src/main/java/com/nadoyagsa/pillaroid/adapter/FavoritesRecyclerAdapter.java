@@ -109,6 +109,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
                     if (response.code() == 200) {
                         tts.speak("즐겨찾기 삭제", TextToSpeech.QUEUE_FLUSH, null, null);
 
+                        favoritesWholeList.remove(favoritesList.get(position));
                         favoritesList.remove(position);     // 스와이프한 객체 삭제
                         notifyItemRemoved(position);
 
