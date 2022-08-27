@@ -29,7 +29,7 @@
         android:textStyle="bold" />
 
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/ibt_ab_medicineresult_star"
+        android:id="@+id/ibt_ab_medicineresult_favorites"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_gravity="center"

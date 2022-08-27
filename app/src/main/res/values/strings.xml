@@ -83,6 +83,9 @@
     <string name="text_mypage_guide_sound_default">8</string>
     <string name="text_mypage_guide_speed">보이스 속도 조절</string>
 
+    <string name="text_favorites_search">즐겨찾기 목록을 조회 중입니다.</string>
+    <string name="text_favorites_no_result">즐겨찾기를 설정한 의약품이 없습니다.</string>
+
     <string name="text_time_setting_introduction">* 설정한 시간대로 약 복용 알림이 갑니다.</string>
     <string name="text_time_setting_hour">시</string>
     <string name="text_time_setting_minute">분</string>
