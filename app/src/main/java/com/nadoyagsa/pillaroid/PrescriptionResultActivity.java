@@ -5,12 +5,15 @@ import static android.speech.tts.TextToSpeech.QUEUE_ADD;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +38,7 @@ import retrofit2.Response;
 
 public class PrescriptionResultActivity extends AppCompatActivity {
     private ArrayList<PrescriptionInfo> prescriptionInfos;
+    private ArrayList<String> medicineList;
 
     private PrescriptionPagerAdapter prescriptionPagerAdapter;
     private TextToSpeech tts;
@@ -45,7 +49,7 @@ public class PrescriptionResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prescription_result);
 
-        ArrayList<String> medicineList = getIntent().getStringArrayListExtra("medicineList");
+        medicineList = getIntent().getStringArrayListExtra("medicineList");
         prescriptionInfos = new ArrayList<>();
 
         tts = new TextToSpeech(this, status -> {
@@ -56,7 +60,7 @@ public class PrescriptionResultActivity extends AppCompatActivity {
                 }
                 tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
 
-                getPrescriptionResult(String.join(",", medicineList));
+                getPrescriptionResult();
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
             }
@@ -76,8 +80,19 @@ public class PrescriptionResultActivity extends AppCompatActivity {
         tvCurrentNum = findViewById(R.id.tv_prescription_result_pos);
         tvResultNum2 = findViewById(R.id.tv_prescription_result_num);
 
+        //로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
+        ActivityResultLauncher<Intent> startActivityResultLogin = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                tts.speak("로그인 되셨습니다. 이후부터 즐겨찾기 추가가 가능합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                getPrescriptionResult();
+            }
+            else {
+                tts.speak("로그인에 문제가 발생해 즐겨찾기 기능 사용이 불가합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+        });
+
         ViewPager2 vpResult = findViewById(R.id.vp_prescription_result);
-        prescriptionPagerAdapter = new PrescriptionPagerAdapter(prescriptionInfos);
+        prescriptionPagerAdapter = new PrescriptionPagerAdapter(startActivityResultLogin, tts, prescriptionInfos);
         vpResult.setAdapter(prescriptionPagerAdapter);
         vpResult.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -92,9 +107,9 @@ public class PrescriptionResultActivity extends AppCompatActivity {
         });
     }
 
-    private void getPrescriptionResult(String medicineList) {
+    private void getPrescriptionResult() {
         prescriptionInfos.clear();
-        PillaroidAPIImplementation.getApiService().getMedicineByPrescription(medicineList).enqueue(new Callback<String>() {
+        PillaroidAPIImplementation.getApiService().getMedicineByPrescription(SharedPrefManager.read("token", null), String.join(",", medicineList)).enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.code() == 200) {
@@ -138,8 +153,10 @@ public class PrescriptionResultActivity extends AppCompatActivity {
                                 AppearanceInfo appearanceInfo = new AppearanceInfo(feature, formulation, shape, color, dividingLine, identificationMark);
                                 appearanceInfo.setIsNull(isAppearanceNull);
 
+                                Long favoritesIdx = medicine.isNull("favoritesIdx") ? null : medicine.getLong("favoritesIdx");
+
                                 prescriptionInfos.add(new PrescriptionInfo(medicine.getInt("medicineIdx"), name,
-                                        appearanceInfo, medicine.getString("efficacy"), medicine.getString("dosage")));
+                                        appearanceInfo, medicine.getString("efficacy"), medicine.getString("dosage"), favoritesIdx));
                             }
                             prescriptionPagerAdapter.notifyDataSetChanged();
 
