@@ -41,7 +41,6 @@ public interface PillaroidAPI {
     @DELETE("/user/favorites/{fid}")
     Call<String> deleteFavorites(@Header("authorization") String jwt, @Path("fid") Long favoritesIdx);          // 의약품 즐겨찾기 삭제
 
-    // TODO: 즐겨찾기 목록 조회
     @GET("/user/favorites/search")
     Call<String> getFavoritesByKeyword(@Header("authorization") String jwt, @Query("keyword") String keyword);  // 회원의 즐겨찾기 목록 조회
 }

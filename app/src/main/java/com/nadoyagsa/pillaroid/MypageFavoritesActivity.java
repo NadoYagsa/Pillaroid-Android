@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -38,6 +39,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MypageFavoritesActivity extends AppCompatActivity {
+    private boolean isSearching = false;
     private ArrayList<FavoritesInfo> favoritesList;
 
     private FavoritesRecyclerAdapter favoritesAdapter;
@@ -74,6 +76,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
         View customView = View.inflate(this, R.layout.actionbar_mypage_favorites, null);
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
+        toolbarListener(toolbar);
 
         RecyclerView rvFavorites = findViewById(R.id.rv_favorites_list);
         LinearLayoutManager favoritesManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
@@ -88,6 +91,19 @@ public class MypageFavoritesActivity extends AppCompatActivity {
         helper.attachToRecyclerView(rvFavorites);
 
         tvFavoritesInfo = findViewById(R.id.tv_favorites_info);
+    }
+
+    private void toolbarListener(Toolbar toolbar) {
+        ImageView ivSearch = toolbar.findViewById(R.id.iv_ab_favorites_search);
+        ivSearch.setOnClickListener(view -> {   // 즐겨찾기 목록 검색
+            isSearching = true;
+
+            String keyword = "타이레놀";
+
+            favoritesAdapter.searchFavoritesList(keyword);
+
+            tts.speak("검색된 즐겨찾기 목록은 총 "+favoritesAdapter.getItemCount()+"개 입니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+        });
     }
 
     private void getFavoritesList() {
@@ -115,6 +131,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                                 JSONObject favorites = results.getJSONObject(i);
                                 favoritesList.add(new FavoritesInfo(favorites.getLong("favoritesIdx"), favorites.getInt("medicineIdx"), favorites.getString("medicineName")));
                             }
+                            favoritesAdapter.setFavoritesWholeList();
                             favoritesAdapter.notifyDataSetChanged();
 
                             tts.speak("즐겨찾기 목록은 총 "+favoritesList.size()+"개 입니다.", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -161,6 +178,19 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isSearching) {
+            favoritesAdapter.searchFavoritesList("");
+            favoritesAdapter.notifyDataSetChanged();
+
+            isSearching = false;
+        }
+        else {
+            super.onBackPressed();
+        }
     }
 
     @Override

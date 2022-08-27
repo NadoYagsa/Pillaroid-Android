@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,10 +41,23 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
     private Context context;
     private final TextToSpeech tts;
     private ArrayList<FavoritesInfo> favoritesList;
+    private final ArrayList<FavoritesInfo> favoritesWholeList;    // 검색 시 필요한 전체 즐겨찾기 목록
 
     public FavoritesRecyclerAdapter(TextToSpeech tts, ArrayList<FavoritesInfo> favoritesList) {
         this.tts = tts;
         this.favoritesList = favoritesList;
+
+        favoritesWholeList = new ArrayList<>();
+    }
+
+    public void setFavoritesWholeList() {
+        favoritesWholeList.clear();
+        favoritesWholeList.addAll(favoritesList);
+    }
+
+    public void searchFavoritesList(String keyword) {
+        favoritesList = (ArrayList<FavoritesInfo>) favoritesWholeList.stream().filter(favoritesInfo -> favoritesInfo.getMedicineName().contains(keyword)).collect(Collectors.toList());
+        notifyDataSetChanged();
     }
 
     @NonNull
