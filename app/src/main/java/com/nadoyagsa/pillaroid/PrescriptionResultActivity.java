@@ -1,14 +1,13 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.QUEUE_ADD;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-import static android.speech.tts.TextToSpeech.SUCCESS;
+
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -29,7 +28,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -41,7 +39,6 @@ public class PrescriptionResultActivity extends AppCompatActivity {
     private ArrayList<String> medicineList;
 
     private PrescriptionPagerAdapter prescriptionPagerAdapter;
-    private TextToSpeech tts;
     private TextView tvResultNum, tvCurrentNum, tvResultNum2;
 
     @Override
@@ -51,20 +48,6 @@ public class PrescriptionResultActivity extends AppCompatActivity {
 
         medicineList = getIntent().getStringArrayListExtra("medicineList");
         prescriptionInfos = new ArrayList<>();
-
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-
-                getPrescriptionResult();
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
 
         Toolbar toolbar = findViewById(R.id.tb_prescription_result_toolbar);
         setSupportActionBar(toolbar);
@@ -83,28 +66,30 @@ public class PrescriptionResultActivity extends AppCompatActivity {
         //로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
         ActivityResultLauncher<Intent> startActivityResultLogin = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
-                tts.speak("로그인 되셨습니다. 이후부터 즐겨찾기 추가가 가능합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak("로그인 되셨습니다. 이후부터 즐겨찾기 추가가 가능합니다.", QUEUE_FLUSH, null, null);
                 getPrescriptionResult();
             }
             else {
-                tts.speak("로그인에 문제가 발생해 즐겨찾기 기능 사용이 불가합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak("로그인에 문제가 발생해 즐겨찾기 기능 사용이 불가합니다.", QUEUE_FLUSH, null, null);
             }
         });
 
         ViewPager2 vpResult = findViewById(R.id.vp_prescription_result);
-        prescriptionPagerAdapter = new PrescriptionPagerAdapter(startActivityResultLogin, tts, prescriptionInfos);
+        prescriptionPagerAdapter = new PrescriptionPagerAdapter(startActivityResultLogin, prescriptionInfos);
         vpResult.setAdapter(prescriptionPagerAdapter);
         vpResult.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 tts.speak(position+1+"번째 약품", QUEUE_FLUSH, null, null);
-                tts.playSilentUtterance(500, TextToSpeech.QUEUE_ADD, null);
+                tts.playSilentUtterance(500, QUEUE_ADD, null);
                 tts.speak(prescriptionInfos.get(position).getName(), QUEUE_ADD, null, null);
 
                 tvCurrentNum.setText(String.valueOf(position+1));
                 super.onPageSelected(position);
             }
         });
+
+        getPrescriptionResult();
     }
 
     private void getPrescriptionResult() {
@@ -160,19 +145,19 @@ public class PrescriptionResultActivity extends AppCompatActivity {
                             }
                             prescriptionPagerAdapter.notifyDataSetChanged();
 
-                            tts.speak("조회된 처방 의약품은 ", TextToSpeech.QUEUE_FLUSH, null, null);
+                            tts.speak("조회된 처방 의약품은 ", QUEUE_FLUSH, null, null);
                             for (PrescriptionInfo prescriptionInfo: prescriptionInfos) {
-                                tts.speak(prescriptionInfo.getName(), TextToSpeech.QUEUE_ADD, null, null);
-                                tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null);
+                                tts.speak(prescriptionInfo.getName(), QUEUE_ADD, null, null);
+                                tts.playSilentUtterance(200, QUEUE_ADD, null);
                             }
                             tts.speak("로, 총 "+prescriptionInfos.size()+"개 입니다.", TextToSpeech.QUEUE_ADD, null, null);
-                            tts.playSilentUtterance(5000, TextToSpeech.QUEUE_ADD, null);
+                            tts.playSilentUtterance(5000, QUEUE_ADD, null);
                         }
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
                 else {
                     tts.speak("처방전 결과 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
-                    tts.playSilentUtterance(7000, TextToSpeech.QUEUE_ADD, null);
+                    tts.playSilentUtterance(7000, QUEUE_ADD, null);
                     finish();
                 }
             }
@@ -180,24 +165,9 @@ public class PrescriptionResultActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                 tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
-                tts.playSilentUtterance(5000, TextToSpeech.QUEUE_ADD, null);
+                tts.playSilentUtterance(5000, QUEUE_ADD, null);
                 finish();
             }
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            //tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

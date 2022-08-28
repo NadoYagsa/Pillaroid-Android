@@ -3,6 +3,8 @@ package com.nadoyagsa.pillaroid;
 import static android.speech.tts.TextToSpeech.QUEUE_ADD;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -174,7 +176,7 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
             if (!iswaitingAPI) {
                 if (mappedRecognitions.size() == 0) {
                     Log.e("Object-Detection-result", "no detection");
-                    tts.speak("알약이 감지되지 않습니다. 알약을 포착할 수 있도록 카메라를 더 멀리 이동해주세요.", QUEUE_ADD, null, null);
+                    tts.speak("알약이 감지되지 않습니다. 알약을 포착할 수 있도록 카메라를 더 멀리 이동해주세요.", QUEUE_FLUSH, null, null);
                 } else {
                     Collections.sort(mappedRecognitions);   // confidence 기준으로 정렬
 

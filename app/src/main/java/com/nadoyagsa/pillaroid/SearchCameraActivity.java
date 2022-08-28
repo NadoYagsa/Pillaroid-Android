@@ -1,13 +1,7 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
-import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-import static android.speech.tts.TextToSpeech.SUCCESS;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,32 +11,13 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import java.util.Locale;
 import java.util.Objects;
 
 public class SearchCameraActivity extends AppCompatActivity {
-    public static final int RESULT_PERMISSION_DENIED = -1;
-    private static final int REQUEST_CAMERA_ACTIVITY = 1;
-
-    private TextToSpeech tts;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_camera);
-
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA
-                        || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
 
         Toolbar toolbar = findViewById(R.id.tb_search_camera_toolbar);
         setSupportActionBar(toolbar);
@@ -60,19 +35,10 @@ public class SearchCameraActivity extends AppCompatActivity {
         actionBar.setCustomView(customView, params);
 
         LinearLayout llSearchCase = findViewById(R.id.ll_search_camera_case);
-        llSearchCase.setOnClickListener(v -> startActivityForResult(new Intent(this, SearchCaseActivity.class), REQUEST_CAMERA_ACTIVITY));
+        llSearchCase.setOnClickListener(v -> startActivity(new Intent(this, SearchCaseActivity.class)));
 
         LinearLayout llSearchPill = findViewById(R.id.ll_search_camera_pill);
-        llSearchPill.setOnClickListener(v -> startActivityForResult(new Intent(this, SearchPillActivity.class), REQUEST_CAMERA_ACTIVITY));    // 알약 사물인식 Activity로 전환
+        llSearchPill.setOnClickListener(v -> startActivity(new Intent(this, SearchPillActivity.class)));
 
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_CAMERA_ACTIVITY && resultCode == RESULT_PERMISSION_DENIED) {
-            tts.speak("카메라 권한이 승인되지 않아 기능을 사용할 수 없습니다.", QUEUE_FLUSH, null, null);
-        }
     }
 }

@@ -2,6 +2,8 @@ package com.nadoyagsa.pillaroid.adapter;
 
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
+
 import android.content.Context;
 import android.content.Intent;
 import android.speech.tts.TextToSpeech;
@@ -37,12 +39,10 @@ import retrofit2.Response;
 public class PrescriptionPagerAdapter extends RecyclerView.Adapter<PrescriptionPagerAdapter.ResultViewHolder> {
     private Context context;
     private final ActivityResultLauncher<Intent> startActivityResultLogin;
-    private final TextToSpeech tts;
     private final ArrayList<PrescriptionInfo> resultList;
 
-    public PrescriptionPagerAdapter(ActivityResultLauncher<Intent> startActivityResultLogin, TextToSpeech tts, ArrayList<PrescriptionInfo> resultList) {
+    public PrescriptionPagerAdapter(ActivityResultLauncher<Intent> startActivityResultLogin, ArrayList<PrescriptionInfo> resultList) {
         this.startActivityResultLogin = startActivityResultLogin;
-        this.tts = tts;
         this.resultList = resultList;
     }
 

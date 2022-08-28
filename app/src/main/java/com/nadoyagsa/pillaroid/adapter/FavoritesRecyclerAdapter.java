@@ -2,6 +2,8 @@ package com.nadoyagsa.pillaroid.adapter;
 
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -39,12 +41,10 @@ import retrofit2.Response;
 
 public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecyclerAdapter.FavoritesViewHolder> implements ItemTouchHelperListener {
     private Context context;
-    private final TextToSpeech tts;
     private ArrayList<FavoritesInfo> favoritesList;
     private final ArrayList<FavoritesInfo> favoritesWholeList;    // 검색 시 필요한 전체 즐겨찾기 목록
 
-    public FavoritesRecyclerAdapter(TextToSpeech tts, ArrayList<FavoritesInfo> favoritesList) {
-        this.tts = tts;
+    public FavoritesRecyclerAdapter(ArrayList<FavoritesInfo> favoritesList) {
         this.favoritesList = favoritesList;
 
         favoritesWholeList = new ArrayList<>();

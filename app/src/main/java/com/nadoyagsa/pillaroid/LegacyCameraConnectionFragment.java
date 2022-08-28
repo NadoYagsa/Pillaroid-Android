@@ -167,15 +167,17 @@ public class LegacyCameraConnectionFragment extends Fragment {
 
   @Override
   public void onPause() {
-    camera.stopPreview();
-    stopBackgroundThread();
     super.onPause();
+    if (camera != null) {
+      camera.stopPreview();
+      stopBackgroundThread();
+    }
   }
 
   @Override
   public void onDestroy() {
-    stopCamera();
     super.onDestroy();
+    stopCamera();
   }
 
   /** Starts a background thread and its {@link Handler}. */

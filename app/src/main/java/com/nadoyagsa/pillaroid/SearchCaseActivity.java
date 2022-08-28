@@ -1,10 +1,8 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-import static android.speech.tts.TextToSpeech.SUCCESS;
 
-import static com.nadoyagsa.pillaroid.SearchCameraActivity.RESULT_PERMISSION_DENIED;
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -37,7 +35,6 @@ import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -46,8 +43,6 @@ public class SearchCaseActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_PERMISSIONS = 1001;
     private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
 
-    private TextToSpeech tts;
-
     private PreviewView pvCaseCamera;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ImageCapture imageCapture;
@@ -55,7 +50,6 @@ public class SearchCaseActivity extends AppCompatActivity {
     private CaseAnalyzer caseAnalyzer;
     private ImageProxy currentImageProxy = null;
 
-    private Boolean canUseCamera = null;
     private boolean isAnalyzing = false;
 
     @Override
@@ -63,40 +57,8 @@ public class SearchCaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_case);
 
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA
-                        || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-
-                // 모든 퍼미션이 있을 때에만 카메라가 켜짐
-                if(hasPermission()){
-                    canUseCamera = true;
-                    tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
-                    startCamera();  // 카메라 실행
-                } else{ // 모든 권한이 허가되지 않았다면 요청
-                    tts.speak("의약품 용기를 찍기 위해선 카메라 권한이 필요합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
-                    tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-                    tts.speak("권한 거부 시에는 이전 화면으로 돌아갑니다.", TextToSpeech.QUEUE_ADD, null, null);
-
-                    ActivityCompat.requestPermissions(this, new String[] {PERMISSION_CAMERA}, REQUEST_CODE_PERMISSIONS);
-                }
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
-
         pvCaseCamera = findViewById(R.id.pv_search_case);
         caseAnalyzer = new CaseAnalyzer();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
     }
 
     private void startCamera() {
@@ -224,12 +186,11 @@ public class SearchCaseActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted(grantResults)) {
-                canUseCamera = true;
                 tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
                 startCamera();  // 권한 모두 허가되면 startCamera 실행
             } else {
                 Log.e("Camera", "Permissions not granted by the user");
-                setResult(RESULT_PERMISSION_DENIED);
+                tts.speak("카메라 권한이 승인되지 않아 기능을 사용할 수 없습니다.", QUEUE_FLUSH, null, null);
                 this.finish();
             }
         }
@@ -263,9 +224,11 @@ public class SearchCaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (canUseCamera != null && canUseCamera) {
+        // 모든 퍼미션이 있을 때에만 카메라가 켜짐
+        if (hasPermission()) {
+            tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
             startCamera();  // 카메라 실행
-        } else if (canUseCamera != null && !canUseCamera){
+        } else { // 모든 권한이 허가되지 않았다면 요청
             tts.speak("의약품 용기를 찍기 위해선 카메라 권한이 필요합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
             tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
             tts.speak("권한 거부 시에는 이전 화면으로 돌아갑니다.", TextToSpeech.QUEUE_ADD, null, null);
@@ -278,21 +241,5 @@ public class SearchCaseActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         closeCamera();  // 카메라 자원 해제
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            // tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-            closeCamera();  // 카메라 자원 해제
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

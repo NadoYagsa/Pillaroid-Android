@@ -1,8 +1,8 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-import static android.speech.tts.TextToSpeech.SUCCESS;
+
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -38,7 +38,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -61,7 +60,6 @@ public class MedicineResultActivity extends AppCompatActivity {
     private AlertDialog dialog;
     private AppCompatImageButton ivAlarm, ibtStar;
     private MedicinePagerAdapter medicinePagerAdapter;
-    private TextToSpeech tts;
     private TextView tvTitle;
     private View dialogView, selectedCategoryView;
     private ViewPager2 vpResult;
@@ -78,6 +76,8 @@ public class MedicineResultActivity extends AppCompatActivity {
         else if (getIntent().hasExtra("barcode"))
             barcode = getIntent().getStringExtra("barcode");    //검색할 바코드
 
+        getMedicineResult();
+
         Toolbar toolbar = findViewById(R.id.tb_medicineresult_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -88,20 +88,6 @@ public class MedicineResultActivity extends AppCompatActivity {
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
         initActionBar(toolbar);
-
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-
-                getMedicineResult();
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
 
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
@@ -497,21 +483,6 @@ public class MedicineResultActivity extends AppCompatActivity {
             PillaroidAPIImplementation.getApiService().getMedicineByIdx(SharedPrefManager.read("token", null), medicineIdx).enqueue(medicineCallback);
         } else if (!barcode.equals("")) {       // 바코드로 정보 조회
             PillaroidAPIImplementation.getApiService().getMedicineByBarcode(SharedPrefManager.read("token", null), barcode).enqueue(medicineCallback);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            //tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

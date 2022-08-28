@@ -1,9 +1,9 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
+import static android.speech.tts.TextToSpeech.QUEUE_ADD;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-import static android.speech.tts.TextToSpeech.SUCCESS;
-import static com.nadoyagsa.pillaroid.SearchCameraActivity.RESULT_PERMISSION_DENIED;
+
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.Manifest;
 import android.app.Fragment;
@@ -20,13 +20,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
-import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,7 +33,6 @@ import androidx.core.app.ActivityCompat;
 import com.nadoyagsa.pillaroid.env.ImageUtils;
 
 import java.nio.ByteBuffer;
-import java.util.Locale;
 
 public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
         implements ImageReader.OnImageAvailableListener, Camera.PreviewCallback, View.OnClickListener {
@@ -46,9 +43,6 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
 
     protected boolean iswaitingAPI = false;
     private boolean canTtsStop = true;
-
-    protected TextToSpeech tts;
-    protected TextView tvSearchPillGuide;
 
     protected int previewWidth = 0;
     protected int previewHeight = 0;
@@ -67,36 +61,11 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_pill);
 
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA
-                        || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-
-                // 모든 퍼미션이 있을 때에만 카메라가 켜짐
-                if(hasPermission()){
-                    setFragment();
-                    tts.speak("후면 카메라가 켜졌습니다. 손바닥 위에 알약을 올려놓고 카메라를 들어주세요. 현재 영상을 기준으로 가이드를 안내할 예정입니다.", QUEUE_FLUSH, null, null);
-                } else{ // 모든 권한이 허가되지 않았다면 요청
-                    tts.speak("알약을 찍기 위해선 카메라 권한이 필요합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
-                    tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-                    tts.speak("권한 거부 시에는 이전 화면으로 돌아갑니다.", TextToSpeech.QUEUE_ADD, null, null);
-
-                    ActivityCompat.requestPermissions(this, new String[] {PERMISSION_CAMERA}, REQUEST_CODE_PERMISSIONS);
-                }
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
-
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId) {
                 if (utteranceId.equals(API_SUCCESS)) {
-                    canTtsStop = false;
+                    canTtsStop = false; // 다음 화면으로 넘어가도 말 해야 함.
                 }
             }
 
@@ -118,11 +87,13 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            canTtsStop = true;
             if (allPermissionsGranted(grantResults)) {
                   setFragment();
             } else {
                 Log.e("Camera", "Permissions not granted by the user");
-                setResult(RESULT_PERMISSION_DENIED);    // 권한 거부로 인해 이전 화면으로 돌아감을 tts하기 위함
+                canTtsStop = false;
+                tts.speak("카메라 권한이 승인되지 않아 기능을 사용할 수 없습니다.", QUEUE_FLUSH, null, null);
                 this.finish();
             }
         }
@@ -245,13 +216,24 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     public synchronized void onResume() {
         super.onResume();
 
-        // TODO: tts 로 카메라 켜짐 안내
-
         iswaitingAPI = false;
 
         handlerThread = new HandlerThread("inference");
         handlerThread.start();
         handler = new Handler(handlerThread.getLooper());
+
+        // 모든 퍼미션이 있을 때에만 카메라가 켜짐
+        if (hasPermission()) {
+            setFragment();
+            tts.speak("후면 카메라가 켜졌습니다. 손바닥 위에 알약을 올려놓고 카메라를 들어주세요. 현재 영상을 기준으로 가이드를 안내할 예정입니다.", QUEUE_FLUSH, null, null);
+        } else { // 모든 권한이 허가되지 않았다면 요청
+            canTtsStop = false;
+            tts.speak("알약을 찍기 위해선 카메라 권한이 필요합니다.", QUEUE_FLUSH, null, null);
+            tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", QUEUE_ADD, null, null);
+            tts.speak("권한 거부 시에는 이전 화면으로 돌아갑니다.", QUEUE_ADD, null, null);
+
+            ActivityCompat.requestPermissions(this, new String[] {PERMISSION_CAMERA}, REQUEST_CODE_PERMISSIONS);
+        }
     }
 
     @Override
@@ -273,17 +255,10 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        if (canTtsStop)
+            tts.stop();
+        
         super.onDestroy();
-        try {
-            // tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     protected synchronized void runInBackground(final Runnable r) {
