@@ -66,6 +66,7 @@
                     android:orientation="horizontal">
                     <EditText
                         android:id="@+id/et_time_morning_hour"
+                        android:tag="morning_hour"
                         android:layout_width="70dp"
                         android:layout_height="wrap_content"
                         android:cursorVisible="false"
@@ -89,6 +90,7 @@
 
                     <EditText
                         android:id="@+id/et_time_morning_minute"
+                        android:tag="morning_minute"
                         android:layout_width="70dp"
                         android:layout_height="wrap_content"
                         android:cursorVisible="false"
@@ -165,6 +167,7 @@
                     android:orientation="horizontal">
                     <EditText
                         android:id="@+id/et_time_lunch_hour"
+                        android:tag="lunch_hour"
                         android:layout_width="70dp"
                         android:layout_height="wrap_content"
                         android:cursorVisible="false"
@@ -188,6 +191,7 @@
 
                     <EditText
                         android:id="@+id/et_time_lunch_minute"
+                        android:tag="lunch_minute"
                         android:layout_width="70dp"
                         android:layout_height="wrap_content"
                         android:cursorVisible="false"
@@ -236,6 +240,7 @@
                     android:orientation="horizontal">
                     <EditText
                         android:id="@+id/et_time_dinner_hour"
+                        android:tag="dinner_hour"
                         android:layout_width="70dp"
                         android:layout_height="wrap_content"
                         android:cursorVisible="false"
@@ -259,6 +264,7 @@
 
                     <EditText
                         android:id="@+id/et_time_dinner_minute"
+                        android:tag="dinner_minute"
                         android:layout_width="70dp"
                         android:layout_height="wrap_content"
                         android:cursorVisible="false"

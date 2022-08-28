@@ -50,4 +50,11 @@ public interface PillaroidAPI {
 
     @GET("/user/favorites/search")
     Call<String> getFavoritesByKeyword(@Header("authorization") String jwt, @Query("keyword") String keyword);  // 회원의 즐겨찾기 목록 조회
+
+
+    @GET("/user/alarmtime")
+    Call<String> getAlarmTime(@Header("authorization") String jwt);         // 사용자 알림 시간대 조회
+
+    @POST("/user/alarmtime")
+    Call<String> postAlarmTime(@Header("authorization") String jwt, @Body JsonObject request);      // 사용자 알림 시간대 등록
 }
