@@ -1,8 +1,8 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-import static android.speech.tts.TextToSpeech.SUCCESS;
+
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.Manifest;
 import android.content.Intent;
@@ -60,7 +60,6 @@ public class MypageFavoritesActivity extends AppCompatActivity {
     private Intent intent;
     private RecognitionListener recognitionListener;
     private SpeechRecognizer speechRecognizer;
-    private TextToSpeech tts;
     private TextView tvFavoritesInfo, tvTitle;
 
     @Override
@@ -69,21 +68,6 @@ public class MypageFavoritesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_mypage_favorites);
 
         favoritesList = new ArrayList<>();
-
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-
-                getFavoritesList();
-                settingForSTT();
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
 
         Toolbar toolbar = findViewById(R.id.tb_favorites_toolbar);
         setSupportActionBar(toolbar);
@@ -100,7 +84,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
         RecyclerView rvFavorites = findViewById(R.id.rv_favorites_list);
         LinearLayoutManager favoritesManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
         rvFavorites.setLayoutManager(favoritesManager);
-        favoritesAdapter = new FavoritesRecyclerAdapter(tts, favoritesList);
+        favoritesAdapter = new FavoritesRecyclerAdapter(favoritesList);
         rvFavorites.setAdapter(favoritesAdapter);
         DividerItemDecoration devider = new DividerItemDecoration(this, 1);
         devider.setDrawable(Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.item_divide_bar, null)));
@@ -110,6 +94,9 @@ public class MypageFavoritesActivity extends AppCompatActivity {
         helper.attachToRecyclerView(rvFavorites);
 
         tvFavoritesInfo = findViewById(R.id.tv_favorites_info);
+
+        getFavoritesList();
+        settingForSTT();
     }
 
     private void toolbarListener(Toolbar toolbar) {
@@ -149,7 +136,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                             favoritesAdapter.setFavoritesWholeList();
                             favoritesAdapter.notifyDataSetChanged();
 
-                            tts.speak("즐겨찾기 목록은 총 "+favoritesList.size()+"개 입니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                            tts.speak("즐겨찾기 목록은 총 "+favoritesList.size()+"개 입니다.", QUEUE_FLUSH, null, null);
                         }
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
@@ -412,21 +399,6 @@ public class MypageFavoritesActivity extends AppCompatActivity {
         if (speechRecognizer != null) {
             speechRecognizer.destroy();
             speechRecognizer = null;
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            //tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

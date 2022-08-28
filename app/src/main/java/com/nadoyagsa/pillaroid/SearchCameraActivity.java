@@ -39,5 +39,6 @@ public class SearchCameraActivity extends AppCompatActivity {
 
         LinearLayout llSearchPill = findViewById(R.id.ll_search_camera_pill);
         llSearchPill.setOnClickListener(v -> startActivity(new Intent(this, SearchPillActivity.class)));
+
     }
 }

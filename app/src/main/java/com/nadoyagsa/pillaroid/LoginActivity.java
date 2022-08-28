@@ -1,13 +1,11 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-import static android.speech.tts.TextToSpeech.SUCCESS;
+
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -21,7 +19,6 @@ import com.kakao.sdk.user.UserApiClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Locale;
 import java.util.Objects;
 
 import kotlin.Unit;
@@ -34,27 +31,12 @@ public class LoginActivity extends AppCompatActivity {
     private boolean isLogin = false;
     private char fromWhere;     //f는 즐겨찾기 목록 확인, a는 알람 목록 확인
 
-    private TextToSpeech tts;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         fromWhere = getIntent().getCharExtra("from", 'a');
-
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA
-                        || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
 
         LinearLayout llKakaoLogin = findViewById(R.id.ll_login_kakao);
         llKakaoLogin.setOnClickListener(view -> {

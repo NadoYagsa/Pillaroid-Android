@@ -1,9 +1,9 @@
 package com.nadoyagsa.pillaroid;
 
-import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.QUEUE_ADD;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-import static android.speech.tts.TextToSpeech.SUCCESS;
+
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +12,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -32,7 +31,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -40,41 +38,18 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class VoiceResultsActivity extends AppCompatActivity {
+    private final String API_ERROR = "api-error";
+
     private int currentIdx = -1;
     private String voiceQuery = null;
     private ArrayList<VoiceResultInfo> voiceResults;
-
-    private TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voice_results);
 
-        voiceQuery = getIntent().getStringExtra("query");   //검색 의약품명
-
-        //의약품 결과 샘플
-        voiceResults = new ArrayList<>();
-
-        tts = new TextToSpeech(this, status -> {
-            if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("TTS", "Language is not supported");
-                }
-                tts.setSpeechRate(SharedPrefManager.read("voiceSpeed", (float) 1));
-
-                if (voiceQuery != null)
-                    getVoiceResults();
-                else {
-                    tts.speak("말하신 의약품명이 전달되지 않았습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
-                    tts.playSilentUtterance(2000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
-                    finish();
-                }
-            } else if (status != ERROR) {
-                Log.e("TTS", "Initialization Failed");
-            }
-        });
+        voiceResults = new ArrayList<>();   //의약품 결과 샘플
 
         Toolbar toolbar = findViewById(R.id.tb_voiceresults_toolbar);
         setSupportActionBar(toolbar);
@@ -86,8 +61,18 @@ public class VoiceResultsActivity extends AppCompatActivity {
         actionBar.setCustomView(customView, params);
         initActionBar(toolbar);
 
+        voiceQuery = getIntent().getStringExtra("query");   //검색 의약품명
+
         TextView tvMedicineName = findViewById(R.id.tv_voiceresults_name);
         tvMedicineName.setText(voiceQuery);
+
+        if (voiceQuery != null)
+            getVoiceResults();
+        else {
+            tts.speak("말하신 의약품명이 전달되지 않았습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+            tts.playSilentUtterance(2000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
+            finish();
+        }
     }
 
     private void initActionBar(Toolbar toolbar) {
@@ -137,7 +122,7 @@ public class VoiceResultsActivity extends AppCompatActivity {
         tts.speak("조회된 의약품을 음성으로 나열합니다. 원하시는 결과가 나오면 볼륨 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
         for (int i = 0; i < voiceResults.size(); i++) {
             tts.speak(i+1 + "번. " + voiceResults.get(i).getMedicineName(), QUEUE_ADD, null, "results " + i);
-            tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, "results " + i);   //1초 딜레이
+            tts.playSilentUtterance(1000, QUEUE_ADD, "results " + i);   //1초 딜레이
         }
     }
 
@@ -159,7 +144,11 @@ public class VoiceResultsActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onDone(String utteranceId) { }
+            public void onDone(String utteranceId) {
+                if (utteranceId.equals(API_ERROR)) {   //api 통신 중 오류가 생기면 이전 페이지로 돌아감
+                    finish();
+                }
+            }
 
             @Override
             public void onError(String utteranceId) { }
@@ -202,16 +191,14 @@ public class VoiceResultsActivity extends AppCompatActivity {
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
                 else {
-                    tts.speak("음성 결과 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
-                    tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
+                    tts.speak("음성 결과 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_ERROR);
                     finish();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
-                tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
+                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_ERROR);
                 finish();
             }
         });
@@ -236,20 +223,5 @@ public class VoiceResultsActivity extends AppCompatActivity {
             }
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            //tts 자원 해제
-            if (tts != null) {
-                tts.stop();
-                tts.shutdown();
-                tts = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
