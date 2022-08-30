@@ -68,13 +68,13 @@ public class TimeSettingActivity extends AppCompatActivity {
         tts.speak("주로 식사하는 시간대를 설정해주세요. 설정한 시간대에 따라 약 복용 알림이 갑니다.", QUEUE_FLUSH, null, null);
         tts.speak("시간대를 눌러 활성시키고 볼륨 버튼으로 값을 조절해주세요.", QUEUE_ADD, null, null);
 
-        requestAlarmTime();
+        requestMealTime();
         setListener();
     }
 
     // 사용자의 알림 시간대 조회
-    private void requestAlarmTime() {
-        PillaroidAPIImplementation.getApiService().getAlarmTime(SharedPrefManager.read("token", "")).enqueue(new Callback<String>() {
+    private void requestMealTime() {
+        PillaroidAPIImplementation.getApiService().getMealTime(SharedPrefManager.read("token", "")).enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.code() == 200) {
@@ -229,7 +229,7 @@ public class TimeSettingActivity extends AppCompatActivity {
             request.addProperty("morning", String.format("%s:%s", morningHour, morningMinute));
             request.addProperty("lunch", String.format("%s:%s", lunchHour, lunchMinute));
             request.addProperty("dinner", String.format("%s:%s", dinnerHour, dinnerMinute));
-            PillaroidAPIImplementation.getApiService().postAlarmTime(SharedPrefManager.read("token", ""), request).enqueue(new Callback<String>() {
+            PillaroidAPIImplementation.getApiService().postMealTime(SharedPrefManager.read("token", ""), request).enqueue(new Callback<String>() {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.code() == 200) {
