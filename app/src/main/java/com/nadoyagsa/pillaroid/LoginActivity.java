@@ -102,6 +102,7 @@ public class LoginActivity extends AppCompatActivity {
     public void finish() {
         if (isLogin) {
             Intent loginIntent = new Intent();
+            loginIntent.putExtra("to", fromWhere);
             setResult(RESULT_OK, loginIntent);
         }
         else {
