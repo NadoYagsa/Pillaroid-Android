@@ -53,14 +53,17 @@ public class LoginActivity extends AppCompatActivity {
         if (oAuthToken != null) {
             JsonObject kakaoToken = new JsonObject();
             kakaoToken.addProperty("access_token", oAuthToken.getAccessToken());
+            kakaoToken.addProperty("alarm_token", SharedPrefManager.read("alarm_token", ""));
             PillaroidAPIImplementation.getApiService().postLogin(kakaoToken).enqueue(new Callback<String>() {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.code() == 200 || response.code() == 201) {
                         try {
                             isLogin = true;
-                            JSONObject loginInfo = new JSONObject(Objects.requireNonNull(response.body()));
-                            String token = loginInfo.getString("authToken");
+
+                            JSONObject responseJson = new JSONObject(Objects.requireNonNull(response.body()));
+                            JSONObject data = responseJson.getJSONObject("data");
+                            String token = data.getString("authToken");
 
                             // 토큰을 저장함
                             SharedPrefManager.write("token", token);

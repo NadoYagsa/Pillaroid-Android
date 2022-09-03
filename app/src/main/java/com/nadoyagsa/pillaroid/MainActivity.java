@@ -4,6 +4,7 @@ import static android.speech.tts.TextToSpeech.ERROR;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static android.speech.tts.TextToSpeech.SUCCESS;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -16,11 +17,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.google.gson.JsonObject;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
+public class MainActivity extends AppCompatActivity {
     public static TextToSpeech tts;
     private boolean isReadyTts = false;
 
@@ -56,6 +66,46 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("TTS", "Initialization Failed");
             }
         });
+
+        //알림 토큰 전달
+        if (!SharedPrefManager.read("token", "").equals("") && !SharedPrefManager.read("alarm_token", "").equals("")) {
+            JsonObject requestData = new JsonObject();
+            requestData.addProperty("token", SharedPrefManager.read("alarm_token", ""));
+            PillaroidAPIImplementation.getApiService().patchAlarmToken(SharedPrefManager.read("token", null), requestData).enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    if (response.code() == 200);
+                    else if (response.code() == 401) {
+                        tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                    }
+                    else if (response.code() == 400) {
+                        if (response.errorBody() != null) {
+                            try {
+                                String errorStr = response.errorBody().string();
+                                JSONObject errorBody = new JSONObject(errorStr);
+                                long errorIdx = errorBody.getLong("errorIdx");
+
+                                if (errorIdx == 40001)
+                                    tts.speak("알람 토큰이 없습니다.", QUEUE_FLUSH, null, null);
+                            } catch (JSONException | IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        else
+                            tts.speak("알람을 위한 토큰 설정에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                    }
+                    else {
+                        tts.speak("알람을 위한 토큰 설정에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                    tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                    tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
+                }
+            });
+        }
 
         Toolbar toolbar = findViewById(R.id.tb_main_toolbar);
         setSupportActionBar(toolbar);
