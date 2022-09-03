@@ -1,6 +1,7 @@
 package com.nadoyagsa.pillaroid;
 
 import com.google.gson.JsonObject;
+import com.nadoyagsa.pillaroid.data.AlarmInfo;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
@@ -56,15 +57,18 @@ public interface PillaroidAPI {
 
 
     @GET("/user/mealtime")
-    Call<String> getMealTime(@Header("authorization") String jwt);         // 사용자 복용 시간대 조회
+    Call<String> getMealTime(@Header("authorization") String jwt);      // 사용자 복용 시간대 조회
 
     @POST("/user/mealtime")
-    Call<String> postMealTime(@Header("authorization") String jwt, @Body JsonObject request);      // 사용자 복용 시간대 등록
+    Call<String> postMealTime(@Header("authorization") String jwt, @Body JsonObject request);   // 사용자 복용 시간대 등록
 
 
     @GET("/user/alarm/list")
-    Call<String> getAlarmList(@Header("authorization") String jwt);  // 사용자 알림 목록 조회
+    Call<String> getAlarmList(@Header("authorization") String jwt);     // 사용자 알림 목록 조회
+
+    @POST("/user/alarm")
+    Call<String> postAlarm(@Header("authorization") String jwt, @Body JsonObject request);      // 의약품 알림 추가
 
     @DELETE("/user/alarm/{nid}")
-    Call<String> deleteAlarm(@Header("authorization") String jwt, @Path("nid") Long alarmIdx);    // 알림 삭제
+    Call<String> deleteAlarm(@Header("authorization") String jwt, @Path("nid") Long alarmIdx);  // 의약품 알림 삭제
 }
