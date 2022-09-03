@@ -77,6 +77,7 @@ public class MypageActivity extends AppCompatActivity {
 
         llLogout.setOnClickListener(view -> {
             SharedPrefManager.remove("token");
+            SharedPrefManager.remove("alarm_token");
 
             isToken = false;
             llLogout.setVisibility(View.INVISIBLE);
