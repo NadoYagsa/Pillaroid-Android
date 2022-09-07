@@ -36,12 +36,14 @@ import java.nio.ByteBuffer;
 
 public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
         implements ImageReader.OnImageAvailableListener, Camera.PreviewCallback, View.OnClickListener {
+    public static final float MINIMUM_CONFIDENCE_TF = 0.7f;
     private static final int REQUEST_CODE_PERMISSIONS = 1001;
     private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
     protected final String API_SUCCESS = "api-success";
     protected final String API_FAILED = "api-failed";
+    protected final String IS_GUIDING = "is-guiding";
 
-    protected boolean iswaitingAPI = false;
+    protected boolean isWaitingForGuide = false;
     private boolean canTtsStop = true;
 
     protected int previewWidth = 0;
@@ -60,27 +62,6 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_pill);
-
-        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-            @Override
-            public void onStart(String utteranceId) {
-                if (utteranceId.equals(API_SUCCESS)) {
-                    canTtsStop = false; // 다음 화면으로 넘어가도 말 해야 함.
-                }
-            }
-
-            @Override
-            public void onDone(String utteranceId) {
-                if (utteranceId.equals(API_FAILED)) {
-                    finish();
-                } else if (utteranceId.equals(API_SUCCESS)) {
-                    canTtsStop = true;
-                }
-            }
-
-            @Override
-            public void onError(String utteranceId) { }
-        });
     }
 
     @Override
@@ -216,7 +197,9 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     public synchronized void onResume() {
         super.onResume();
 
-        iswaitingAPI = false;
+        tts.setOnUtteranceProgressListener(objectDetectionCameraTTSListener);
+
+        isWaitingForGuide = false;
 
         handlerThread = new HandlerThread("inference");
         handlerThread.start();
@@ -383,4 +366,31 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     protected abstract int getLayoutId();
 
     protected abstract Size getDesiredPreviewFrameSize();
+
+    UtteranceProgressListener objectDetectionCameraTTSListener = new UtteranceProgressListener() {
+        @Override
+        public void onStart(String utteranceId) {
+            if (utteranceId.equals(API_SUCCESS)) {
+                canTtsStop = false; // 다음 화면으로 넘어가도 말 해야 함.
+            } else if (utteranceId.equals(IS_GUIDING)) {
+                isWaitingForGuide = true;
+            }
+        }
+
+        @Override
+        public void onDone(String utteranceId) {
+            if (utteranceId.equals(API_FAILED)) {
+                finish();
+            } else if (utteranceId.equals(API_SUCCESS)) {
+                canTtsStop = true;
+            } else {
+                if (utteranceId.equals(IS_GUIDING)) {
+                    isWaitingForGuide = false;
+                }
+            }
+        }
+
+        @Override
+        public void onError(String utteranceId) { }
+    };
 }

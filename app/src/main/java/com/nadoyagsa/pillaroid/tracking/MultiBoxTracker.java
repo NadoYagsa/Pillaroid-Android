@@ -19,7 +19,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Cap;
 import android.graphics.Paint.Join;
@@ -32,7 +31,6 @@ import android.util.Pair;
 import android.util.TypedValue;
 
 import com.nadoyagsa.pillaroid.env.BorderedText;
-import com.nadoyagsa.pillaroid.env.ImageUtils;
 import com.nadoyagsa.pillaroid.tflite.Classifier.Recognition;
 
 import java.util.LinkedList;
@@ -62,7 +60,6 @@ public class MultiBoxTracker {
   public final List<TrackedRecognition> trackedObjects = new LinkedList<>();
   private final Paint boxPaint = new Paint();
   private final BorderedText borderedText;
-  private Matrix frameToCanvasMatrix;
   private int frameWidth;
   private int frameHeight;
   private int sensorOrientation;
@@ -87,24 +84,16 @@ public class MultiBoxTracker {
     this.sensorOrientation = sensorOrientation;
   }
 
-  public synchronized void trackResults(final List<Recognition> results, final long timestamp) {
+  public synchronized void trackResults(final List<Recognition> results, final long timestamp) {  // frame의 RectF가 담긴 Recognition
     Log.i("Object-Detection", String.format("Processing %d results from %d", results.size(), timestamp));
 
     final List<Pair<Float, Recognition>> rectsToTrack = new LinkedList<>();
-
-    final Matrix rgbFrameToScreen = new Matrix(getFrameToCanvasMatrix());
 
     for (final Recognition result : results) {
       if (result.getLocation() == null) {
         continue;
       }
       final RectF detectionFrameRect = new RectF(result.getLocation());
-
-      final RectF detectionScreenRect = new RectF();
-      rgbFrameToScreen.mapRect(detectionScreenRect, detectionFrameRect);
-
-      Log.v("Object-Detection",
-              "Result! Frame: " + result.getLocation() + " mapped to screen:" + detectionScreenRect);
 
       if (detectionFrameRect.width() < MIN_SIZE || detectionFrameRect.height() < MIN_SIZE) {
         Log.w("Object-Detection", "Degenerate rectangle! " + detectionFrameRect);
@@ -130,30 +119,22 @@ public class MultiBoxTracker {
     }
   }
 
-  public Matrix getFrameToCanvasMatrix() {
-    return frameToCanvasMatrix;
-  }
-
   public synchronized void draw(final Canvas canvas) {
     final boolean rotated = sensorOrientation % 180 == 90;
 
-    final float multiplier =
-            Math.min(
-                    canvas.getHeight() / (float) (rotated ? frameWidth : frameHeight),
-                    canvas.getWidth() / (float) (rotated ? frameHeight : frameWidth));
-    frameToCanvasMatrix =
-            ImageUtils.getTransformationMatrix(
-                    frameWidth,
-                    frameHeight,
-                    (int) (multiplier * (rotated ? frameHeight : frameWidth)),
-                    (int) (multiplier * (rotated ? frameWidth : frameHeight)),
-                    sensorOrientation,
-                    false);
     for (final TrackedRecognition recognition : trackedObjects) {
-      final RectF trackedPos = new RectF(recognition.location);
-      
-      getFrameToCanvasMatrix().mapRect(trackedPos);
-      
+      RectF trackedPos = new RectF(recognition.location);
+
+      int rotatedFrameWidth = rotated ? frameHeight : frameWidth;
+      int rotatedFrameHeight = rotated ? frameWidth : frameHeight;
+
+      // screen 좌표로 변환
+      trackedPos = new RectF(
+              trackedPos.left * canvas.getWidth() / rotatedFrameWidth,
+              trackedPos.top + (rotatedFrameHeight * 0.2f), // 20% margin top
+              trackedPos.right * canvas.getWidth() / rotatedFrameWidth,
+              trackedPos.bottom + (rotatedFrameHeight * 0.2f)); // 20% margin top
+
       boxPaint.setColor(recognition.color);
 
       float cornerSize = Math.min(trackedPos.width(), trackedPos.height()) / 8.0f;

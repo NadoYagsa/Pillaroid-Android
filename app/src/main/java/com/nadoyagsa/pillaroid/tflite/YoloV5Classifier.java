@@ -15,13 +15,14 @@ limitations under the License.
 
 package com.nadoyagsa.pillaroid.tflite;
 
+import static com.nadoyagsa.pillaroid.ObjectDetectionCameraActivity.MINIMUM_CONFIDENCE_TF;
+
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.Log;
 
-import com.nadoyagsa.pillaroid.SearchPillActivity;
 import com.nadoyagsa.pillaroid.env.Utils;
 
 import org.tensorflow.lite.Interpreter;
@@ -175,11 +176,6 @@ public class YoloV5Classifier implements Classifier {
         if (tfLite != null) tfLite.setNumThreads(num_threads);
     }
 
-    @Override
-    public void setUseNNAPI(boolean isChecked) {
-//        if (tfLite != null) tfLite.setUseNNAPI(isChecked);
-    }
-
     private void recreateInterpreter() {
         if (tfLite != null) {
             tfLite.close();
@@ -207,7 +203,7 @@ public class YoloV5Classifier implements Classifier {
 
     @Override
     public float getObjThresh() {
-        return SearchPillActivity.MINIMUM_CONFIDENCE_TF_OD_API;
+        return MINIMUM_CONFIDENCE_TF;
     }
 
     private final float IMAGE_STD = 255.0f;
@@ -221,7 +217,7 @@ public class YoloV5Classifier implements Classifier {
     private  int output_box;
 
     // Number of threads in the java app
-    private static final int NUM_THREADS = 1;
+    private static final int NUM_THREADS = 4;   // output 종류 수
     private static boolean isNNAPI = false;
     private static boolean isGPU = false;
 
