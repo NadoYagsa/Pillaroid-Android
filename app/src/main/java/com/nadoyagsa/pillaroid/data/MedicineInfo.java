@@ -11,9 +11,10 @@ public class MedicineInfo {
     private final String save;              // 보관법
 
     private Long favoritesIdx;              // 즐겨찾기 번호
+    private AlarmInfo alarmInfo;  // 알림 정보
 
     // 처방전 용으로 외형정보가 있음
-    public MedicineInfo(int medicineIdx, String name, String efficacy, String dosage, String precaution, AppearanceInfo appearanceInfo, String ingredient, String save, Long favoritesIdx) {
+    public MedicineInfo(int medicineIdx, String name, String efficacy, String dosage, String precaution, AppearanceInfo appearanceInfo, String ingredient, String save, Long favoritesIdx, AlarmInfo alarmInfo) {
         this.medicineIdx = medicineIdx;
         this.name = name;
         this.efficacy = efficacy;
@@ -23,6 +24,7 @@ public class MedicineInfo {
         this.ingredient = ingredient;
         this.save = save;
         this.favoritesIdx = favoritesIdx;
+        this.alarmInfo = alarmInfo;
     }
 
     public int getMedicineIdx() {
@@ -61,11 +63,17 @@ public class MedicineInfo {
         return favoritesIdx == null;
     }
 
-    public Long getFavoritesIdx() {
-        return favoritesIdx;
+    public Long getFavoritesIdx() { return favoritesIdx; }
+
+    public boolean isAlarmNull() {
+        return alarmInfo == null;
     }
+
+    public AlarmInfo getAlarmInfo() { return alarmInfo; }
 
     public void setFavoritesIdx(Long favoritesIdx) {
         this.favoritesIdx = favoritesIdx;
     }
+
+    public void setAlarmInfo(AlarmInfo alarmInfo) { this.alarmInfo = alarmInfo; }
 }

@@ -86,6 +86,9 @@
     <string name="text_favorites_search">즐겨찾기 목록을 조회 중입니다.</string>
     <string name="text_favorites_no_result">즐겨찾기를 설정한 의약품이 없습니다.</string>
 
+    <string name="text_alarm_search">알림 목록을 조회 중입니다.</string>
+    <string name="text_alarm_no_result">알림 설정한 의약품이 없습니다.</string>
+
     <string name="text_time_setting_introduction">* 설정한 시간대로 약 복용 알림이 갑니다.</string>
     <string name="text_time_setting_hour">시</string>
     <string name="text_time_setting_minute">분</string>
@@ -94,6 +97,10 @@
     <string name="text_time_setting_time_morning">아침 시간</string>
     <string name="text_time_setting_time_lunch">점심 시간</string>
     <string name="text_time_setting_time_dinner">저녁 시간</string>
+
+    <string name="text_time_setting_00">00</string>
+    <string name="text_time_setting_hour_last">23</string>
+    <string name="text_time_setting_minute_last">50</string>
 
     <string name="text_alarm_period">복용 기간</string>
     <string name="text_alarm_delete">삭\n제</string>

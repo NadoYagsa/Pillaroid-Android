@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@android:color/transparent">
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/ibt_dialog_deletefavorites_delete"
+        android:id="@+id/ibt_dialog_delete"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:adjustViewBounds="true"

@@ -84,7 +84,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
     public void onItemSwipe(int position) {     // 즐겨찾기 삭제
         tts.speak(favoritesList.get(position).getMedicineName().concat("의 즐겨찾기를 삭제하시겠습니까?"), TextToSpeech.QUEUE_FLUSH, null, null);
 
-        View deleteFavoritesDialogView = View.inflate(context, R.layout.dialog_delete_favorites, null);
+        View deleteFavoritesDialogView = View.inflate(context, R.layout.dialog_delete, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setView(deleteFavoritesDialogView);
@@ -100,7 +100,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
         params.width = (int) (width*0.75);
         alertDialog.getWindow().setAttributes(params);
 
-        AppCompatImageButton ibtDeleteFavorites = deleteFavoritesDialogView.findViewById(R.id.ibt_dialog_deletefavorites_delete);
+        AppCompatImageButton ibtDeleteFavorites = deleteFavoritesDialogView.findViewById(R.id.ibt_dialog_delete);
         // 휴지통 이미지 버튼을 꾹 누르면 삭제, 클릭하면 취소
         ibtDeleteFavorites.setOnLongClickListener(view -> {
             PillaroidAPIImplementation.getApiService().deleteFavorites(SharedPrefManager.read("token", null), favoritesList.get(position).getFavoritesIdx()).enqueue(new Callback<String>() {

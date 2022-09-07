@@ -1,6 +1,7 @@
 package com.nadoyagsa.pillaroid;
 
 import com.google.gson.JsonObject;
+import com.nadoyagsa.pillaroid.data.AlarmInfo;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
@@ -9,6 +10,7 @@ import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.Header;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
@@ -35,6 +37,12 @@ public interface PillaroidAPI {
     @GET("/medicine/prescription")
     Call<String> getMedicineByPrescription(@Header("authorization") String jwt, @Query("names") String medicineList);   // 처방전으로 의약품명 조회
 
+    @GET("/medicine/{id}/user-info")
+    Call<String> getFavoritesAndAlarm(@Header("authorization") String jwt, @Path("id") int medicineIdx);    // 의약품에 대한 회원 즐겨찾기와 알림 조회
+
+
+    @PATCH("/user/alarm-token")
+    Call<String> patchAlarmToken(@Header("authorization") String jwt, @Body JsonObject request);    // 알람을 위한 토큰 저장 및 수정
 
     @GET("/user/favorites")
     Call<String> getFavorites(@Header("authorization") String jwt, @Query("medicineIdx") int medicineIdx);      // 의약품의 즐겨찾기 여부 조회
@@ -50,4 +58,21 @@ public interface PillaroidAPI {
 
     @GET("/user/favorites/search")
     Call<String> getFavoritesByKeyword(@Header("authorization") String jwt, @Query("keyword") String keyword);  // 회원의 즐겨찾기 목록 조회
+
+
+    @GET("/user/mealtime")
+    Call<String> getMealTime(@Header("authorization") String jwt);      // 사용자 복용 시간대 조회
+
+    @POST("/user/mealtime")
+    Call<String> postMealTime(@Header("authorization") String jwt, @Body JsonObject request);   // 사용자 복용 시간대 등록
+
+
+    @GET("/user/alarm/list")
+    Call<String> getAlarmList(@Header("authorization") String jwt);     // 사용자 알림 목록 조회
+
+    @POST("/user/alarm")
+    Call<String> postAlarm(@Header("authorization") String jwt, @Body JsonObject request);      // 의약품 알림 추가
+
+    @DELETE("/user/alarm/{nid}")
+    Call<String> deleteAlarm(@Header("authorization") String jwt, @Path("nid") Long alarmIdx);  // 의약품 알림 삭제
 }

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "237972687938",
+    "project_id": "pillaroid",
+    "storage_bucket": "pillaroid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237972687938:android:5865bee1b3489f4cd8b1db",
+        "android_client_info": {
+          "package_name": "com.nadoyagsa.pillaroid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "237972687938-mbtnsuu4ck9368lo960kusd96427sq1m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFZYvxs-9ifiyTTOm4nZ_d3jWe-BW2HwY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "237972687938-mbtnsuu4ck9368lo960kusd96427sq1m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
