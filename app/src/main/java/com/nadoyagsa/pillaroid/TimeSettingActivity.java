@@ -38,6 +38,9 @@ public class TimeSettingActivity extends AppCompatActivity {
     private EditText etTimeDinnerHour;
     private EditText etTimeDinnerMinute;
 
+    private long delay = 0;
+    private View currentClickedView = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +58,10 @@ public class TimeSettingActivity extends AppCompatActivity {
         ivIcon.setImageResource(R.drawable.icon_alarm);
         TextView tvTopic = customView.findViewById(R.id.tv_ab_icontext_title);
         tvTopic.setText("알림 시간대 설정");
+        tvTopic.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
 
@@ -168,6 +175,38 @@ public class TimeSettingActivity extends AppCompatActivity {
 
     @SuppressLint("DefaultLocale")
     private void setListener() {
+        TextView tvAnnounce = findViewById(R.id.tv_time_announce);
+        tvAnnounce.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
+        TextView tvMorning = findViewById(R.id.tv_time_morning);
+        tvMorning.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
+        TextView tvLunch = findViewById(R.id.tv_time_lunch);
+        tvLunch.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
+        TextView tvAM = findViewById(R.id.tv_time_lunch_am);
+        tvAM.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
+        TextView tvPM = findViewById(R.id.tv_time_lunch_pm);
+        tvPM.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
+
+        TextView tvDinner = findViewById(R.id.tv_time_dinner);
+        tvDinner.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
+
         // time EditText 리스너
         View.OnClickListener etTimeClickListener = view -> {    // 클릭 시 항목 활성화
             activatedEditText = (EditText) view;
@@ -196,72 +235,77 @@ public class TimeSettingActivity extends AppCompatActivity {
 
         // 저장하기 버튼
         AppCompatButton btTimeSettingComplete = findViewById(R.id.bt_time_setting_complete);
-        btTimeSettingComplete.setOnClickListener((view) -> {
-            String morningHour = etTimeMorningHour.getText().toString();
-            String morningMinute = etTimeMorningMinute.getText().toString();
-            String lunchHour = etTimeLunchHour.getText().toString();
-            String lunchMinute = etTimeLunchMinute.getText().toString();
-            String dinnerHour = etTimeDinnerHour.getText().toString();
-            String dinnerMinute = etTimeDinnerMinute.getText().toString();
+        btTimeSettingComplete.setOnClickListener(v -> {
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak("버튼." + ((AppCompatButton) v).getText().toString(), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                String morningHour = etTimeMorningHour.getText().toString();
+                String morningMinute = etTimeMorningMinute.getText().toString();
+                String lunchHour = etTimeLunchHour.getText().toString();
+                String lunchMinute = etTimeLunchMinute.getText().toString();
+                String dinnerHour = etTimeDinnerHour.getText().toString();
+                String dinnerMinute = etTimeDinnerMinute.getText().toString();
 
-            // 데이터 유효성 검사 (빈칸 있으면 X)
-            StringBuilder sb = new StringBuilder();
-            if (morningHour.equals(""))
-                sb.append("아침 시, ");
-            if (morningMinute.equals(""))
-                sb.append("아침 분, ");
-            if (lunchHour.equals(""))
-                sb.append("점심 시, ");
-            if (lunchMinute.equals(""))
-                sb.append("점심 분, ");
-            if (dinnerHour.equals(""))
-                sb.append("저녁 시, ");
-            if (dinnerMinute.equals(""))
-                sb.append("저녁 분, ");
-            if (sb.length() != 0) {
-                sb.append(sb.charAt(sb.length()-3) == '시' ? "가" : "이").append(" 입력되지 않아 저장할 수 없습니다.");
-                tts.speak(sb.toString(), QUEUE_FLUSH, null, null);
-                return;
-            }
+                // 데이터 유효성 검사 (빈칸 있으면 X)
+                StringBuilder sb = new StringBuilder();
+                if (morningHour.equals(""))
+                    sb.append("아침 시, ");
+                if (morningMinute.equals(""))
+                    sb.append("아침 분, ");
+                if (lunchHour.equals(""))
+                    sb.append("점심 시, ");
+                if (lunchMinute.equals(""))
+                    sb.append("점심 분, ");
+                if (dinnerHour.equals(""))
+                    sb.append("저녁 시, ");
+                if (dinnerMinute.equals(""))
+                    sb.append("저녁 분, ");
+                if (sb.length() != 0) {
+                    sb.append(sb.charAt(sb.length()-3) == '시' ? "가" : "이").append(" 입력되지 않아 저장할 수 없습니다.");
+                    tts.speak(sb.toString(), QUEUE_FLUSH, null, null);
+                    return;
+                }
 
-            // 사용자 알림 시간대 등록
-            JsonObject request = new JsonObject();
-            request.addProperty("morning", String.format("%s:%s", morningHour, morningMinute));
-            request.addProperty("lunch", String.format("%s:%s", lunchHour, lunchMinute));
-            request.addProperty("dinner", String.format("%s:%s", dinnerHour, dinnerMinute));
-            PillaroidAPIImplementation.getApiService().postMealTime(SharedPrefManager.read("token", ""), request).enqueue(new Callback<String>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.code() == 200) {
-                        try {
-                            JSONObject responseJson = new JSONObject(Objects.requireNonNull(response.body()));
-                            JSONObject result = responseJson.getJSONObject("data");
+                // 사용자 알림 시간대 등록
+                JsonObject request = new JsonObject();
+                request.addProperty("morning", String.format("%s:%s", morningHour, morningMinute));
+                request.addProperty("lunch", String.format("%s:%s", lunchHour, lunchMinute));
+                request.addProperty("dinner", String.format("%s:%s", dinnerHour, dinnerMinute));
+                PillaroidAPIImplementation.getApiService().postMealTime(SharedPrefManager.read("token", ""), request).enqueue(new Callback<String>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        if (response.code() == 200) {
+                            try {
+                                JSONObject responseJson = new JSONObject(Objects.requireNonNull(response.body()));
+                                JSONObject result = responseJson.getJSONObject("data");
 
-                            String[] mornings = result.getString("morning").split(":");
-                            String[] lunches = result.getString("lunch").split(":");
-                            String[] dinners = result.getString("dinner").split(":");
+                                String[] mornings = result.getString("morning").split(":");
+                                String[] lunches = result.getString("lunch").split(":");
+                                String[] dinners = result.getString("dinner").split(":");
 
-                            String resultText = String.format("아침 %s시 %s분, 점심 %s시 %s분, 저녁 %s시 %s분으로 저장되었습니다.",
-                                    mornings[0], mornings[1], lunches[0], lunches[1], dinners[0], dinners[1]);
-                            tts.speak(resultText, QUEUE_FLUSH, null, null);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                                String resultText = String.format("아침 %s시 %s분, 점심 %s시 %s분, 저녁 %s시 %s분으로 저장되었습니다.",
+                                        mornings[0], mornings[1], lunches[0], lunches[1], dinners[0], dinners[1]);
+                                tts.speak(resultText, QUEUE_FLUSH, null, null);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        } else if (response.code() == 400) {
+                            tts.speak("올바르지 않은 값입니다. 시간대를 다시 설정해주세요.", QUEUE_FLUSH, null, null);
+                        } else {
+                            tts.speak("알림 시간대 설정에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                            finish();
                         }
-                    } else if (response.code() == 400) {
-                        tts.speak("올바르지 않은 값입니다. 시간대를 다시 설정해주세요.", QUEUE_FLUSH, null, null);
-                    } else {
-                        tts.speak("알림 시간대 설정에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
                         finish();
                     }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
-                    finish();
-                }
-            });
-
+                });
+            }
         });
     }
 }

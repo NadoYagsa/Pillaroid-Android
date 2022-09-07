@@ -12,9 +12,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -39,6 +41,10 @@ import retrofit2.Response;
 
 public class VoiceResultsActivity extends AppCompatActivity {
     private final String API_ERROR = "api-error";
+
+    private long delay = 0;
+    private int selectedPos = -1;       // currentClickedView 대신
+    private TextView tvResultsIdx, tvResultsCount;
 
     private int currentIdx = -1;
     private String voiceQuery = null;
@@ -65,6 +71,10 @@ public class VoiceResultsActivity extends AppCompatActivity {
 
         TextView tvMedicineName = findViewById(R.id.tv_voiceresults_name);
         tvMedicineName.setText(voiceQuery);
+        tvMedicineName.setOnClickListener(v -> {
+            selectedPos = -1;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
 
         if (voiceQuery != null)
             getVoiceResults();
@@ -73,6 +83,8 @@ public class VoiceResultsActivity extends AppCompatActivity {
             tts.playSilentUtterance(2000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
             finish();
         }
+
+        setClickListener();
     }
 
     private void initActionBar(Toolbar toolbar) {
@@ -82,13 +94,17 @@ public class VoiceResultsActivity extends AppCompatActivity {
 
         TextView tvTitle = toolbar.findViewById(R.id.tv_ab_icontext_title);
         tvTitle.setText("검색 결과");
+        tvTitle.setOnClickListener(v -> {
+            selectedPos = -1;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
     }
 
     private void showVoiceResults() {
-        TextView tvResultsIdx = findViewById(R.id.tv_voiceresults_idx);
+        tvResultsIdx = findViewById(R.id.tv_voiceresults_idx);
         tvResultsIdx.setText("0");
 
-        TextView tvResultsCount = findViewById(R.id.tv_voiceresults_count);
+        tvResultsCount = findViewById(R.id.tv_voiceresults_count);
         tvResultsCount.setText(String.valueOf(voiceResults.size()));
 
         ListView lvResults = findViewById(R.id.lv_voiceresults_results);
@@ -98,10 +114,17 @@ public class VoiceResultsActivity extends AppCompatActivity {
             tts.stop();
             currentIdx = position;
             adapter.setSelectedItem(position);
+            tvResultsIdx.setText(String.valueOf(position+1));
 
-            Intent medicineIntent = new Intent(VoiceResultsActivity.this, MedicineResultActivity.class);
-            medicineIntent.putExtra("medicineIdx", voiceResults.get(position).getMedicineIdx());
-            startActivity(medicineIntent);
+            if (System.currentTimeMillis() > delay) {
+                selectedPos = position;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak(voiceResults.get(position).getMedicineName(), QUEUE_FLUSH, null, null);
+            } else if (selectedPos == position) {
+                Intent medicineIntent = new Intent(VoiceResultsActivity.this, MedicineResultActivity.class);
+                medicineIntent.putExtra("medicineIdx", voiceResults.get(position).getMedicineIdx());
+                startActivity(medicineIntent);
+            }
         });
 
         //UI 변경 (main thread에서 진행)
@@ -223,5 +246,18 @@ public class VoiceResultsActivity extends AppCompatActivity {
             }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    public void setClickListener() {
+        TextView tvRule = findViewById(R.id.tv_voiceresults_rule);
+        tvRule.setOnClickListener(v -> {
+            selectedPos = -1;
+            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+        });
+        LinearLayout llTotal = findViewById(R.id.ll_voiceresults_total);
+        llTotal.setOnClickListener(v -> {
+            selectedPos = -1;
+            tts.speak("총 "+tvResultsCount.getText().toString()+"개 중 "+tvResultsIdx.getText().toString() + "개입니다.", QUEUE_FLUSH, null, null);
+        });
     }
 }
