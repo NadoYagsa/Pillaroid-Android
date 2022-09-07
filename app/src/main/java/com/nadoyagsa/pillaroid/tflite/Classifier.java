@@ -30,11 +30,9 @@ public interface Classifier {
 
     void close();
 
-    void setNumThreads(int num_threads);
-
-    void setUseNNAPI(boolean isChecked);
-
     abstract float getObjThresh();
+
+    public int getInputSize();
 
     /**
      * An immutable result returned by a Classifier describing what was recognized.

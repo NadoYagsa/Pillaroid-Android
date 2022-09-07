@@ -5,7 +5,7 @@ import android.content.res.AssetManager;
 import java.io.IOException;
 
 public class DetectorFactory {
-    public static YoloV5Classifier getDetector(
+    public static Classifier getDetector(
             final AssetManager assetManager,
             final String modelFilename)
             throws IOException {
@@ -13,14 +13,21 @@ public class DetectorFactory {
         boolean isQuantized = false;
         int inputSize = 0;
 
-        if (modelFilename.equals("pill-fp16.tflite")) {
+        if (modelFilename.equals("pill-fp16.tflite")) {     // yoloV5에서 만든 tflite로, out을 한 객체에 담아 내보냄 (xPos, yPos, confidence)
             labelFilename = "file:///android_asset/pill_label.txt";
             isQuantized = false;
             inputSize = 640;
-        }
-        // TODO: 바코드 관련 tflite 생기면 else if문으로 작성
 
-        return YoloV5Classifier.create(assetManager, modelFilename, labelFilename, isQuantized, inputSize);
+            return YoloV5Classifier.create(assetManager, modelFilename, labelFilename, isQuantized, inputSize);
+        }  else if (modelFilename.equals("hand.tflite")) {   // out을 네 객체에 담아 내보냄 (locations, scores, classes, numDetections)
+            labelFilename = "file:///android_asset/hand_label.txt";
+            isQuantized = false;
+            inputSize = 300;
+
+            return TFLiteClassifier.create(assetManager, modelFilename, labelFilename, isQuantized, inputSize);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
 }
