@@ -62,33 +62,6 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_pill);
-
-        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-            @Override
-            public void onStart(String utteranceId) {
-                if (utteranceId.equals(API_SUCCESS)) {
-                    canTtsStop = false; // 다음 화면으로 넘어가도 말 해야 함.
-                } else if (utteranceId.equals(IS_GUIDING)) {
-                    isWaitingForGuide = true;
-                }
-            }
-
-            @Override
-            public void onDone(String utteranceId) {
-                if (utteranceId.equals(API_FAILED)) {
-                    finish();
-                } else if (utteranceId.equals(API_SUCCESS)) {
-                    canTtsStop = true;
-                } else {
-                    if (utteranceId.equals(IS_GUIDING)) {
-                        isWaitingForGuide = false;
-                    }
-                }
-            }
-
-            @Override
-            public void onError(String utteranceId) { }
-        });
     }
 
     @Override
@@ -223,6 +196,8 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     @Override
     public synchronized void onResume() {
         super.onResume();
+
+        tts.setOnUtteranceProgressListener(objectDetectionCameraTTSListener);
 
         isWaitingForGuide = false;
 
@@ -391,4 +366,31 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     protected abstract int getLayoutId();
 
     protected abstract Size getDesiredPreviewFrameSize();
+
+    UtteranceProgressListener objectDetectionCameraTTSListener = new UtteranceProgressListener() {
+        @Override
+        public void onStart(String utteranceId) {
+            if (utteranceId.equals(API_SUCCESS)) {
+                canTtsStop = false; // 다음 화면으로 넘어가도 말 해야 함.
+            } else if (utteranceId.equals(IS_GUIDING)) {
+                isWaitingForGuide = true;
+            }
+        }
+
+        @Override
+        public void onDone(String utteranceId) {
+            if (utteranceId.equals(API_FAILED)) {
+                finish();
+            } else if (utteranceId.equals(API_SUCCESS)) {
+                canTtsStop = true;
+            } else {
+                if (utteranceId.equals(IS_GUIDING)) {
+                    isWaitingForGuide = false;
+                }
+            }
+        }
+
+        @Override
+        public void onError(String utteranceId) { }
+    };
 }

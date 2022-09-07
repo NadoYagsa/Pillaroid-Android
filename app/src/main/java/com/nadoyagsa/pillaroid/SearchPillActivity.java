@@ -49,7 +49,7 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
     private static final Size DESIRED_PREVIEW_SIZE = new Size(300, 300);    // tflite에서 설정한 값대로 변경
     private static final boolean SAVE_PREVIEW_BITMAP = false;
     private static final float TEXT_SIZE_DIP = 10;
-    OverlayView trackingOverlay;
+//    OverlayView trackingOverlay;  // 화면에 인식된 객체 나타내기
 
     private Classifier detector;
 
@@ -100,11 +100,12 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
                         cropSize, cropSize,
                         sensorOrientation, MAINTAIN_ASPECT);
 
-        trackingOverlay = findViewById(R.id.tracking_overlay);
-        trackingOverlay.addCallback(
-                canvas -> {
-                    tracker.draw(canvas);
-                });
+
+//        trackingOverlay = findViewById(R.id.tracking_overlay);
+//        trackingOverlay.addCallback(
+//                canvas -> {
+//                    tracker.draw(canvas);
+//                });
 
         tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
     }
@@ -113,7 +114,7 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
     protected void processImage() {
         ++timestamp;
         final long currTimestamp = timestamp;
-        trackingOverlay.postInvalidate();
+//        trackingOverlay.postInvalidate();
 
         // No mutex needed as this method is not reentrant.
         if (computingDetection) {
@@ -159,7 +160,7 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
             }
 
             tracker.trackResults(mappedRecognitions, currTimestamp);
-            trackingOverlay.postInvalidate();
+//            trackingOverlay.postInvalidate();
 
             computingDetection = false;
 
