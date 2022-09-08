@@ -288,7 +288,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
         btResult.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + ((AppCompatButton) v).getText(), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 tts.stop();     //진행중이던 tts speak가 있다면 멈춤

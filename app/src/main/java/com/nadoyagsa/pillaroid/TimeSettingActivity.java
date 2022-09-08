@@ -238,7 +238,7 @@ public class TimeSettingActivity extends AppCompatActivity {
         btTimeSettingComplete.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + ((AppCompatButton) v).getText().toString(), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 String morningHour = etTimeMorningHour.getText().toString();

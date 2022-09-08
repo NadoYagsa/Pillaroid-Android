@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         llCamera.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + getString(R.string.page_search_camera), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (isReadyTts)
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         llVoice.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + getString(R.string.page_search_voice), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (isReadyTts)
@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         llPrescription.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + getString(R.string.page_search_prescription), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (isReadyTts)
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
         llMypage.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + getString(R.string.page_mypage), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (isReadyTts)

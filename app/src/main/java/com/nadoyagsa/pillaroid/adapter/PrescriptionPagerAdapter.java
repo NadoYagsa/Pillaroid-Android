@@ -76,7 +76,7 @@ public class PrescriptionPagerAdapter extends RecyclerView.Adapter<PrescriptionP
         holder.ibtFavorites.setOnClickListener(view -> {
             if (System.currentTimeMillis() > delay) {
                 currentViewId = IBT_FAVORITES;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼. 즐겨찾기", QUEUE_FLUSH, null, null);
             } else if (currentViewId == IBT_FAVORITES) {
                 final int clickPosition = position;

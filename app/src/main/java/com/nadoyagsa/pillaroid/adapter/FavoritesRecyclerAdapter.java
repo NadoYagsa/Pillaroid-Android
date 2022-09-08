@@ -177,7 +177,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
                 int pos = getAdapterPosition();
                 if (System.currentTimeMillis() > delay) {
                     currentClickedPos = pos;
-                    delay = System.currentTimeMillis() + 2000;
+                    delay = System.currentTimeMillis() + 3000;
                     tts.speak("버튼." + favoritesList.get(pos).getMedicineName(), QUEUE_FLUSH, null, null);
                 } else if (currentClickedPos == pos) {
                     if (pos != RecyclerView.NO_POSITION) {

@@ -118,7 +118,7 @@ public class LoginActivity extends AppCompatActivity {
         llKakaoLogin.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼. 카카오 로그인하기", QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 // 카카오 로그인 연동

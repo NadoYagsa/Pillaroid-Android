@@ -194,7 +194,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         ibtStar.setOnClickListener(view -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼. 즐겨찾기", QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 if (SharedPrefManager.read("token", null) == null) {
@@ -282,7 +282,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         ivAlarm.setOnClickListener(view -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼. 알림", QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 if (SharedPrefManager.read("token", null) == null) {
@@ -322,7 +322,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         tvOk.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (ivAlarm.getTag().equals("off")) {        // 알림 추가
@@ -458,7 +458,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         tvCancel.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 dialog.dismiss();

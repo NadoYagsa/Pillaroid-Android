@@ -81,7 +81,7 @@ public class MypageActivity extends AppCompatActivity {
         llLogout.setOnClickListener(view -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼. 로그아웃", QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 SharedPrefManager.remove("token");
@@ -159,7 +159,7 @@ public class MypageActivity extends AppCompatActivity {
         rlFavorites.setOnClickListener(view -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + getString(R.string.page_medicine_favorites), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 String token = SharedPrefManager.read("token", "");
@@ -180,7 +180,7 @@ public class MypageActivity extends AppCompatActivity {
         rlAlarm.setOnClickListener(view -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + getString(R.string.page_medicine_notice), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 String token = SharedPrefManager.read("token", "");

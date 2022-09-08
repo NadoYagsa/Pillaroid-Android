@@ -48,7 +48,7 @@ public class SearchCameraActivity extends AppCompatActivity {
         llSearchCase.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + getString(R.string.page_search_case), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 startActivity(new Intent(this, SearchCaseActivity.class));
@@ -59,7 +59,7 @@ public class SearchCameraActivity extends AppCompatActivity {
         llSearchPill.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + getString(R.string.page_search_pill), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 startActivity(new Intent(this, SearchPillActivity.class));

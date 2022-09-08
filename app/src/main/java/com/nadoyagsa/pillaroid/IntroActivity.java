@@ -49,7 +49,7 @@ public class IntroActivity extends AppCompatActivity {
         btNext.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak("버튼." + getString(R.string.page_medicine_favorites), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v){
                 finish();   // MainActivity로 돌아감

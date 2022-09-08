@@ -159,7 +159,7 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
                 int pos = getAdapterPosition();
                 if (System.currentTimeMillis() > delay) {
                     currentClickedPos = pos;
-                    delay = System.currentTimeMillis() + 2000;
+                    delay = System.currentTimeMillis() + 3000;
                     tts.speak("버튼." + alarmList.get(pos).getName() + ". 상세 보기", QUEUE_FLUSH, null, null);
                 } else if (currentClickedPos == pos) {
                     if (pos != RecyclerView.NO_POSITION) {

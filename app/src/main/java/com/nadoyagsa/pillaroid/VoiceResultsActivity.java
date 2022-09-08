@@ -118,7 +118,7 @@ public class VoiceResultsActivity extends AppCompatActivity {
 
             if (System.currentTimeMillis() > delay) {
                 selectedPos = position;
-                delay = System.currentTimeMillis() + 2000;
+                delay = System.currentTimeMillis() + 3000;
                 tts.speak(voiceResults.get(position).getMedicineName(), QUEUE_FLUSH, null, null);
             } else if (selectedPos == position) {
                 Intent medicineIntent = new Intent(VoiceResultsActivity.this, MedicineResultActivity.class);
