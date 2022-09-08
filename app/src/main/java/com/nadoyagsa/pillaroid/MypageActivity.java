@@ -208,4 +208,10 @@ public class MypageActivity extends AppCompatActivity {
             tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
         });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        tts.speak("마이페이지 화면", QUEUE_FLUSH, null, null);
+    }
 }

@@ -187,4 +187,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        tts.speak("메인 화면", QUEUE_FLUSH, null, null);
+    }
 }
