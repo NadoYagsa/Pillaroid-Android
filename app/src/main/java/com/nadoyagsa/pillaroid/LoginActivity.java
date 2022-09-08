@@ -6,6 +6,7 @@ import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -31,6 +32,9 @@ public class LoginActivity extends AppCompatActivity {
     private boolean isLogin = false;
     private char fromWhere;     //f는 즐겨찾기 목록 확인, a는 알람 목록 확인
 
+    private long delay = 0;
+    private View currentClickedView = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,14 +42,7 @@ public class LoginActivity extends AppCompatActivity {
 
         fromWhere = getIntent().getCharExtra("from", 'a');
 
-        LinearLayout llKakaoLogin = findViewById(R.id.ll_login_kakao);
-        llKakaoLogin.setOnClickListener(view -> {
-            // 카카오 로그인 연동
-            if (UserApiClient.getInstance().isKakaoTalkLoginAvailable(this))
-                UserApiClient.getInstance().loginWithKakaoTalk(this, kakaoLoginCallback);
-            else
-                UserApiClient.getInstance().loginWithKakaoAccount(this, kakaoLoginCallback);
-        });
+        setClickListener();
     }
 
     //카카오 로그인 콜백 함수
@@ -114,5 +111,22 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         super.finish();
+    }
+
+    public void setClickListener() {
+        LinearLayout llKakaoLogin = findViewById(R.id.ll_login_kakao);
+        llKakaoLogin.setOnClickListener(v -> {
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak("버튼. 카카오 로그인하기", QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                // 카카오 로그인 연동
+                if (UserApiClient.getInstance().isKakaoTalkLoginAvailable(this))
+                    UserApiClient.getInstance().loginWithKakaoTalk(this, kakaoLoginCallback);
+                else
+                    UserApiClient.getInstance().loginWithKakaoAccount(this, kakaoLoginCallback);
+            }
+        });
     }
 }

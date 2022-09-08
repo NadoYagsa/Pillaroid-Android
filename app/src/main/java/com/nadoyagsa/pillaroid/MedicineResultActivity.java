@@ -65,6 +65,9 @@ public class MedicineResultActivity extends AppCompatActivity {
     private View dialogView, selectedCategoryView;
     private ViewPager2 vpResult;
 
+    private long delay = 0;
+    private View currentClickedView = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -189,87 +192,87 @@ public class MedicineResultActivity extends AppCompatActivity {
         // 즐겨찾기
         ibtStar = toolbar.findViewById(R.id.ibt_ab_medicineresult_favorites);
         ibtStar.setOnClickListener(view -> {
-            if (SharedPrefManager.read("token", null) == null) {
-                tts.speak("즐겨찾기 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = view;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak("버튼. 즐겨찾기", QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == view) {
+                if (SharedPrefManager.read("token", null) == null) {
+                    tts.speak("즐겨찾기 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
 
-                // 로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
-                Intent loginIntent = new Intent(this, LoginActivity.class);
-                loginIntent.putExtra("from", 'r');
-                startActivityResultLogin.launch(loginIntent);
-            }
-            else {  // 이미 로그인된 사용자
-                if (medicine.isFavoritesNull()) {   // 즐겨찾기 추가
-                    JsonObject request = new JsonObject();
-                    request.addProperty("medicineIdx", medicine.getMedicineIdx());
-                    PillaroidAPIImplementation.getApiService().postFavorites(SharedPrefManager.read("token", null), request).enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.code() == 201) {
-                                try {
-                                    JSONObject responseJson = new JSONObject(Objects.requireNonNull(response.body()));
-                                    JSONObject data = responseJson.getJSONObject("data");
-
-                                    medicine.setFavoritesIdx(data.getLong("favoritesIdx"));
-                                    tts.speak("즐겨찾기 추가", TextToSpeech.QUEUE_FLUSH, null, null);
-
-                                    ((AppCompatImageButton) view).setImageResource(R.drawable.icon_star_on);
-                                } catch (JSONException e) { e.printStackTrace(); }
-                            }
-                            else if (response.code() == 401) {
-                                tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
-                            }
-                            else {
-                                tts.speak("즐겨찾기 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
-                            tts.playSilentUtterance(3000, QUEUE_ADD, null);
-                        }
-                    });
-                }
-                else {                                              // 즐겨찾기 해제
-                    PillaroidAPIImplementation.getApiService().deleteFavorites(SharedPrefManager.read("token", null), medicine.getFavoritesIdx()).enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (response.code() == 200) {
-                                medicine.setFavoritesIdx(null);
-                                tts.speak("즐겨찾기 삭제", TextToSpeech.QUEUE_FLUSH, null, null);
-
-                                ((AppCompatImageButton) view).setImageResource(R.drawable.icon_star_off);
-                            }
-                            else if (response.code() == 401) {
-                                tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
-                            }
-                            else if (response.code() == 400) {
-                                if (response.errorBody() != null) {
+                    // 로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
+                    Intent loginIntent = new Intent(this, LoginActivity.class);
+                    loginIntent.putExtra("from", 'r');
+                    startActivityResultLogin.launch(loginIntent);
+                } else {  // 이미 로그인된 사용자
+                    if (medicine.isFavoritesNull()) {   // 즐겨찾기 추가
+                        JsonObject request = new JsonObject();
+                        request.addProperty("medicineIdx", medicine.getMedicineIdx());
+                        PillaroidAPIImplementation.getApiService().postFavorites(SharedPrefManager.read("token", null), request).enqueue(new Callback<String>() {
+                            @Override
+                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                if (response.code() == 201) {
                                     try {
-                                        String errorStr = response.errorBody().string();
-                                        JSONObject errorBody = new JSONObject(errorStr);
-                                        long errorIdx = errorBody.getLong("errorIdx");
+                                        JSONObject responseJson = new JSONObject(Objects.requireNonNull(response.body()));
+                                        JSONObject data = responseJson.getJSONObject("data");
 
-                                        if (errorIdx == 40001)  // 삭제 오류
-                                            tts.speak("즐겨찾기에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
-                                    } catch (JSONException | IOException e) {
+                                        medicine.setFavoritesIdx(data.getLong("favoritesIdx"));
+                                        tts.speak("즐겨찾기 추가", TextToSpeech.QUEUE_FLUSH, null, null);
+
+                                        ((AppCompatImageButton) view).setImageResource(R.drawable.icon_star_on);
+                                    } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
+                                } else if (response.code() == 401) {
+                                    tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                                } else {
+                                    tts.speak("즐겨찾기 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
                                 }
-                                else
-                                    tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
                             }
-                            else {
-                                tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
-                            }
-                        }
 
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
-                            tts.playSilentUtterance(3000, QUEUE_ADD, null);
-                        }
-                    });
+                            @Override
+                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                                tts.playSilentUtterance(3000, QUEUE_ADD, null);
+                            }
+                        });
+                    } else {                                              // 즐겨찾기 해제
+                        PillaroidAPIImplementation.getApiService().deleteFavorites(SharedPrefManager.read("token", null), medicine.getFavoritesIdx()).enqueue(new Callback<String>() {
+                            @Override
+                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                if (response.code() == 200) {
+                                    medicine.setFavoritesIdx(null);
+                                    tts.speak("즐겨찾기 삭제", TextToSpeech.QUEUE_FLUSH, null, null);
+
+                                    ((AppCompatImageButton) view).setImageResource(R.drawable.icon_star_off);
+                                } else if (response.code() == 401) {
+                                    tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                                } else if (response.code() == 400) {
+                                    if (response.errorBody() != null) {
+                                        try {
+                                            String errorStr = response.errorBody().string();
+                                            JSONObject errorBody = new JSONObject(errorStr);
+                                            long errorIdx = errorBody.getLong("errorIdx");
+
+                                            if (errorIdx == 40001)  // 삭제 오류
+                                                tts.speak("즐겨찾기에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
+                                        } catch (JSONException | IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    } else
+                                        tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                } else {
+                                    tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                                tts.playSilentUtterance(3000, QUEUE_ADD, null);
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -277,15 +280,21 @@ public class MedicineResultActivity extends AppCompatActivity {
         // 알람
         ivAlarm = toolbar.findViewById(R.id.ibt_ab_medicineresult_alarm);   //TODO: 시각장애인 모드일 때 description 읽어주는지 확인하기
         ivAlarm.setOnClickListener(view -> {
-            if (SharedPrefManager.read("token", null) == null) {
-                tts.speak("알림 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = view;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak("버튼. 알림", QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == view) {
+                if (SharedPrefManager.read("token", null) == null) {
+                    tts.speak("알림 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
 
-                // 로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
-                Intent loginIntent = new Intent(this, LoginActivity.class);
-                loginIntent.putExtra("from", 'a');
-                startActivityResultLogin.launch(loginIntent);
-            } else {    // 이미 로그인된 사용자
-                showAlarmDialog(medicine.getAlarmInfo());
+                    // 로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
+                    Intent loginIntent = new Intent(this, LoginActivity.class);
+                    loginIntent.putExtra("from", 'a');
+                    startActivityResultLogin.launch(loginIntent);
+                } else {    // 이미 로그인된 사용자
+                    showAlarmDialog(medicine.getAlarmInfo());
+                }
             }
         });
     }
@@ -311,137 +320,149 @@ public class MedicineResultActivity extends AppCompatActivity {
             tvOk.setText("삭제");
         }
         tvOk.setOnClickListener(v -> {
-            if (ivAlarm.getTag().equals("off")) {        // 알림 추가
-                if (etDays.getText().toString().equals("")) {
-                    tts.speak("복용 기간을 설정해주세요.", QUEUE_FLUSH, null, null);
-                    return;
-                }
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak("버튼." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                if (ivAlarm.getTag().equals("off")) {        // 알림 추가
+                    if (etDays.getText().toString().equals("")) {
+                        tts.speak("복용 기간을 설정해주세요.", QUEUE_FLUSH, null, null);
+                        return;
+                    }
 
-                int days = Integer.parseInt(etDays.getText().toString());
-                if (days <= 0) {
-                    tts.speak("복용 기간은 양수여야 합니다.", QUEUE_FLUSH, null, null);
-                    return;
-                }
-                if (days > 92) {
-                    tts.speak("최대 복용 알림 기간은 세 달입니다.", QUEUE_FLUSH, null, null);
-                    return;
-                }
+                    int days = Integer.parseInt(etDays.getText().toString());
+                    if (days <= 0) {
+                        tts.speak("복용 기간은 양수여야 합니다.", QUEUE_FLUSH, null, null);
+                        return;
+                    }
+                    if (days > 92) {
+                        tts.speak("최대 복용 알림 기간은 세 달입니다.", QUEUE_FLUSH, null, null);
+                        return;
+                    }
 
-                String label = etLabel.getText().toString().equals("") ? etLabel.getHint().toString() : etLabel.getText().toString();
-                if (label.length() > 30) {
-                    tts.speak("레이블이 너무 길어 30자까지만 저장합니다.", QUEUE_FLUSH, null, null);
-                    label = label.substring(0, 30);
-                }
+                    String label = etLabel.getText().toString().equals("") ? etLabel.getHint().toString() : etLabel.getText().toString();
+                    if (label.length() > 30) {
+                        tts.speak("레이블이 너무 길어 30자까지만 저장합니다.", QUEUE_FLUSH, null, null);
+                        label = label.substring(0, 30);
+                    }
 
-                JsonObject request = new JsonObject();
-                request.addProperty("medicineIdx", medicine.getMedicineIdx());
-                request.addProperty("name", label);
-                request.addProperty("period", days);
+                    JsonObject request = new JsonObject();
+                    request.addProperty("medicineIdx", medicine.getMedicineIdx());
+                    request.addProperty("name", label);
+                    request.addProperty("period", days);
 
-                PillaroidAPIImplementation.getApiService().postAlarm(SharedPrefManager.read("token", null),request).enqueue(new Callback<String>(){
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.code() == 201) {
-                            try {
-                                JSONObject responseJson = new JSONObject(Objects.requireNonNull(response.body()));
-                                JSONObject data = responseJson.getJSONObject("data");
-
-                                AlarmInfo alarmInfo = new AlarmInfo(data);
-                                medicine.setAlarmInfo(alarmInfo);
-                                tts.speak(alarmInfo.getName() + " 이름으로 알림이 생성되었습니다. 복용 기간은 " + alarmInfo.getPeriod() + "일 입니다.", QUEUE_FLUSH, null, null);
-
-                                ivAlarm.setBackgroundDrawable(AppCompatResources.getDrawable(MedicineResultActivity.this, R.drawable.icon_bell_on));
-                                ivAlarm.setTag("on");
-                                ((TextView) v).setText("삭제");
-                                dialog.hide();
-                            } catch (JSONException e) { e.printStackTrace(); }
-                        } else if (response.code() == 400) {
-                            if (response.errorBody() != null) {
+                    PillaroidAPIImplementation.getApiService().postAlarm(SharedPrefManager.read("token", null), request).enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.code() == 201) {
                                 try {
-                                    String errorStr = response.errorBody().string();
-                                    JSONObject errorBody = new JSONObject(errorStr);
-                                    long errorIdx = errorBody.getLong("errorIdx");
+                                    JSONObject responseJson = new JSONObject(Objects.requireNonNull(response.body()));
+                                    JSONObject data = responseJson.getJSONObject("data");
 
-                                    if (errorIdx == 40004) {        // 복용 시간대 없음
-                                        tts.speak("복용 시간대가 설정되지 않았습니다. 마이페이지에서 설정해주세요.", QUEUE_FLUSH, null, null);
-                                    } else if (errorIdx == 40005) { // 복용시기 파싱 정보 없음
-                                        tts.speak("의약품에서 알림을 위한 정보를 얻을 수 없습니다.", QUEUE_FLUSH, null, null);
-                                    }
-                                } catch (JSONException | IOException e) {
+                                    AlarmInfo alarmInfo = new AlarmInfo(data);
+                                    medicine.setAlarmInfo(alarmInfo);
+                                    tts.speak(alarmInfo.getName() + " 이름으로 알림이 생성되었습니다. 복용 기간은 " + alarmInfo.getPeriod() + "일 입니다.", QUEUE_FLUSH, null, null);
+
+                                    ivAlarm.setBackgroundDrawable(AppCompatResources.getDrawable(MedicineResultActivity.this, R.drawable.icon_bell_on));
+                                    ivAlarm.setTag("on");
+                                    ((TextView) v).setText("삭제");
+                                    dialog.hide();
+                                } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
-                            }
-                            else {
+                            } else if (response.code() == 400) {
+                                if (response.errorBody() != null) {
+                                    try {
+                                        String errorStr = response.errorBody().string();
+                                        JSONObject errorBody = new JSONObject(errorStr);
+                                        long errorIdx = errorBody.getLong("errorIdx");
+
+                                        if (errorIdx == 40004) {        // 복용 시간대 없음
+                                            tts.speak("복용 시간대가 설정되지 않았습니다. 마이페이지에서 설정해주세요.", QUEUE_FLUSH, null, null);
+                                        } else if (errorIdx == 40005) { // 복용시기 파싱 정보 없음
+                                            tts.speak("의약품에서 알림을 위한 정보를 얻을 수 없습니다.", QUEUE_FLUSH, null, null);
+                                        }
+                                    } catch (JSONException | IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                } else {
+                                    tts.speak("알림 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                    dialog.dismiss();
+                                }
+                            } else if (response.code() == 401) {
+                                tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                                dialog.dismiss();
+                            } else if (response.code() == 409) {
+                                tts.speak("이미 등록된 알림입니다.", QUEUE_FLUSH, null, null);
+                                dialog.dismiss();
+                            } else {
                                 tts.speak("알림 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
                                 dialog.dismiss();
                             }
-                        } else if (response.code() == 401) {
-                            tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
-                            dialog.dismiss();
-                        } else if (response.code() == 409) {
-                            tts.speak("이미 등록된 알림입니다.", QUEUE_FLUSH, null, null);
-                            dialog.dismiss();
-                        } else {
-                            tts.speak("알림 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
-                            dialog.dismiss();
                         }
-                    }
 
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
-                    }
-                });
-            } else if (ivAlarm.getTag().equals("on")) {        // 알림 삭제
-                //서버에 알림 삭제 요청 (사용자 및 의약품 품목일련번호 통해 삭제)
-                PillaroidAPIImplementation.getApiService().deleteAlarm(SharedPrefManager.read("token", null), alarmInfo.getAlarmIdx()).enqueue(new Callback<String>(){
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.code() == 200) {
-                            tts.speak("알림이 삭제되었습니다.", QUEUE_FLUSH, null, null);
-                            medicine.setAlarmInfo(null);
-                        } else if (response.code() == 400) {
-                            if (response.errorBody() != null) {
-                                try {
-                                    String errorStr = response.errorBody().string();
-                                    JSONObject errorBody = new JSONObject(errorStr);
-                                    long errorIdx = errorBody.getLong("errorIdx");
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                        }
+                    });
+                } else if (ivAlarm.getTag().equals("on")) {        // 알림 삭제
+                    //서버에 알림 삭제 요청 (사용자 및 의약품 품목일련번호 통해 삭제)
+                    PillaroidAPIImplementation.getApiService().deleteAlarm(SharedPrefManager.read("token", null), alarmInfo.getAlarmIdx()).enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (response.code() == 200) {
+                                tts.speak("알림이 삭제되었습니다.", QUEUE_FLUSH, null, null);
+                                medicine.setAlarmInfo(null);
+                            } else if (response.code() == 400) {
+                                if (response.errorBody() != null) {
+                                    try {
+                                        String errorStr = response.errorBody().string();
+                                        JSONObject errorBody = new JSONObject(errorStr);
+                                        long errorIdx = errorBody.getLong("errorIdx");
 
-                                    if (errorIdx == 40001)  // 존재하지 않는 데이터
-                                        tts.speak("알림에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
-                                } catch (JSONException | IOException e) {
-                                    e.printStackTrace();
-                                }
+                                        if (errorIdx == 40001)  // 존재하지 않는 데이터
+                                            tts.speak("알림에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
+                                    } catch (JSONException | IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                } else
+                                    tts.speak("알림 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                            } else if (response.code() == 401) {
+                                tts.speak("허가받지 않은 회원의 접근입니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                                finish();
+                            } else {
+                                Log.e("SOEUN-DEBUG", String.valueOf(response.code()));
+                                tts.speak("알림 기능에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                             }
-                            else
-                                tts.speak("알림 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
-                        } else if (response.code() == 401) {
-                            tts.speak("허가받지 않은 회원의 접근입니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
-                            finish();
-                        } else {
-                            Log.e("SOEUN-DEBUG", String.valueOf(response.code()));
-                            tts.speak("알림 기능에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
                         }
-                    }
 
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
-                    }
-                });
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                        }
+                    });
 
-                ivAlarm.setBackgroundDrawable(AppCompatResources.getDrawable(this, R.drawable.icon_bell_off));
-                ivAlarm.setTag("off");
-                ((TextView) v).setText("등록");
+                    ivAlarm.setBackgroundDrawable(AppCompatResources.getDrawable(this, R.drawable.icon_bell_off));
+                    ivAlarm.setTag("off");
+                    ((TextView) v).setText("등록");
 
-                etLabel.setText("");
-                etDays.setText("");
-                dialog.dismiss();
+                    etLabel.setText("");
+                    etDays.setText("");
+                    dialog.dismiss();
+                }
             }
         });
 
         tvCancel.setOnClickListener(v -> {
-            dialog.dismiss();
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak("버튼." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                dialog.dismiss();
+            }
         });
     }
 

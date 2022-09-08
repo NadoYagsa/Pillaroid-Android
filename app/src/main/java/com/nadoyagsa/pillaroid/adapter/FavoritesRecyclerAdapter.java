@@ -44,6 +44,9 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
     private ArrayList<FavoritesInfo> favoritesList;
     private final ArrayList<FavoritesInfo> favoritesWholeList;    // 검색 시 필요한 전체 즐겨찾기 목록
 
+    private long delay = 0;
+    private Integer currentClickedPos = null;
+
     public FavoritesRecyclerAdapter(ArrayList<FavoritesInfo> favoritesList) {
         this.favoritesList = favoritesList;
 
@@ -112,6 +115,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
                         favoritesWholeList.remove(favoritesList.get(position));
                         favoritesList.remove(position);     // 스와이프한 객체 삭제
                         notifyItemRemoved(position);
+                        currentClickedPos = null;
 
                         return;
                     }
@@ -171,10 +175,16 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
 
             itemView.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
-                if (pos != RecyclerView.NO_POSITION) {
-                    Intent medicineIntent = new Intent(context, MedicineResultActivity.class);
-                    medicineIntent.putExtra("medicineIdx", favoritesList.get(pos).getMedicineIdx());
-                    context.startActivity(medicineIntent);
+                if (System.currentTimeMillis() > delay) {
+                    currentClickedPos = pos;
+                    delay = System.currentTimeMillis() + 2000;
+                    tts.speak("버튼." + favoritesList.get(pos).getMedicineName(), QUEUE_FLUSH, null, null);
+                } else if (currentClickedPos == pos) {
+                    if (pos != RecyclerView.NO_POSITION) {
+                        Intent medicineIntent = new Intent(context, MedicineResultActivity.class);
+                        medicineIntent.putExtra("medicineIdx", favoritesList.get(pos).getMedicineIdx());
+                        context.startActivity(medicineIntent);
+                    }
                 }
             });
         }

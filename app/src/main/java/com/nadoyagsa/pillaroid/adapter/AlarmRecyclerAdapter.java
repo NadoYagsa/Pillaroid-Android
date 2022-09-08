@@ -41,6 +41,9 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
     private Context context;
     private ArrayList<AlarmInfo> alarmList;
 
+    private long delay = 0;
+    private Integer currentClickedPos = null;
+
     public AlarmRecyclerAdapter(ArrayList<AlarmInfo> alarmList) { this.alarmList = alarmList; }
 
     @NonNull
@@ -95,6 +98,7 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
 
                         alarmList.remove(position);     // 스와이프한 객체 삭제
                         notifyItemRemoved(position);
+                        currentClickedPos = null;
 
                         return;
                     }
@@ -153,11 +157,23 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
 
             itemView.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
-                if (pos != RecyclerView.NO_POSITION) {
-                    Intent medicineIntent = new Intent(context, MedicineResultActivity.class);
-                    medicineIntent.putExtra("medicineIdx", alarmList.get(pos).getMedicineIdx());
-                    context.startActivity(medicineIntent);
+                if (System.currentTimeMillis() > delay) {
+                    currentClickedPos = pos;
+                    delay = System.currentTimeMillis() + 2000;
+                    tts.speak("버튼." + alarmList.get(pos).getName() + ". 상세 보기", QUEUE_FLUSH, null, null);
+                } else if (currentClickedPos == pos) {
+                    if (pos != RecyclerView.NO_POSITION) {
+                        Intent medicineIntent = new Intent(context, MedicineResultActivity.class);
+                        medicineIntent.putExtra("medicineIdx", alarmList.get(pos).getMedicineIdx());
+                        context.startActivity(medicineIntent);
+                    }
                 }
+            });
+
+            tvAlarmDetails.setOnClickListener(v -> {
+                int pos = getAdapterPosition();
+                currentClickedPos = pos;
+                tts.speak("텍스트." + alarmList.get(pos).getName() + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
             });
         }
     }

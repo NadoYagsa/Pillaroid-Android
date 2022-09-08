@@ -1,5 +1,8 @@
 package com.nadoyagsa.pillaroid;
 
+import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +17,9 @@ import androidx.appcompat.widget.Toolbar;
 import java.util.Objects;
 
 public class SearchCameraActivity extends AppCompatActivity {
+    private long delay = 0;
+    private View currentClickedView = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,11 +40,30 @@ public class SearchCameraActivity extends AppCompatActivity {
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
 
+        setClickListener();
+    }
+
+    public void setClickListener() {
         LinearLayout llSearchCase = findViewById(R.id.ll_search_camera_case);
-        llSearchCase.setOnClickListener(v -> startActivity(new Intent(this, SearchCaseActivity.class)));
+        llSearchCase.setOnClickListener(v -> {
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak("버튼." + getString(R.string.page_search_case), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                startActivity(new Intent(this, SearchCaseActivity.class));
+            }
+        });
 
         LinearLayout llSearchPill = findViewById(R.id.ll_search_camera_pill);
-        llSearchPill.setOnClickListener(v -> startActivity(new Intent(this, SearchPillActivity.class)));
-
+        llSearchPill.setOnClickListener(v -> {
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak("버튼." + getString(R.string.page_search_pill), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                startActivity(new Intent(this, SearchPillActivity.class));
+            }
+        });
     }
 }

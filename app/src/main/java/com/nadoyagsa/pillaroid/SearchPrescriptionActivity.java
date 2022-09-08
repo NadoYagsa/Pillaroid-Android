@@ -15,7 +15,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,8 +46,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
     private boolean canUseCamera = false;
     private boolean isSearching = false;
 
-    private TextView tvGuide;
-
     private ImageCapture imageCapture;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private PreviewView pvPrescriptionCamera;
@@ -62,7 +59,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
 
         checkCameraPermission();    // 카메라로 인식을 위한 카메라 퍼미션 체크
 
-        tvGuide = findViewById(R.id.tv_search_prescription_guide);
         pvPrescriptionCamera = findViewById(R.id.pv_search_prescription);
 
         recognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
@@ -244,7 +240,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                         .addOnFailureListener(e -> {
                             Log.i("Failure", "사진 속 텍스트 인식 오류");
                             tts.speak("처방전의 텍스트를 읽는데 오류가 발생했습니다.", QUEUE_FLUSH, null, null);
-                            tvGuide.setText("텍스트 인식 오류가 발생했습니다.");
                         });
             }
         }
@@ -258,7 +253,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                 if (!isSearching) {
                     isSearching = true;
                     tts.speak("사진이 찍혔습니다.", QUEUE_FLUSH, null, null);
-                    tvGuide.setText("처방전 사진 속 약품명 인식 중");
 
                     imageCapture.takePicture(ContextCompat.getMainExecutor(SearchPrescriptionActivity.this), new ImageCapture.OnImageCapturedCallback() {
                         @Override

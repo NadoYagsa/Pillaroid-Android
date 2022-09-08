@@ -1,5 +1,6 @@
 package com.nadoyagsa.pillaroid;
 
+import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
 import android.Manifest;
@@ -39,6 +40,9 @@ public class SearchVoiceActivity extends AppCompatActivity {
     private RecognitionListener recognitionListener;
     private SpeechRecognizer speechRecognizer;
 
+    private long delay = 0;
+    private View currentClickedView = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,28 +62,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
 
         etQuery = findViewById(R.id.et_voicesearch_query);
         settingForSTT();
-
-        AppCompatButton btResult = findViewById(R.id.bt_voicesearch_result);
-        btResult.setOnClickListener(v -> {
-            tts.stop();     //진행중이던 tts speak가 있다면 멈춤
-            if (etQuery.getText().length() > 0) {
-                isResultBtClicked = true;
-
-                if (isRecording)
-                    speechRecognizer.cancel();
-
-                if (isResultEnd) {
-                    isResultBtClicked = false;
-
-                    Intent resultIntent = new Intent(this, VoiceResultsActivity.class);
-                    resultIntent.putExtra("query", etQuery.getText().toString());
-                    startActivity(resultIntent);
-                }
-                // isResultEnd == false일 때는 recognitionListener에서 처리함
-            }
-            else
-                tts.speak("검색할 단어가 없습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
-        });
+        setClickListener();
     }
 
     private void speakRecordMethod() {
@@ -223,14 +206,14 @@ public class SearchVoiceActivity extends AppCompatActivity {
                 else {              // 인식 종료 버튼이 눌렸을 때, 종료 시점 이후에 결과가 반환이 되는 경우
                     temporaryQuery = "";
                     etQuery.setText(etQuery.getText().toString().replaceAll("\\s", ""));
-                    tts.speak("음성 인식 종료", TextToSpeech.QUEUE_FLUSH, null, null);
+                    tts.speak("음성 인식 종료. " + etQuery.getText(), TextToSpeech.QUEUE_FLUSH, null, null);
                 }
 
                 if (isResultBtClicked) {
                     isResultBtClicked = false;
 
                     Intent resultIntent = new Intent(SearchVoiceActivity.this, VoiceResultsActivity.class);
-                    resultIntent.putExtra("query", etQuery.getText().toString());
+                    resultIntent.putExtra("query", etQuery.getText());
                     startActivity(resultIntent);
                 }
             }
@@ -298,5 +281,64 @@ public class SearchVoiceActivity extends AppCompatActivity {
             speechRecognizer.destroy();
             speechRecognizer = null;
         }
+    }
+
+    public void setClickListener() {
+        AppCompatButton btResult = findViewById(R.id.bt_voicesearch_result);
+        btResult.setOnClickListener(v -> {
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 2000;
+                tts.speak("버튼." + ((AppCompatButton) v).getText(), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                tts.stop();     //진행중이던 tts speak가 있다면 멈춤
+                if (etQuery.getText().length() > 0) {
+                    isResultBtClicked = true;
+
+                    if (isRecording)
+                        speechRecognizer.cancel();
+
+                    if (isResultEnd) {
+                        isResultBtClicked = false;
+
+                        Intent resultIntent = new Intent(this, VoiceResultsActivity.class);
+                        resultIntent.putExtra("query", etQuery.getText().toString());
+                        startActivity(resultIntent);
+                    }
+                    // isResultEnd == false일 때는 recognitionListener에서 처리함
+                } else
+                    tts.speak("검색할 단어가 없습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+        });
+
+        TextView tvDescriptionResult = findViewById(R.id.tv_voicesearch_description_result);
+        tvDescriptionResult.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+        });
+
+        TextView tvDescriptionRule = findViewById(R.id.tv_voicesearch_description_rule);
+        tvDescriptionRule.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+        });
+
+        TextView tvDescriptionRule1 = findViewById(R.id.tv_voicesearch_description_rule1);
+        tvDescriptionRule1.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트. " + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+        });
+
+        TextView tvDescriptionRule2 = findViewById(R.id.tv_voicesearch_description_rule2);
+        tvDescriptionRule2.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+        });
+
+        TextView tvDescriptionRule3 = findViewById(R.id.tv_voicesearch_description_rule3);
+        tvDescriptionRule3.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+        });
     }
 }
