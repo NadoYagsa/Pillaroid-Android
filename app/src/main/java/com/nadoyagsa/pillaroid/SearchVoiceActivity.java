@@ -6,6 +6,8 @@ import static com.nadoyagsa.pillaroid.MainActivity.tts;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
@@ -35,6 +37,9 @@ public class SearchVoiceActivity extends AppCompatActivity {
     private boolean isResultBtClicked = false;  // 결과 확인하기 버튼이 클릭되었는지 확인 (isResultEnd 시 넘어감 방지)
     private String temporaryQuery = "";
 
+    private SoundPool soundPool;
+    private int soundID;
+
     private EditText etQuery;
     private Intent intent;
     private RecognitionListener recognitionListener;
@@ -49,6 +54,9 @@ public class SearchVoiceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search_voice);
 
         checkRecordPermission();    // 음성 인식을 위한 녹음 퍼미션 체크
+
+        soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC,0);	//작성
+        soundID = soundPool.load(this,R.raw.ding_dong,1);
 
         Toolbar toolbar = findViewById(R.id.tb_voicesearch_toolbar);
         setSupportActionBar(toolbar);
@@ -206,7 +214,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
                 else {              // 인식 종료 버튼이 눌렸을 때, 종료 시점 이후에 결과가 반환이 되는 경우
                     temporaryQuery = "";
                     etQuery.setText(etQuery.getText().toString().replaceAll("\\s", ""));
-                    tts.speak("음성 인식 종료. " + etQuery.getText(), TextToSpeech.QUEUE_FLUSH, null, null);
+                    tts.speak("음성 인식 종료." + etQuery.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, null);
                 }
 
                 if (isResultBtClicked) {
@@ -243,7 +251,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
         if (isResultEnd) {
             temporaryQuery = "";
             etQuery.setText(etQuery.getText().toString().replaceAll("\\s", ""));
-            tts.speak("음성 인식 종료", TextToSpeech.QUEUE_FLUSH, null, null);
+            tts.speak("음성 인식 종료." + etQuery.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, null);
         }
     }
 
@@ -256,6 +264,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
                     endRecord();
                 else {
                     tts.stop();
+                    soundPool.play(soundID,1f,1f,0,0,1f);	//작성
                     startRecord();
                 }
                 return true;
