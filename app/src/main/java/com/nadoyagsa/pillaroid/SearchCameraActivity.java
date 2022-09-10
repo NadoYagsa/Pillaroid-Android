@@ -66,4 +66,10 @@ public class SearchCameraActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        tts.speak("의약품 촬영 방식 선택 화면", QUEUE_FLUSH, null, null);
+    }
 }

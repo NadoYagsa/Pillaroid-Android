@@ -21,7 +21,9 @@ public class PillaroidAPIImplementation {
         Gson gson = new GsonBuilder().setLenient().create();
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder()    // 네트워크 타임아웃 설정
                 .callTimeout(2, TimeUnit.MINUTES)
-                .connectTimeout(20, TimeUnit.SECONDS);
+                .connectTimeout(90, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(15, TimeUnit.SECONDS);
         return new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())

@@ -1,170 +1,189 @@
 package com.nadoyagsa.pillaroid;
 
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
-
 import static com.nadoyagsa.pillaroid.MainActivity.tts;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.media.Image;
-import android.os.Bundle;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.RectF;
+import android.media.ImageReader;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.view.KeyEvent;
+import android.util.Size;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.camera.core.Camera;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageProxy;
-import androidx.camera.core.Preview;
-import androidx.camera.core.UseCaseGroup;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.android.odml.image.BitmapMlImageBuilder;
+import com.google.android.odml.image.MlImage;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
-import com.google.mlkit.vision.common.InputImage;
+import com.nadoyagsa.pillaroid.customview.OverlayView;
+import com.nadoyagsa.pillaroid.env.ImageUtils;
+import com.nadoyagsa.pillaroid.tflite.Classifier;
+import com.nadoyagsa.pillaroid.tflite.DetectorFactory;
+import com.nadoyagsa.pillaroid.tracking.MultiBoxTracker;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
-public class SearchCaseActivity extends AppCompatActivity {
-    private static final int REQUEST_CODE_PERMISSIONS = 1001;
-    private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
+public class SearchCaseActivity extends ObjectDetectionCameraActivity implements ImageReader.OnImageAvailableListener {
+    private static final boolean MAINTAIN_ASPECT = true;
+    private static final Size DESIRED_PREVIEW_SIZE = new Size(300, 300);    // tflite에서 설정한 값대로 변경
+    private static final boolean SAVE_PREVIEW_BITMAP = false;
 
-    private PreviewView pvCaseCamera;
-    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
-    private ImageCapture imageCapture;
-    private Executor caseExecutor;
-    private CaseAnalyzer caseAnalyzer;
-    private ImageProxy currentImageProxy = null;
+    private Classifier detector;
+    private MultiBoxTracker tracker;
+    private OverlayView trackingOverlay;
 
-    private boolean isAnalyzing = false;
+    private Bitmap rgbFrameBitmap = null;
+    private Bitmap croppedBitmap = null;
+    private Matrix frameToCropTransform;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_case);
-
-        pvCaseCamera = findViewById(R.id.pv_search_case);
-        caseAnalyzer = new CaseAnalyzer();
-    }
-
-    private void startCamera() {
-        caseExecutor = Executors.newSingleThreadExecutor(); // 카메라 시작시 executor도 실행
-
-        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-        cameraProviderFuture.addListener(() -> {
-            try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                bindPreview(cameraProvider);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }, ContextCompat.getMainExecutor(this));
-    }
-
-    private void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
-        cameraProvider.unbindAll();
-
-        // camera preview로 보여줄 view finder 설정
-        Preview preview = new Preview.Builder().build();
-
-        // 카메라 선택 (렌즈 앞/뒤)
-        CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                .build();
-
-        // 사진 캡쳐 관련 설정
-        imageCapture = new ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY) // 화질을 기준으로 최적화
-                .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())   // rotation은 디바이스의 기본 설정에 따름
-                .build();
-
-        // 위에서 만든 설정 객체들로 useCaseGroup 만들기
-        UseCaseGroup useCaseGroup = new UseCaseGroup.Builder()
-                .addUseCase(preview)
-                .addUseCase(imageCapture)
-                .build();
-
-        // useGroup으로 카메라 객체 생성
-        Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, useCaseGroup);
-        camera.getCameraControl().enableTorch(true);    // flash
-
-        preview.setSurfaceProvider(pvCaseCamera.getSurfaceProvider());  // 영상(preview)을 PreviewView에 연결
-    }
+    private boolean computingDetection = false;
+    private long timestamp = 0;
+    private long currTimestamp;
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            if (isAnalyzing) {
-                tts.speak("아직 이전 사진을 분석 중입니다. 조금 뒤에 시도해주세요.", QUEUE_FLUSH, null, null);
-            } else {
-                // 사진 찍기
-                imageCapture.takePicture(caseExecutor, new ImageCapture.OnImageCapturedCallback() {
-                    @Override
-                    public void onCaptureSuccess(@NonNull ImageProxy imageProxy) {
-                        isAnalyzing = true;
-                        currentImageProxy = imageProxy;
-                        tts.speak("사진이 찍혔습니다. 이미지를 분석합니다.", QUEUE_FLUSH, null, null);
+    protected void onPreviewSizeChosen(Size size, int rotation) {
+        tracker = new MultiBoxTracker(this);
 
-                        // 이미지 분석
-                        caseAnalyzer.analyze(imageProxy);
+        final String modelString = "hand.tflite";  // 사물인식 돌릴 tflite 파일
+        try {
+            detector = DetectorFactory.getDetector(getAssets(), modelString);
+        } catch (IOException e) {   // Classifier could not be initialized
+            e.printStackTrace();
+            finish();
+        }
 
-                        isAnalyzing = false;
-                    }
+        int cropSize = detector.getInputSize();
+
+        previewWidth = size.getWidth();
+        previewHeight = size.getHeight();
+
+        int sensorOrientation = getScreenOrientation();
+        Log.i("Object-Detection", String.format("Camera orientation relative to screen canvas: %d", sensorOrientation));
+
+        Log.i("Object-Detection", String.format("Initializing at size %dx%d", previewWidth, previewHeight));
+        rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
+        croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Bitmap.Config.ARGB_8888);
+
+        frameToCropTransform =
+                ImageUtils.getTransformationMatrix(
+                        previewWidth, previewHeight,
+                        cropSize, cropSize,
+                        sensorOrientation, MAINTAIN_ASPECT);
+
+        trackingOverlay = findViewById(R.id.tracking_overlay);
+        trackingOverlay.addCallback(
+                canvas -> {
+                    tracker.draw(canvas);
                 });
-            }
-            return true;    // 볼륨 UP 기능 없앰
-        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            return true;    // 볼륨 DOWN 기능 없앰
-        }
-        return super.onKeyDown(keyCode, event);
+
+        tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
     }
 
-    private class CaseAnalyzer implements ImageAnalysis.Analyzer {
+    @Override
+    protected void processImage() {
+        ++timestamp;
+        currTimestamp = timestamp;
+
+        trackingOverlay.postInvalidate();
+
+        // No mutex needed as this method is not reentrant.
+        if (computingDetection) {
+            readyForNextImage();
+            return;
+        }
+        computingDetection = true;
+        Log.i("Object-Detection", "Preparing image " + currTimestamp + " for detection in bg thread.");
+
+        rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
+
+        readyForNextImage();
+
+        final Canvas canvas = new Canvas(croppedBitmap);
+        canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
+        // For examining the actual TF input.
+        if (SAVE_PREVIEW_BITMAP) {
+            ImageUtils.saveBitmap(croppedBitmap);
+        }
+
+        runInBackground(detectRunnable);
+    }
+
+    Runnable detectRunnable = new Runnable() {
         @Override
-        public void analyze(@NonNull ImageProxy imageProxy) {
-            scanBarcode(imageProxy);
-        }
-    }
+        public void run() {
+            Log.i("Object-Detection", "Running detection on image " + currTimestamp);
+            final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);    // 사물인식 좌표: 0~1 사이 값
 
-    private void scanBarcode(ImageProxy imageProxy) {
-        @SuppressLint("UnsafeOptInUsageError")
-        Image mediaImage = imageProxy.getImage();
-        if (mediaImage != null) {
-            // InputImage 객체에 분석할 이미지 받기
-            InputImage inputImage =
-                    InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
+            final List<Classifier.Recognition> mappedRecognitions = new LinkedList<>();
+
+            for (final Classifier.Recognition result : results) {
+                RectF location = result.getLocation();
+                if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF) {
+                    boolean rotated = getScreenOrientation() % 180 == 90;
+                    int rotatedFrameWidth = rotated ? previewHeight : previewWidth;
+                    int rotatedFrameHeight = rotated ? previewWidth : previewHeight;
+
+                    // frame 크기로 사물인식 좌표 변경
+                    location = new RectF(
+                            Math.max(result.getLocation().left * rotatedFrameWidth, 1),
+                            Math.max(result.getLocation().top * rotatedFrameHeight, 1),
+                            Math.min(result.getLocation().right * rotatedFrameWidth, rotatedFrameWidth),
+                            Math.min(result.getLocation().bottom * rotatedFrameHeight, rotatedFrameHeight));
+
+                    result.setLocation(location);
+                    mappedRecognitions.add(result);
+                }
+            }
+
+            tracker.trackResults(mappedRecognitions, currTimestamp);
+            trackingOverlay.postInvalidate();
+
+            computingDetection = false;
+
+            // 가이드를 위한 분석 시작
+            if (!isWaitingForGuide) {
+                isWaitingForGuide = true;
+                guide(mappedRecognitions);
+            }
+        }
+    };
+
+    private void guide(List<Classifier.Recognition> mappedRecognitions) {
+        if (mappedRecognitions.size() == 0) {
+            Log.e("Object-Detection-result", "no detection");
+            tts.speak("손이 감지되지 않습니다. 천천히 상하좌우로 움직여주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+        } else {
+            Collections.sort(mappedRecognitions);   // confidence 기준으로 정렬
+
+            // confidence가 가장 높은 hand Recognition 찾기
+            Classifier.Recognition recognition = mappedRecognitions.stream()
+                    .filter(r -> r.getTitle().equals("hand"))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("detected object 중 hand가 없습니다."));
+
             BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
-                    .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+                    .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_QR_CODE)   // 13자리 숫자 형태, QR 형태
                     .build();
             BarcodeScanner scanner = BarcodeScanning.getClient(options);
-            scanner.process(inputImage)
+            MlImage mlImage = new BitmapMlImageBuilder(rgbFrameBitmap).build();
+            scanner.process(mlImage)
                     .addOnSuccessListener(barcodes -> {
                         String code = null;
-                        for (Barcode barcode: barcodes) {
+                        for (Barcode barcode : barcodes) {
                             int valueType = barcode.getValueType();
                             if (valueType == Barcode.TYPE_PRODUCT) {
                                 code = barcode.getDisplayValue();
-                                Log.d("resultBarcodeCode", code);
+                                Log.e("resultBarcodeCode", code);
 
-                                tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, API_SUCCESS);
                                 tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, null);
-
-                                imageProxy.close(); // 바코드 인식됐으므로 imageProxy 종료
-                                currentImageProxy = null;
 
                                 Intent medicineIntent = new Intent(this, MedicineResultActivity.class);
                                 medicineIntent.putExtra("barcode", code);
@@ -173,73 +192,15 @@ public class SearchCaseActivity extends AppCompatActivity {
                         }
                         if (code == null) {
                             // 인식된 바코드가 없을 경우
-                            tts.speak("바코드가 인식되지 않았습니다. 다시 촬영을 진행합니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("바코드가 인식되지 않았습니다.", QUEUE_FLUSH, null, IS_GUIDING);
                         }
-                        imageProxy.close(); // 바코드 인식되면 imageProxy 닫음
-                        currentImageProxy = null;
                     });
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted(grantResults)) {
-                tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
-                startCamera();  // 권한 모두 허가되면 startCamera 실행
-            } else {
-                Log.e("Camera", "Permissions not granted by the user");
-                tts.speak("카메라 권한이 승인되지 않아 기능을 사용할 수 없습니다.", QUEUE_FLUSH, null, null);
-                this.finish();
-            }
-        }
-    }
-
-    private static boolean allPermissionsGranted(final int[] grantResults) {
-        for (int result : grantResults) {
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean hasPermission() {
-        return checkSelfPermission(PERMISSION_CAMERA) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void closeCamera() {
-        if (cameraProviderFuture != null && caseExecutor != null){
-            cameraProviderFuture.cancel(true);
-            cameraProviderFuture = null;
-            caseExecutor = null;
-            if (currentImageProxy != null) {
-                currentImageProxy.close();
-                currentImageProxy = null;
-            }
-        }
-    }
+    protected int getLayoutId() { return R.layout.fragment_camera_connection; }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        // 모든 퍼미션이 있을 때에만 카메라가 켜짐
-        if (hasPermission()) {
-            tts.speak("후면 카메라와 플래시가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
-            startCamera();  // 카메라 실행
-        } else { // 모든 권한이 허가되지 않았다면 요청
-            tts.speak("의약품 용기를 찍기 위해선 카메라 권한이 필요합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
-            tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-            tts.speak("권한 거부 시에는 이전 화면으로 돌아갑니다.", TextToSpeech.QUEUE_ADD, null, null);
-
-            ActivityCompat.requestPermissions(this, new String[] {PERMISSION_CAMERA}, REQUEST_CODE_PERMISSIONS);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        closeCamera();  // 카메라 자원 해제
-    }
+    protected Size getDesiredPreviewFrameSize() { return DESIRED_PREVIEW_SIZE; }
 }
