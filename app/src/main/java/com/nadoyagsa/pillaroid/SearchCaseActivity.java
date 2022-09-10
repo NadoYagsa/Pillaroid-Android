@@ -168,51 +168,33 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("detected object 중 hand가 없습니다."));
 
-            RectF location = recognition.getLocation();
-            float objectWidth = location.right - location.left;
-            float objectHeight = location.bottom - location.top;
+            BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
+                    .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_QR_CODE)   // 13자리 숫자 형태, QR 형태
+                    .build();
+            BarcodeScanner scanner = BarcodeScanning.getClient(options);
+            MlImage mlImage = new BitmapMlImageBuilder(rgbFrameBitmap).build();
+            scanner.process(mlImage)
+                    .addOnSuccessListener(barcodes -> {
+                        String code = null;
+                        for (Barcode barcode : barcodes) {
+                            int valueType = barcode.getValueType();
+                            if (valueType == Barcode.TYPE_PRODUCT) {
+                                code = barcode.getDisplayValue();
+                                Log.e("resultBarcodeCode", code);
 
-            boolean rotated = getScreenOrientation() % 180 == 90;
-            int rotatedFrameWidth = rotated ? previewHeight : previewWidth;
-            int rotatedFrameHeight = rotated ? previewWidth : previewHeight;
+                                tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, API_SUCCESS);
+                                tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, null);
 
-            // 거리 가이드
-            boolean isNormal = true;
-            if ((objectWidth < rotatedFrameWidth / 3) || (objectHeight < rotatedFrameHeight / 3)) {
-                isNormal = false;
-                Log.e("Object-Detection-result", "too far");
-                tts.speak("손이 멀리 있습니다. 가까이 대주세요.", QUEUE_FLUSH, null, IS_GUIDING);
-            }
-
-            if (isNormal) {
-                BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
-                        .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_QR_CODE)   // 13자리 숫자 형태, QR 형태
-                        .build();
-                BarcodeScanner scanner = BarcodeScanning.getClient(options);
-                MlImage mlImage = new BitmapMlImageBuilder(rgbFrameBitmap).build();
-                scanner.process(mlImage)
-                        .addOnSuccessListener(barcodes -> {
-                            String code = null;
-                            for (Barcode barcode : barcodes) {
-                                int valueType = barcode.getValueType();
-                                if (valueType == Barcode.TYPE_PRODUCT) {
-                                    code = barcode.getDisplayValue();
-                                    Log.e("resultBarcodeCode", code);
-
-                                    tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, API_SUCCESS);
-                                    tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, null);
-
-                                    Intent medicineIntent = new Intent(this, MedicineResultActivity.class);
-                                    medicineIntent.putExtra("barcode", code);
-                                    startActivity(medicineIntent);
-                                }
+                                Intent medicineIntent = new Intent(this, MedicineResultActivity.class);
+                                medicineIntent.putExtra("barcode", code);
+                                startActivity(medicineIntent);
                             }
-                            if (code == null) {
-                                // 인식된 바코드가 없을 경우
-                                tts.speak("바코드가 인식되지 않았습니다.", QUEUE_FLUSH, null, IS_GUIDING);
-                            }
-                        });
-            }
+                        }
+                        if (code == null) {
+                            // 인식된 바코드가 없을 경우
+                            tts.speak("바코드가 인식되지 않았습니다.", QUEUE_FLUSH, null, IS_GUIDING);
+                        }
+                    });
         }
     }
 
