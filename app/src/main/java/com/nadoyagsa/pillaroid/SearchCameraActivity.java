@@ -1,5 +1,8 @@
 package com.nadoyagsa.pillaroid;
 
+import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -40,5 +43,11 @@ public class SearchCameraActivity extends AppCompatActivity {
         LinearLayout llSearchPill = findViewById(R.id.ll_search_camera_pill);
         llSearchPill.setOnClickListener(v -> startActivity(new Intent(this, SearchPillActivity.class)));
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        tts.speak("의약품 촬영 방식 선택 화면", QUEUE_FLUSH, null, null);
     }
 }

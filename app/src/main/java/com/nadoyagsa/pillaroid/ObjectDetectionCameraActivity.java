@@ -39,11 +39,13 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     public static final float MINIMUM_CONFIDENCE_TF = 0.7f;
     private static final int REQUEST_CODE_PERMISSIONS = 1001;
     private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
+
+    protected static boolean isWaitingForGuide = false;
+
     protected final String API_SUCCESS = "api-success";
     protected final String API_FAILED = "api-failed";
     protected final String IS_GUIDING = "is-guiding";
 
-    protected boolean isWaitingForGuide = false;
     private boolean canTtsStop = true;
 
     protected int previewWidth = 0;
@@ -383,10 +385,8 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
                 finish();
             } else if (utteranceId.equals(API_SUCCESS)) {
                 canTtsStop = true;
-            } else {
-                if (utteranceId.equals(IS_GUIDING)) {
-                    isWaitingForGuide = false;
-                }
+            } else if (utteranceId.equals(IS_GUIDING)) {
+                isWaitingForGuide = false;
             }
         }
 
