@@ -32,6 +32,7 @@
             android:orientation="vertical"
             android:padding="20dp">
             <TextView
+                android:id="@+id/tv_mypage_description_guide_volume"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/text_mypage_guide_sound"
@@ -86,6 +87,7 @@
             android:orientation="vertical"
             android:padding="20dp">
             <TextView
+                android:id="@+id/tv_mypage_description_guide_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/text_mypage_guide_speed"

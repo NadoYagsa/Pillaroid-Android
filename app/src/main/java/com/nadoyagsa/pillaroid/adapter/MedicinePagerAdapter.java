@@ -1,5 +1,9 @@
 package com.nadoyagsa.pillaroid.adapter;
 
+import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
+
+import static com.nadoyagsa.pillaroid.MainActivity.tts;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -179,6 +183,41 @@ public class MedicinePagerAdapter extends RecyclerView.Adapter<MedicinePagerAdap
             tvColor = itemView.findViewById(R.id.tv_item_medicineresult_color);
             tvDividingLine = itemView.findViewById(R.id.tv_item_medicineresult_dividingline);
             tvIdentificationMark = itemView.findViewById(R.id.tv_item_medicineresult_identification);
+
+            tvContent.setOnClickListener(v -> {
+                tts.speak("텍스트. " + tvContent.getText(), QUEUE_FLUSH, null, null);
+            });
+
+            llAppearance.setOnClickListener(v -> {
+                tts.speak("텍스트. " + toAppearanceString(), QUEUE_FLUSH, null, null);
+            });
+
+            tvNoAppearance.setOnClickListener(v -> {
+                tts.speak("텍스트. " + tvNoAppearance.getText(), QUEUE_FLUSH, null, null);
+            });
+        }
+
+        private String toAppearanceString() {
+            StringBuilder resultSb = new StringBuilder();
+            if (!tvFeature.getText().equals("")) {
+                resultSb.append("성상. " + tvFeature.getText() + ". ");
+            }
+            if (!tvFormulation.getText().equals("")) {
+                resultSb.append("제형. " + tvFormulation.getText() + ". ");
+            }
+            if (!tvShape.getText().equals("")) {
+                resultSb.append("모양. " + tvShape.getText() + ". ");
+            }
+            if (!tvColor.getText().equals("")) {
+                resultSb.append("색상. " + tvColor.getText() + ". ");
+            }
+            if (!tvDividingLine.getText().equals("")) {
+                resultSb.append("분할선. " + tvDividingLine.getText() + ". ");
+            }
+            if (!tvIdentificationMark.getText().equals("")) {
+                resultSb.append("식별표기. " + tvIdentificationMark.getText() + ". ");
+            }
+            return resultSb.toString();
         }
     }
 }
