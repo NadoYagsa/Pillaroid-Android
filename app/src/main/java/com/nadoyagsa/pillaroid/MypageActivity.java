@@ -36,6 +36,9 @@ public class MypageActivity extends AppCompatActivity {
     private LinearLayout llLogout;
     private TextView tvGuideVolume;
 
+    private long delay = 0;
+    private View currentClickedView = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,13 +79,19 @@ public class MypageActivity extends AppCompatActivity {
             llLogout.setVisibility(View.INVISIBLE);
 
         llLogout.setOnClickListener(view -> {
-            SharedPrefManager.remove("token");
-            SharedPrefManager.remove("alarm_token");
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = view;
+                delay = System.currentTimeMillis() + 3000;
+                tts.speak("버튼. 로그아웃", QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == view) {
+                SharedPrefManager.remove("token");
+                SharedPrefManager.remove("alarm_token");
 
-            isToken = false;
-            llLogout.setVisibility(View.INVISIBLE);
+                isToken = false;
+                llLogout.setVisibility(View.INVISIBLE);
 
-            tts.speak("로그아웃이 완료되었습니다.", QUEUE_FLUSH, null, null);
+                tts.speak("로그아웃이 완료되었습니다.", QUEUE_FLUSH, null, null);
+            }
         });
     }
 
@@ -148,31 +157,61 @@ public class MypageActivity extends AppCompatActivity {
         // 자동로그인 됨->MypageFavoritesActivity(즐겨찾기 목록)으로 이동  ||  자동로그인 안됨->LoginActivity로 이동
         RelativeLayout rlFavorites = findViewById(R.id.rl_mypage_favorites);
         rlFavorites.setOnClickListener(view -> {
-            String token = SharedPrefManager.read("token", "");
-            if (!token.equals(""))
-                startActivity(new Intent(this, MypageFavoritesActivity.class));
-            else {
-                tts.speak("즐겨찾기 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = view;
+                delay = System.currentTimeMillis() + 3000;
+                tts.speak("버튼." + getString(R.string.page_medicine_favorites), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == view) {
+                String token = SharedPrefManager.read("token", "");
+                if (!token.equals(""))
+                    startActivity(new Intent(this, MypageFavoritesActivity.class));
+                else {
+                    tts.speak("즐겨찾기 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
 
-                Intent loginIntent = new Intent(this, LoginActivity.class);
-                loginIntent.putExtra("from", 'f');
-                startActivityResultLogin.launch(loginIntent);
+                    Intent loginIntent = new Intent(this, LoginActivity.class);
+                    loginIntent.putExtra("from", 'f');
+                    startActivityResultLogin.launch(loginIntent);
+                }
             }
         });
 
         // 자동로그인 됨->MypageAlarmActivity(알림 목록)으로 이동  ||  자동로그인 안됨->LoginActivity로 이동
         RelativeLayout rlAlarm = findViewById(R.id.rl_mypage_alarm);
         rlAlarm.setOnClickListener(view -> {
-            String token = SharedPrefManager.read("token", "");
-            if (!token.equals(""))
-                startActivity(new Intent(this, MypageAlarmActivity.class));
-            else {
-                tts.speak("알림 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
-                
-                Intent loginIntent = new Intent(this, LoginActivity.class);
-                loginIntent.putExtra("from", 'a');
-                startActivityResultLogin.launch(loginIntent);
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = view;
+                delay = System.currentTimeMillis() + 3000;
+                tts.speak("버튼." + getString(R.string.page_medicine_notice), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == view) {
+                String token = SharedPrefManager.read("token", "");
+                if (!token.equals(""))
+                    startActivity(new Intent(this, MypageAlarmActivity.class));
+                else {
+                    tts.speak("알림 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+
+                    Intent loginIntent = new Intent(this, LoginActivity.class);
+                    loginIntent.putExtra("from", 'a');
+                    startActivityResultLogin.launch(loginIntent);
+                }
             }
         });
+
+        TextView tvDescriptionGuideVolume = findViewById(R.id.tv_mypage_description_guide_volume);
+        tvDescriptionGuideVolume.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+        });
+
+        TextView tvDescriptionGuideSpeed = findViewById(R.id.tv_mypage_description_guide_speed);
+        tvDescriptionGuideSpeed.setOnClickListener(v -> {
+            currentClickedView = v;
+            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        tts.speak("마이페이지 화면", QUEUE_FLUSH, null, null);
     }
 }

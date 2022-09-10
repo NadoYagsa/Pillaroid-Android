@@ -34,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
     public static TextToSpeech tts;
     private boolean isReadyTts = false;
 
+    private long delay = 0;
+    private View currentClickedView = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,29 +119,7 @@ public class MainActivity extends AppCompatActivity {
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
 
-        LinearLayout llCamera = findViewById(R.id.ll_main_camera);
-        llCamera.setOnClickListener(v -> {
-            if (isReadyTts)
-                startActivity(new Intent(this, SearchCameraActivity.class));
-        });
-
-        LinearLayout llVoice = findViewById(R.id.ll_main_voice);
-        llVoice.setOnClickListener(v -> {
-            if (isReadyTts)
-                startActivity(new Intent(this, SearchVoiceActivity.class));
-        });
-
-        LinearLayout llPrescription = findViewById(R.id.ll_main_prescription);
-        llPrescription.setOnClickListener(v -> {
-            if (isReadyTts)
-                startActivity(new Intent(this, SearchPrescriptionActivity.class));
-        });
-
-        LinearLayout llMypage = findViewById(R.id.ll_main_mypage);
-        llMypage.setOnClickListener(v -> {
-            if (isReadyTts)
-                startActivity(new Intent(this, MypageActivity.class));
-        });
+        setClickListener();
     }
 
     @Override
@@ -154,5 +135,62 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void setClickListener() {
+        LinearLayout llCamera = findViewById(R.id.ll_main_camera);
+        llCamera.setOnClickListener(v -> {
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 3000;
+                tts.speak("버튼." + getString(R.string.page_search_camera), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                if (isReadyTts)
+                    startActivity(new Intent(this, SearchCameraActivity.class));
+            }
+        });
+
+        LinearLayout llVoice = findViewById(R.id.ll_main_voice);
+        llVoice.setOnClickListener(v -> {
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 3000;
+                tts.speak("버튼." + getString(R.string.page_search_voice), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                if (isReadyTts)
+                    startActivity(new Intent(this, SearchVoiceActivity.class));
+            }
+        });
+
+        LinearLayout llPrescription = findViewById(R.id.ll_main_prescription);
+        llPrescription.setOnClickListener(v -> {
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 3000;
+                tts.speak("버튼." + getString(R.string.page_search_prescription), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                if (isReadyTts)
+                    startActivity(new Intent(this, SearchPrescriptionActivity.class));
+            }
+        });
+
+        LinearLayout llMypage = findViewById(R.id.ll_main_mypage);
+        llMypage.setOnClickListener(v -> {
+            if (System.currentTimeMillis() > delay) {
+                currentClickedView = v;
+                delay = System.currentTimeMillis() + 3000;
+                tts.speak("버튼." + getString(R.string.page_mypage), QUEUE_FLUSH, null, null);
+            } else if (currentClickedView == v) {
+                if (isReadyTts)
+                    startActivity(new Intent(this, MypageActivity.class));
+            }
+        });
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        tts.speak("메인 화면", QUEUE_FLUSH, null, null);
     }
 }

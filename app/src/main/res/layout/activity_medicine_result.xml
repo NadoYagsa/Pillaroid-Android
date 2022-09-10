@@ -38,8 +38,7 @@
                     android:layout_gravity="center"
                     android:scaleType="fitCenter"
                     android:contentDescription="@string/icon_dot"
-                    android:src="@drawable/dot"
-                    app:tint="@color/main_color" />
+                    android:src="@drawable/dot" />
 
                 <TextView
                     android:id="@+id/tv_medicineresult_efficacy"
