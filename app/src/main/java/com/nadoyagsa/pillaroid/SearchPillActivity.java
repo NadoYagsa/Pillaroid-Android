@@ -1,5 +1,6 @@
 package com.nadoyagsa.pillaroid;
 
+import static android.speech.tts.TextToSpeech.QUEUE_ADD;
 import static android.speech.tts.TextToSpeech.QUEUE_FLUSH;
 
 import static com.nadoyagsa.pillaroid.MainActivity.tts;
@@ -187,7 +188,8 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
                     int rotatedFrameWidth = rotated ? previewHeight : previewWidth;
                     int rotatedFrameHeight = rotated ? previewWidth : previewHeight;
 
-                    int boundaryWidth = (int) (rotatedFrameWidth * 0.2);
+                    int distanceBoundaryWidth = (int) (rotatedFrameWidth * 0.2);
+                    int boundaryWidth = (int) (rotatedFrameWidth * 0.3);
                     int boundaryHeight = (int) (rotatedFrameHeight * 0.3);
 
                     Log.e("pillaroid-debug", String.format("box location (%f, %f) -> (%f, %f)", location.left, location.top, location.right, location.bottom));
@@ -200,30 +202,35 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
                         isNormal = false;
                         Log.e("Object-Detection-result", "too far");
                         tts.speak("손이 너무 멀리 있습니다. 손바닥을 조금만 가까이 대주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                    } else if (location.left > distanceBoundaryWidth && location.right < rotatedFrameWidth - distanceBoundaryWidth) {
+                        isNormal = false;
+                        Log.e("Object-Detection-result", "too far");
+                        tts.speak("손이 멀리 있습니다. 손바닥을 조금만 가까이 대주세요.", QUEUE_FLUSH, null, IS_GUIDING);
                     }
 
                     // 위치 가이드 (여백 정도에 따른 가이드)
                     if (location.bottom < rotatedFrameHeight - boundaryHeight) {   // TODO: 알약이 보통 손바닥 위에 있음을 감안하여 boundary를 줄일지
                         isNormal = false;
                         Log.e("Object-Detection-result", "too over");
-                        tts.speak("손이 너무 위에 있습니다. 손바닥을 조금만 아래로 내려주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("손이 위에 있습니다. 손바닥을 조금만 아래로 내려주세요.", QUEUE_FLUSH, null, IS_GUIDING);
                     } else if (location.top > boundaryHeight) {
                         isNormal = false;
                         Log.e("Object-Detection-result", "too under");
-                        tts.speak("손이 너무 아래에 있습니다. 손바닥을 조금만 위로 올려주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("손이 아래에 있습니다. 손바닥을 조금만 위로 올려주세요.", QUEUE_FLUSH, null, IS_GUIDING);
                     } else if (location.right < rotatedFrameWidth - boundaryWidth) {
                         isNormal = false;
                         Log.e("Object-Detection-result", "too left");
-                        tts.speak("손이 너무 왼쪽에 있습니다. 손바닥을 조금만 오른쪽으로 이동해 주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("손이 왼쪽에 있습니다. 손바닥을 조금만 오른쪽으로 이동해 주세요.", QUEUE_FLUSH, null, IS_GUIDING);
                     } else if (location.left > boundaryWidth) {
                         isNormal = false;
                         Log.e("Object-Detection-result", "too right");
-                        tts.speak("손이 너무 오른쪽에 있습니다. 손바닥을 조금만 왼쪽으로 이동해 주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("손이 오른쪽에 있습니다. 손바닥을 조금만 왼쪽으로 이동해 주세요.", QUEUE_FLUSH, null, IS_GUIDING);
                     }
 
                     if (isNormal) {
                         Log.i("Object-Detection-result", "normal");
                         tts.speak("알약이 잘 감지되었습니다. 인식 결과를 가져오는 중입니다.", QUEUE_FLUSH, null, API_SUCCESS);
+                        tts.playSilentUtterance(3000, QUEUE_ADD, null);
 
                         // 서버에게 이미지 보내기
                         @SuppressLint("SimpleDateFormat")
