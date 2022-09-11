@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);    //설정한 음량값으로 음량 조절
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, SharedPrefManager.read("guideVolume", 8), AudioManager.FLAG_SHOW_UI);
 
+        SharedPrefManager.write("isFirstConnection", true);
         tts = new TextToSpeech(this, status -> {
             if (status == SUCCESS) {
                 int result = tts.setLanguage(Locale.KOREAN);

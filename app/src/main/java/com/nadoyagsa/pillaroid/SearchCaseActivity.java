@@ -37,7 +37,7 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
 
     private Classifier detector;
     private MultiBoxTracker tracker;
-    private OverlayView trackingOverlay;
+//    private OverlayView trackingOverlay;
 
     private Bitmap rgbFrameBitmap = null;
     private Bitmap croppedBitmap = null;
@@ -77,11 +77,11 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
                         cropSize, cropSize,
                         sensorOrientation, MAINTAIN_ASPECT);
 
-        trackingOverlay = findViewById(R.id.tracking_overlay);
-        trackingOverlay.addCallback(
-                canvas -> {
-                    tracker.draw(canvas);
-                });
+//        trackingOverlay = findViewById(R.id.tracking_overlay);
+//        trackingOverlay.addCallback(
+//                canvas -> {
+//                    tracker.draw(canvas);
+//                });
 
         tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
     }
@@ -91,7 +91,7 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
         ++timestamp;
         currTimestamp = timestamp;
 
-        trackingOverlay.postInvalidate();
+//        trackingOverlay.postInvalidate();
 
         // No mutex needed as this method is not reentrant.
         if (computingDetection) {
@@ -143,7 +143,7 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
             }
 
             tracker.trackResults(mappedRecognitions, currTimestamp);
-            trackingOverlay.postInvalidate();
+//            trackingOverlay.postInvalidate();
 
             computingDetection = false;
 
@@ -156,18 +156,18 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
     };
 
     private void guide(List<Classifier.Recognition> mappedRecognitions) {
-        if (mappedRecognitions.size() == 0) {
-            Log.e("Object-Detection-result", "no detection");
-            tts.speak("손이 감지되지 않습니다. 천천히 상하좌우로 움직여주세요.", QUEUE_FLUSH, null, IS_GUIDING);
-        } else {
-            Collections.sort(mappedRecognitions);   // confidence 기준으로 정렬
-
-            // confidence가 가장 높은 hand Recognition 찾기
-            Classifier.Recognition recognition = mappedRecognitions.stream()
-                    .filter(r -> r.getTitle().equals("hand"))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("detected object 중 hand가 없습니다."));
-
+//        if (mappedRecognitions.size() == 0) {
+//            Log.e("Object-Detection-result", "no detection");
+//            tts.speak("손이 감지되지 않습니다. 천천히 상하좌우로 움직여주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+//        } else {
+//            Collections.sort(mappedRecognitions);   // confidence 기준으로 정렬
+//
+//            // confidence가 가장 높은 hand Recognition 찾기
+//            Classifier.Recognition recognition = mappedRecognitions.stream()
+//                    .filter(r -> r.getTitle().equals("hand"))
+//                    .findFirst()
+//                    .orElseThrow(() -> new IllegalArgumentException("detected object 중 hand가 없습니다."));
+//
             BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
                     .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_QR_CODE)   // 13자리 숫자 형태, QR 형태
                     .build();
@@ -192,10 +192,10 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
                         }
                         if (code == null) {
                             // 인식된 바코드가 없을 경우
-                            tts.speak("바코드가 인식되지 않았습니다.", QUEUE_FLUSH, null, IS_GUIDING);
+                            tts.speak("바코드가 인식되지 않았습니다. 천천히 상하좌우로 움직여주세요.", QUEUE_FLUSH, null, IS_GUIDING);
                         }
                     });
-        }
+//        }
     }
 
     @Override
