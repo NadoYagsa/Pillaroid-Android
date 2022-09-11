@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.JsonObject;
 
 import org.json.JSONException;
@@ -69,6 +70,22 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("TTS", "Initialization Failed");
             }
         });
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.e("fcm", "Fetching FCM registration token failed", task.getException());
+                        return;
+                    }
+
+                    // Get new FCM registration token
+                    String token = task.getResult();
+
+                    if (!SharedPrefManager.read("alarm_token", "").equals("") || !SharedPrefManager.read("alarm_token", "").equals(token)) {
+                        SharedPrefManager.remove("alarm_token");
+                    }
+                    SharedPrefManager.write("alarm_token", token);
+                });
 
         //알림 토큰 전달
         if (!SharedPrefManager.read("token", "").equals("") && !SharedPrefManager.read("alarm_token", "").equals("")) {
