@@ -19,14 +19,12 @@ import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
-import com.nadoyagsa.pillaroid.customview.OverlayView;
 import com.nadoyagsa.pillaroid.env.ImageUtils;
 import com.nadoyagsa.pillaroid.tflite.Classifier;
 import com.nadoyagsa.pillaroid.tflite.DetectorFactory;
 import com.nadoyagsa.pillaroid.tracking.MultiBoxTracker;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,7 +35,6 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
 
     private Classifier detector;
     private MultiBoxTracker tracker;
-//    private OverlayView trackingOverlay;
 
     private Bitmap rgbFrameBitmap = null;
     private Bitmap croppedBitmap = null;
@@ -77,12 +74,6 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
                         cropSize, cropSize,
                         sensorOrientation, MAINTAIN_ASPECT);
 
-//        trackingOverlay = findViewById(R.id.tracking_overlay);
-//        trackingOverlay.addCallback(
-//                canvas -> {
-//                    tracker.draw(canvas);
-//                });
-
         tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
     }
 
@@ -90,8 +81,6 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
     protected void processImage() {
         ++timestamp;
         currTimestamp = timestamp;
-
-//        trackingOverlay.postInvalidate();
 
         // No mutex needed as this method is not reentrant.
         if (computingDetection) {
@@ -143,59 +132,45 @@ public class SearchCaseActivity extends ObjectDetectionCameraActivity implements
             }
 
             tracker.trackResults(mappedRecognitions, currTimestamp);
-//            trackingOverlay.postInvalidate();
 
             computingDetection = false;
 
             // 가이드를 위한 분석 시작
             if (!isWaitingForGuide) {
                 isWaitingForGuide = true;
-                guide(mappedRecognitions);
+                guide();
             }
         }
     };
 
-    private void guide(List<Classifier.Recognition> mappedRecognitions) {
-//        if (mappedRecognitions.size() == 0) {
-//            Log.e("Object-Detection-result", "no detection");
-//            tts.speak("손이 감지되지 않습니다. 천천히 상하좌우로 움직여주세요.", QUEUE_FLUSH, null, IS_GUIDING);
-//        } else {
-//            Collections.sort(mappedRecognitions);   // confidence 기준으로 정렬
-//
-//            // confidence가 가장 높은 hand Recognition 찾기
-//            Classifier.Recognition recognition = mappedRecognitions.stream()
-//                    .filter(r -> r.getTitle().equals("hand"))
-//                    .findFirst()
-//                    .orElseThrow(() -> new IllegalArgumentException("detected object 중 hand가 없습니다."));
-//
-            BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
-                    .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_QR_CODE)   // 13자리 숫자 형태, QR 형태
-                    .build();
-            BarcodeScanner scanner = BarcodeScanning.getClient(options);
-            MlImage mlImage = new BitmapMlImageBuilder(rgbFrameBitmap).build();
-            scanner.process(mlImage)
-                    .addOnSuccessListener(barcodes -> {
-                        String code = null;
-                        for (Barcode barcode : barcodes) {
-                            int valueType = barcode.getValueType();
-                            if (valueType == Barcode.TYPE_PRODUCT) {
-                                code = barcode.getDisplayValue();
-                                Log.e("resultBarcodeCode", code);
+    private void guide() {
+        BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_QR_CODE)   // 13자리 숫자 형태, QR 형태
+                .build();
+        BarcodeScanner scanner = BarcodeScanning.getClient(options);
+        MlImage mlImage = new BitmapMlImageBuilder(rgbFrameBitmap).build();
+        scanner.process(mlImage)
+                .addOnSuccessListener(barcodes -> {
+                    String code = null;
+                    for (Barcode barcode : barcodes) {
+                        int valueType = barcode.getValueType();
+                        if (valueType == Barcode.TYPE_PRODUCT) {
+                            code = barcode.getDisplayValue();
+                            Log.e("resultBarcodeCode", code);
 
-                                tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, API_SUCCESS);
-                                tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, null);
+                            tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, API_SUCCESS);
+                            tts.playSilentUtterance(1000, TextToSpeech.QUEUE_ADD, null);
 
-                                Intent medicineIntent = new Intent(this, MedicineResultActivity.class);
-                                medicineIntent.putExtra("barcode", code);
-                                startActivity(medicineIntent);
-                            }
+                            Intent medicineIntent = new Intent(this, MedicineResultActivity.class);
+                            medicineIntent.putExtra("barcode", code);
+                            startActivity(medicineIntent);
                         }
-                        if (code == null) {
-                            // 인식된 바코드가 없을 경우
-                            tts.speak("바코드가 인식되지 않았습니다. 천천히 상하좌우로 움직여주세요.", QUEUE_FLUSH, null, IS_GUIDING);
-                        }
-                    });
-//        }
+                    }
+                    if (code == null) {
+                        // 인식된 바코드가 없을 경우
+                        tts.speak("바코드가 인식되지 않았습니다. 천천히 상하좌우로 움직여주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                    }
+                });
     }
 
     @Override
