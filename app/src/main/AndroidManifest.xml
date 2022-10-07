@@ -29,8 +29,10 @@
         <activity android:name=".SearchCameraActivity"/>
         <activity android:name=".SearchCaseActivity"/>
         <activity android:name=".SearchPillActivity"/>
+        <activity android:name=".SearchDocumentActivity"/>
         <activity android:name=".SearchPrescriptionActivity"/>
         <activity android:name=".PrescriptionResultActivity"/>
+        <activity android:name=".SearchPharmacyEnvelopeActivity"/>
         <activity android:name=".SearchVoiceActivity" />
         <activity android:name=".VoiceResultsActivity" />
         <activity android:name=".MedicineResultActivity" />

@@ -7,7 +7,9 @@
     <string name="page_search_case">포장용기로 검색</string>
     <string name="page_search_pill">낱알로 검색</string>
     <string name="page_search_voice">의약품 음성으로 검색</string>
+    <string name="page_search_document">문서로 검색</string>
     <string name="page_search_prescription">처방전으로 검색</string>
+    <string name="page_search_pharmacy_envelope">약국 봉투로 검색</string>
     <string name="page_medicine_favorites">의약품 즐겨찾기</string>
     <string name="page_medicine_notice">약 복용 알림</string>
 
@@ -33,7 +35,9 @@
     <string name="icon_camera">촬영 아이콘</string>
     <string name="icon_pill">알약 아이콘</string>
     <string name="icon_voice">음성 아이콘</string>
+    <string name="icon_document">문서 아이콘</string>
     <string name="icon_prescription">처방전 아이콘</string>
+    <string name="icon_pharmacy">약국 아이콘</string>
     <string name="icon_mypage">마이페이지 아이콘</string>
     <string name="icon_notice">알림 아이콘</string>
     <string name="icon_favorites">즐겨찾기 아이콘</string>
