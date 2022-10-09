@@ -56,6 +56,7 @@ public class MedicineResultActivity extends AppCompatActivity {
     private String barcode = "";
     private MedicineInfo medicine;
     private HashMap<Integer,View> categories;
+    private boolean isloadingActivity = true;
 
     private ActivityResultLauncher<Intent> startActivityResultLogin;
     private AlertDialog dialog;
@@ -124,15 +125,16 @@ public class MedicineResultActivity extends AppCompatActivity {
         vpResult.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                tts.speak(medicinePagerAdapter.getCategories().get(position), QUEUE_FLUSH, null, null);
-
+                if (!isloadingActivity) {
+                    tts.speak(medicinePagerAdapter.getCategories().get(position), QUEUE_FLUSH, null, null);
+                }
                 ((TextView) selectedCategoryView).setTextColor(getColor(R.color.black));
-                ((TextView)selectedCategoryView).setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                ((TextView) selectedCategoryView).setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
 
                 selectedCategoryView = categories.get(position);
                 assert selectedCategoryView != null;
-                ((TextView)selectedCategoryView).setTextColor(getColor(R.color.main_color));
-                ((TextView)selectedCategoryView).setTypeface(Typeface.DEFAULT_BOLD);
+                ((TextView) selectedCategoryView).setTextColor(getColor(R.color.main_color));
+                ((TextView) selectedCategoryView).setTypeface(Typeface.DEFAULT_BOLD);
 
                 vpResult.setCurrentItem(position);
                 super.onPageSelected(position);
@@ -531,7 +533,7 @@ public class MedicineResultActivity extends AppCompatActivity {
                                 .replace(']', ')')
                                 .replaceAll("\\([^)]*\\)", "");
 
-                        tts.speak("검색된 의약품은 " + name + "입니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("검색된 의약품은 " + name + "입니다. 효능 및 효과", QUEUE_FLUSH, null, null);
 
                         JSONObject appearance = data.getJSONObject("appearance");
                         String feature = null, formulation = null, shape = null, color = null, dividingLine = null, identificationMark = null;
@@ -571,6 +573,7 @@ public class MedicineResultActivity extends AppCompatActivity {
 
                         medicinePagerAdapter.setMedicineInfo(medicine);
                         vpResult.setCurrentItem(0);
+                        isloadingActivity = false;
                         medicinePagerAdapter.notifyItemChanged(0);
                     } catch (JSONException e) {
                         e.printStackTrace();
