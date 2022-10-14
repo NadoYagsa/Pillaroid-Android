@@ -19,7 +19,7 @@
             android:layout_height="130dp"
             android:layout_gravity="center"
             android:contentDescription="@string/app_name"
-            android:src="@color/main_color"/>
+            android:src="@drawable/icon_logo"/>
 
         <View
             android:layout_width="match_parent"
