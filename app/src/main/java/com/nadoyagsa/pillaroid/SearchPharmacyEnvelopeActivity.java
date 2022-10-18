@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.UtteranceProgressListener;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -35,10 +36,14 @@ import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
-
+    private static final String PHARMACY_ENVELOPE_LAST_GUIDE = "pharmacy-envelope-last-guide";
     private static final int REQUEST_CODE_PERMISSIONS = 1000;
 
     private ImageCapture imageCapture;
@@ -149,7 +154,7 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
                         @Override
                         public void onError(@NonNull ImageCaptureException exception) {
                             super.onError(exception);
-                            isSearching = false;
+                            tts.speak("사진을 찍는데 오류가 발생했습니다. 다시 시도해주세요.", QUEUE_FLUSH, null, PHARMACY_ENVELOPE_LAST_GUIDE);
                         }
                     });
                 }
@@ -166,6 +171,21 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) { }
+
+            @Override
+            public void onDone(String utteranceId) {
+                if (utteranceId.equals(PHARMACY_ENVELOPE_LAST_GUIDE)) {   // 마지막 가이드가 끝나면 사진 분석 가능
+                    isSearching = false;
+                }
+            }
+
+            @Override
+            public void onError(String utteranceId) { }
+        });
 
         if (canUseCamera) {
             startCamera();
@@ -195,18 +215,116 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
 
             InputImage image = InputImage.fromMediaImage(phamacyEnvelopeImage, imageProxy.getImageInfo().getRotationDegrees());
             recognizer.process(image)
-                    .addOnSuccessListener(new PharmacyEnvelopeSuccessListner())
+                    .addOnSuccessListener(new PharmacyEnvelopeSuccessListener())
                     .addOnFailureListener(e -> {
-                        tts.speak("약국 봉투의 텍스트를 읽는데 오류가 발생했습니다.", QUEUE_FLUSH, null, null);
-                        isSearching = false;
+                        tts.speak("약국 봉투의 텍스트를 읽는데 오류가 발생했습니다.", QUEUE_FLUSH, null, PHARMACY_ENVELOPE_LAST_GUIDE);
                     });
         }
     }
 
-    private class PharmacyEnvelopeSuccessListner implements OnSuccessListener<Text> {
+    private class PharmacyEnvelopeSuccessListener implements OnSuccessListener<Text> {
         @Override
         public void onSuccess(Text text) {
-            isSearching = false;
+            // TODO: 주의사항에 있는 단어를 착각할 수 있어 일단 제외시킴
+            // 약제 종류 (인식된 단어가 string에 endswith 되는지로 판별)
+            /*String[] categories = new String[]{
+                    "억제제", "조절제", "치료제", "진경제", "촉진제", "진통제", "거담제", "항혈소판제",
+                    "소염효소제", "항생제", "고혈압약", "H2 차단제", "해열제", "소염제", "위산과다증약",
+                    "구충제", "칼슘제", "진경제", "혈압강하제", "진해거담제", "비염약", "소화성궤양용제",
+                    "기타의소화기관용약", "항악성종양제", "최면진정제", "동맥경화용제",
+                    "정신신경용제", "기타의중추신경용약", "기타의비뇨생식기관및항문용약", "당뇨병용제", "치과구강용약",
+                    "기타의순환계용약", "간장질환용제", "혼합비타민제차",
+                    "기타의비타민제", "기타의화학요법제", "무기질제제", "기타의자양강장변질제", "하제|완장제",
+                    "골격근이완제", "따로분류되지않는대사성의약품", "항전간제", "제산제", "주로그람양성|음성균에작용하는것",
+                    "주로그람양성균|리케치아|비루스에작용하는것", "비타민C및P제", "단백아미노산제제", "항히스타민제", "종합대사성제제",
+                    "혈관확장제", "기타의외피용약", "정장제", "비타민E및K제", "기타의알레르기용약",
+                    "자격요법제(비특이성면역억제제를포함)", "난포호르몬제및황체호르몬제", "효소제제", "기타의호흡기관용약", "안과용제",
+                    "합성마약", "통풍치료제", "따로분류되지않고치료를주목적으로하지않는의약품", "기타의혈액및체액용약", "부정맥용제",
+                    "비타민B제(비타민B1을제외)", "비타민B1제", "건위소화제", "자율신경제", "아편알카로이드계제제", "혈액응고저지제",
+                    "진훈제", "피임제", "항원충제", "기타의조제용약", "최토제|진토제", "뇌하수체호르몬제", "각성제|흥분제", "해독제",
+                    "비타민A및D제", "기타의조직세포의기능용의약품", "기타의항생물질제제(복합항생물질제제를포함)", "부신호르몬제", "이비과용제",
+                    "강심제", "화농성질환용제", "모발용제(발모|탈모|염모|양모제)", "주로그람양성|음성균|리케치아|비루스에작용하는것", "지혈제",
+                    "항결핵제", "주로항산성균에작용하는것", "이담제", "비뇨생식기관용제(성병예방제포함)", "주로그람음성균에작용하는것", "설화제",
+                    "혈관보강제", "단백동화스테로이드제", "이뇨제", "치질용제", "주로그람양성균에작용하는것", "치나제", "기타의종양치료제",
+                    "기타의호르몬제(항호르몬제를포함)", "혈액대용제", "자궁수축제", "갑상선|부갑상선호르몬제", "장기제제", "기생성피부질환용제",
+                    "기타의신경계및감각기관용의약품", "주로곰팡이|원충에작용하는것", "혈관수축제", "X선조영제", "면역혈청학적검사용시약", "후란계제제",
+                    "기타의말초신경용약", "호흡기관용약", "백신류", "소화기관용약",
+            };*/
+
+            String pharmacyName = null;     // 약국명
+            String dispensingYear = null;   // 조제일자(년)
+            String dispensingMonth = null;  // 조제일자(월)
+            String dispensingDay = null;    // 조제일자(일)
+            Pattern datePattern = Pattern.compile("(\\d{4})-(\\d{2})-(\\d{2})");    // xxxx-xx-xx로 표기된 날짜
+            List<String> detectedCategories = new ArrayList<>();   // 약제 종류
+            Pattern categoryPattern = Pattern.compile("[\\(\\[]([ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]*[제약])[\\)\\]]"); // (), [] 안에 있으면서 ~제 또는 ~약으로 끝나는 text
+            boolean voiceQR = false;        // 음성복약지도 큐알 여부
+
+            for (Text.TextBlock block : text.getTextBlocks()) {
+                String blockText = block.getText();
+
+                // 약국
+                if (pharmacyName == null && blockText.contains("약국")) {
+                    String[] words = blockText.split(" ");
+                    for (String word: words) {
+                        if (word.endsWith("약국") && ! word.equals("약국")) {   // 'xx약국' 단어 찾기
+                            pharmacyName =  word;
+                            break;
+                        }
+                    }
+                }
+
+                blockText = blockText.replaceAll("\\s", "");   // 공백 전부 제거
+
+                // 조제일자
+                if (dispensingYear == null && blockText.contains("조제일자")) {
+                    Matcher dispensingDateMatcher = datePattern.matcher(blockText);
+                    if (dispensingDateMatcher.find()) {
+                        dispensingYear = dispensingDateMatcher.group(1);
+                        dispensingMonth = dispensingDateMatcher.group(2);
+                        dispensingDay = dispensingDateMatcher.group(3);
+                    }
+                }
+
+                // 음성 복약 지도
+                if (!voiceQR && blockText.contains("음성복약지도")) {
+                    voiceQR = true;
+                }
+
+                // 약제 종류
+                Matcher categoryMatcher = categoryPattern.matcher(blockText);
+                while (categoryMatcher.find()) {
+                    detectedCategories.add(categoryMatcher.group(1));
+                }
+            }
+
+            if (voiceQR) {
+                tts.speak("음성복약지도 큐알코드가 발견되었습니다. 보이스아이 어플을 통해 세부 복약 정보를 음성으로 확인하실 수 있습니다.", QUEUE_ADD, null, null);
+                // TODO: 보이스아이 실행
+            }
+
+            if (pharmacyName != null && dispensingYear != null) {
+                tts.speak(String.format("%s년 %s월 %s일, %s에서 만들어진 약 봉투입니다.", dispensingYear, dispensingMonth, dispensingDay, pharmacyName), QUEUE_FLUSH, null, null);
+            } else if (pharmacyName != null){
+                tts.speak(String.format("%s에서 만들어진 약 봉투입니다.", pharmacyName), QUEUE_FLUSH, null, null);
+            } else if (dispensingYear != null) {
+                tts.speak(String.format("%s년 %s월 %s일에 제조된 약 봉투입니다.", dispensingYear, dispensingMonth, dispensingDay), QUEUE_FLUSH, null, null);
+            } else {
+                tts.speak("약국과 제조일자에 대한 정보를 찾을 수 없습니다.", QUEUE_FLUSH, null, null);
+            }
+
+            if (detectedCategories.size() > 0) {
+                StringBuilder sb = new StringBuilder();
+
+                sb.append("조회된 약제 종류는 ");
+                for (String category: detectedCategories) {
+                    sb.append(category).append(", ");
+                }
+                sb.append("입니다.");
+                tts.speak(sb, QUEUE_ADD, null, PHARMACY_ENVELOPE_LAST_GUIDE);
+            } else {
+                tts.speak("약제 종류 정보를 찾을 수 없습니다.", QUEUE_ADD, null, PHARMACY_ENVELOPE_LAST_GUIDE);
+            }
         }
     }
 }
