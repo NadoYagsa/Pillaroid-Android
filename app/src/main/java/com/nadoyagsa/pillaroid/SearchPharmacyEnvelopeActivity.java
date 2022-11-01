@@ -259,6 +259,7 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
             List<String> detectedCategories = new ArrayList<>();   // 약제 종류
             Pattern categoryPattern = Pattern.compile("[\\(\\[]([ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]*[제약])[\\)\\]]"); // (), [] 안에 있으면서 ~제 또는 ~약으로 끝나는 text
             boolean voiceQR = false;        // 음성복약지도 큐알 여부
+            int[] threeTimes = new int[3];
 
             for (Text.TextBlock block : text.getTextBlocks()) {
                 String blockText = block.getText();
@@ -296,13 +297,56 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
                 while (categoryMatcher.find()) {
                     detectedCategories.add(categoryMatcher.group(1));
                 }
-            }
 
+                // 아침 점심 저녁
+                if (blockText.equals("아침")) {
+                    threeTimes[0]++;
+                } else if (blockText.equals("점심")) {
+                    threeTimes[1]++;
+                } else if (blockText.equals("저녁")) {
+                    threeTimes[2]++;
+                }
+            }
+            
+            if (dispensingYear == null && detectedCategories.size() == 0 && ! voiceQR) {    // 약포지
+                speakDetectedPharmacyName(pharmacyName);
+                speakDetectedThreeTimes(threeTimes);
+            } else {    // 약국 봉투
+                speakDetectedVoiceQR(voiceQR);
+                speakDetectedPharmacyNameAndDispensingDate(pharmacyName, dispensingYear, dispensingMonth, dispensingDay);
+                speakDetectedCategories(detectedCategories);
+            }
+        }
+
+        private void speakDetectedPharmacyName(String pharmacyName) {
+            if (pharmacyName != null){
+                tts.speak(String.format("%s에서 만들어진 약 봉투입니다.", pharmacyName), QUEUE_FLUSH, null, null);
+            }
+        }
+
+        private void speakDetectedThreeTimes(int[] threeTimes) {
+            StringBuilder ThreeTimesGuide = new StringBuilder();
+            ThreeTimesGuide.append("사진에서 ");
+            if (threeTimes[0] != 0) {
+                ThreeTimesGuide.append("아침 ").append(threeTimes[0]).append("개, ");
+            }
+            if (threeTimes[1] != 0) {
+                ThreeTimesGuide.append("점심 ").append(threeTimes[1]).append("개, ");
+            }
+            if (threeTimes[2] != 0) {
+                ThreeTimesGuide.append("저녁 ").append(threeTimes[2]).append("개, ");
+            }
+            ThreeTimesGuide.append("의 단어가 발견되었습니다.");
+            tts.speak(ThreeTimesGuide.toString(), QUEUE_ADD, null, null);
+        }
+
+        private void speakDetectedVoiceQR(boolean voiceQR) {
             if (voiceQR) {
                 tts.speak("음성복약지도 큐알코드가 발견되었습니다. 보이스아이 어플을 통해 세부 복약 정보를 음성으로 확인하실 수 있습니다.", QUEUE_ADD, null, null);
-                // TODO: 보이스아이 실행
             }
+        }
 
+        private void speakDetectedPharmacyNameAndDispensingDate(String pharmacyName, String dispensingYear, String dispensingMonth, String dispensingDay) {
             if (pharmacyName != null && dispensingYear != null) {
                 tts.speak(String.format("%s년 %s월 %s일, %s에서 만들어진 약 봉투입니다.", dispensingYear, dispensingMonth, dispensingDay, pharmacyName), QUEUE_FLUSH, null, null);
             } else if (pharmacyName != null){
@@ -312,7 +356,9 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
             } else {
                 tts.speak("약국과 제조일자에 대한 정보를 찾을 수 없습니다.", QUEUE_FLUSH, null, null);
             }
+        }
 
+        private void speakDetectedCategories(List<String> detectedCategories) {
             if (detectedCategories.size() > 0) {
                 StringBuilder sb = new StringBuilder();
 
