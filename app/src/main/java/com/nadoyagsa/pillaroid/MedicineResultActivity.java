@@ -310,6 +310,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         if (alarmInfo == null) {
             tts.speak("알림 추가. 알림 이름과 복용 기간을 설정해주세요.", QUEUE_FLUSH, null, null);
             etLabel.setHint(medicine.getName());
+            etDays.setHint("5");
         } else {
             tts.speak(String.format("현재 등록된 알림은 %s %d일 입니다.", alarmInfo.getName(), alarmInfo.getPeriod()), QUEUE_FLUSH, null, null);
             etLabel.setText(alarmInfo.getName());
@@ -328,12 +329,7 @@ public class MedicineResultActivity extends AppCompatActivity {
                 tts.speak("버튼." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (ivAlarm.getTag().equals("off")) {        // 알림 추가
-                    if (etDays.getText().toString().equals("")) {
-                        tts.speak("복용 기간을 설정해주세요.", QUEUE_FLUSH, null, null);
-                        return;
-                    }
-
-                    int days = Integer.parseInt(etDays.getText().toString());
+                    int days = Integer.parseInt(etDays.getText().toString().equals("") ? etDays.getHint().toString() : etDays.getText().toString());
                     if (days <= 0) {
                         tts.speak("복용 기간은 양수여야 합니다.", QUEUE_FLUSH, null, null);
                         return;
