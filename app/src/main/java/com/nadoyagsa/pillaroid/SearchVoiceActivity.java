@@ -82,7 +82,6 @@ public class SearchVoiceActivity extends AppCompatActivity {
     }
 
     private void checkRecordPermission() {
-        //TODO: layout text들 string.xml에 넣으면 getString(R.string._)로 바꾸기
         if (Build.VERSION.SDK_INT >= 23) {
             // 녹음 권한이 없으면 권한 요청
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_DENIED) {

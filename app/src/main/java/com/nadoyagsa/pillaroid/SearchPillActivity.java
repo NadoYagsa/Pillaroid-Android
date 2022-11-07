@@ -209,7 +209,7 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
                     }
 
                     // 위치 가이드 (여백 정도에 따른 가이드)
-                    if (location.bottom < rotatedFrameHeight - boundaryHeight) {   // TODO: 알약이 보통 손바닥 위에 있음을 감안하여 boundary를 줄일지
+                    if (location.bottom < rotatedFrameHeight - boundaryHeight) {
                         isNormal = false;
                         Log.e("Object-Detection-result", "too over");
                         tts.speak("손이 위에 있습니다. 손바닥을 조금만 아래로 내려주세요.", QUEUE_FLUSH, null, IS_GUIDING);

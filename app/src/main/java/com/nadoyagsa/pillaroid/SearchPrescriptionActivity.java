@@ -187,7 +187,6 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                                                 .replaceAll("\\([^)]*\\)?", "")                   // 모든 괄호 내용 제거
                                                 .trim();
 
-                                        //TODO: 의약품 대신 보험 코드가 있을 때, 보험 코드를 쓰는 것이 나을지 고민해보자!
                                         itemList.add(new PrescriptionPosition(blockCornerPoints[0].y, medicine));
                                     }
                                     // 의약품의 명칭보다 아래 위치하며 오른쪽에 적힌 문장들

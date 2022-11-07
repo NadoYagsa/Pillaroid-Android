@@ -225,7 +225,6 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
     private class PharmacyEnvelopeSuccessListener implements OnSuccessListener<Text> {
         @Override
         public void onSuccess(Text text) {
-            // TODO: 주의사항에 있는 단어를 착각할 수 있어 일단 제외시킴
             // 약제 종류 (인식된 단어가 string에 endswith 되는지로 판별)
             /*String[] categories = new String[]{
                     "억제제", "조절제", "치료제", "진경제", "촉진제", "진통제", "거담제", "항혈소판제",

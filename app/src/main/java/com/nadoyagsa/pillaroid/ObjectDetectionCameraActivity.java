@@ -138,7 +138,6 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
     }
 
     // CameraConnectionFragment에서 쓰이는 콜백 함수
-    // TODO: 영은 디바이스로 확인 요망
     /* Callback for Camera2 API */
     @Override
     public void onImageAvailable(ImageReader reader) {
@@ -286,7 +285,7 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
                 useCamera2API =
                         (facing == CameraCharacteristics.LENS_FACING_EXTERNAL)
                                 || isHardwareLevelSupported(
-                                characteristics, CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL); // TODO: 영은 camera2 되는지 확인 (소은: false여서 legacy만 확인됨)
+                                characteristics, CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL);
                 Log.i("Object-Detection", String.format("Camera API lv2?: %s", useCamera2API));
                 return cameraId;
             }

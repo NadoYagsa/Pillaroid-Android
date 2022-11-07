@@ -90,7 +90,6 @@ public class PrescriptionPagerAdapter extends RecyclerView.Adapter<PrescriptionP
                 } else {  // 이미 로그인된 사용자
                     PrescriptionInfo prescription = resultList.get(clickPosition);
 
-                    // TODO: 처음 즐겨찾기 추가 시에 선택된 의약품 명이 출력됨
                     if (prescription.isFavoritesNull()) {   // 즐겨찾기 추가
                         JsonObject request = new JsonObject();
                         request.addProperty("medicineIdx", prescription.getMedicineIdx());

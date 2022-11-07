@@ -280,7 +280,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         });
 
         // 알람
-        ivAlarm = toolbar.findViewById(R.id.ibt_ab_medicineresult_alarm);   //TODO: 시각장애인 모드일 때 description 읽어주는지 확인하기
+        ivAlarm = toolbar.findViewById(R.id.ibt_ab_medicineresult_alarm);
         ivAlarm.setOnClickListener(view -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;

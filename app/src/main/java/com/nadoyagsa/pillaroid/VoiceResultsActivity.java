@@ -181,7 +181,6 @@ public class VoiceResultsActivity extends AppCompatActivity {
     private void getVoiceResults() {
         voiceResults.clear();
 
-        //TODO: voiceQuery 에서 마이크로그램과 밀리그램, 밀리리터, 밀리그람, 그램, 그람을 바꿔야 함
         /*
         String query = voiceQuery.replace("마이크로그램", "μg")
                 .replace("마이크로그람", "μg")
@@ -240,8 +239,6 @@ public class VoiceResultsActivity extends AppCompatActivity {
                 return true;
             }
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
-                // TODO: 추후에 결정
-
                 return true;
             }
         }

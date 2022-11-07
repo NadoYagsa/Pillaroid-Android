@@ -62,11 +62,6 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-/**
- * TODO 확인 필요한 것
- * 1. orientation (감지된 객체 box가 올바른 위치에 그려지는가?)
- * 2. flash (카메라가 켜졌을 때 자동으로 flash도 켜지는가?)
- */
 @SuppressLint("ValidFragment")
 public class CameraConnectionFragment extends Fragment {
   /**
@@ -313,7 +308,7 @@ public class CameraConnectionFragment extends Fragment {
               characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
       sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-      Log.e("pillaroid-debug", "sensorOrientation: " + sensorOrientation);  // TODO: 값 확인해야 함
+      Log.e("pillaroid-debug", "sensorOrientation: " + sensorOrientation);
 
       // Danger, W.R.! Attempting to use too large a preview size could  exceed the camera
       // bus' bandwidth limitation, resulting in gorgeous previews but the storage of
@@ -326,7 +321,7 @@ public class CameraConnectionFragment extends Fragment {
 
       // We fit the aspect ratio of TextureView to the size of preview we picked.
       final int orientation = getResources().getConfiguration().orientation;
-      Log.e("pillaroid-debug", "orientation: " + orientation);  // TODO: 값 확인해야 함
+      Log.e("pillaroid-debug", "orientation: " + orientation);
       if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
         textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
       } else {
