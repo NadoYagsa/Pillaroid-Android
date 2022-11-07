@@ -179,15 +179,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        LinearLayout llPrescription = findViewById(R.id.ll_main_prescription);
+        LinearLayout llPrescription = findViewById(R.id.ll_main_document);
         llPrescription.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_search_prescription), QUEUE_FLUSH, null, null);
+                tts.speak("버튼." + getString(R.string.page_search_document), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (isReadyTts)
-                    startActivity(new Intent(this, SearchPrescriptionActivity.class));
+                    startActivity(new Intent(this, SearchDocumentActivity.class));
             }
         });
 
