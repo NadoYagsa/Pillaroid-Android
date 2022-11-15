@@ -156,7 +156,7 @@ public class PrescriptionResultActivity extends AppCompatActivity {
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
                 else {
-                    tts.speak("처방전 결과 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("처방전 결과 조회에 문제가 생겼습니다. Return to the previous screen.", QUEUE_FLUSH, null, null);
                     tts.playSilentUtterance(7000, QUEUE_ADD, null);
                     finish();
                 }
@@ -164,7 +164,7 @@ public class PrescriptionResultActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, null);
                 tts.playSilentUtterance(5000, QUEUE_ADD, null);
                 finish();
             }

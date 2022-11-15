@@ -29,12 +29,12 @@ public class MedicinePagerAdapter extends RecyclerView.Adapter<MedicinePagerAdap
         this.medicineInfo = medicineInfo;
         categories = new HashMap<Integer,String>(){
             {
-                put(0, "효능 및 효과");
-                put(1, "용법 및 용량");
-                put(2, "주의사항");
-                put(3, "외형");
-                put(4, "성분");
-                put(5, "보관법");
+                put(0, "Efficacy");
+                put(1, "Usage and Dosage");
+                put(2, "Precaution");
+                put(3, "Appearance");
+                put(4, "Ingredient");
+                put(5, "Storage Method");
             }
         };
     }
@@ -185,37 +185,37 @@ public class MedicinePagerAdapter extends RecyclerView.Adapter<MedicinePagerAdap
             tvIdentificationMark = itemView.findViewById(R.id.tv_item_medicineresult_identification);
 
             tvContent.setOnClickListener(v -> {
-                tts.speak("텍스트. " + tvContent.getText(), QUEUE_FLUSH, null, null);
+                tts.speak("Text. " + tvContent.getText(), QUEUE_FLUSH, null, null);
             });
 
             llAppearance.setOnClickListener(v -> {
-                tts.speak("텍스트. " + toAppearanceString(), QUEUE_FLUSH, null, null);
+                tts.speak("Text. " + toAppearanceString(), QUEUE_FLUSH, null, null);
             });
 
             tvNoAppearance.setOnClickListener(v -> {
-                tts.speak("텍스트. " + tvNoAppearance.getText(), QUEUE_FLUSH, null, null);
+                tts.speak("Text. " + tvNoAppearance.getText(), QUEUE_FLUSH, null, null);
             });
         }
 
         private String toAppearanceString() {
             StringBuilder resultSb = new StringBuilder();
             if (!tvFeature.getText().equals("")) {
-                resultSb.append("성상. " + tvFeature.getText() + ". ");
+                resultSb.append("Feature. " + tvFeature.getText() + ". ");
             }
             if (!tvFormulation.getText().equals("")) {
-                resultSb.append("제형. " + tvFormulation.getText() + ". ");
+                resultSb.append("Formulation. " + tvFormulation.getText() + ". ");
             }
             if (!tvShape.getText().equals("")) {
-                resultSb.append("모양. " + tvShape.getText() + ". ");
+                resultSb.append("Shape. " + tvShape.getText() + ". ");
             }
             if (!tvColor.getText().equals("")) {
-                resultSb.append("색상. " + tvColor.getText() + ". ");
+                resultSb.append("Color. " + tvColor.getText() + ". ");
             }
             if (!tvDividingLine.getText().equals("")) {
-                resultSb.append("분할선. " + tvDividingLine.getText() + ". ");
+                resultSb.append("Dividing Line. " + tvDividingLine.getText() + ". ");
             }
             if (!tvIdentificationMark.getText().equals("")) {
-                resultSb.append("식별표기. " + tvIdentificationMark.getText() + ". ");
+                resultSb.append("Identification Mark. " + tvIdentificationMark.getText() + ". ");
             }
             return resultSb.toString();
         }

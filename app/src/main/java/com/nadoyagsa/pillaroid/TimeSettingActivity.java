@@ -60,7 +60,7 @@ public class TimeSettingActivity extends AppCompatActivity {
         tvTopic.setText("알림 시간대 설정");
         tvTopic.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
@@ -72,8 +72,8 @@ public class TimeSettingActivity extends AppCompatActivity {
         etTimeDinnerHour = findViewById(R.id.et_time_dinner_hour);
         etTimeDinnerMinute = findViewById(R.id.et_time_dinner_minute);
 
-        tts.speak("주로 식사하는 시간대를 설정해주세요. 설정한 시간대에 따라 약 복용 알림이 갑니다.", QUEUE_FLUSH, null, null);
-        tts.speak("시간대를 눌러 활성시키고 볼륨 버튼으로 값을 조절해주세요.", QUEUE_ADD, null, null);
+        tts.speak("Please set a time of day to eat most of the time. You will be reminded to take your medicine according to the set time zone.", QUEUE_FLUSH, null, null);
+        tts.speak("Press the time zone to activate it and adjust the value with the volume buttons.", QUEUE_ADD, null, null);
 
         requestMealTime();
         setListener();
@@ -108,7 +108,7 @@ public class TimeSettingActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, null);
                 finish();
             }
         });
@@ -124,20 +124,20 @@ public class TimeSettingActivity extends AppCompatActivity {
             switch (tags[1]) {
                 case "hour":
                     if (time >= 23) {
-                        tts.speak("0시", QUEUE_FLUSH, null, null);
+                        tts.speak("0 o'clock", QUEUE_FLUSH, null, null);
                         activatedEditText.setText(R.string.text_time_setting_00);
                     } else {
-                        tts.speak(++time + "시", QUEUE_FLUSH, null, null);
+                        tts.speak(++time + "o'clock", QUEUE_FLUSH, null, null);
                         activatedEditText.setText(String.format("%02d", time));
                     }
                     break;
                 case "minute":
                     if (time >= 50) {
-                        tts.speak("0분", QUEUE_FLUSH, null, null);
+                        tts.speak("0 minutes", QUEUE_FLUSH, null, null);
                         activatedEditText.setText(R.string.text_time_setting_00 );
                     } else {
                         time += 10;
-                        tts.speak(time + "분", QUEUE_FLUSH, null, null);
+                        tts.speak(time + "minutes", QUEUE_FLUSH, null, null);
                         activatedEditText.setText(String.format("%02d", time));
                     }
                     break;
@@ -150,20 +150,20 @@ public class TimeSettingActivity extends AppCompatActivity {
             switch (tags[1]) {
                 case "hour":
                     if (time <= 0) {
-                        tts.speak("23시", QUEUE_FLUSH, null, null);
+                        tts.speak("23 o'clock", QUEUE_FLUSH, null, null);
                         activatedEditText.setText(R.string.text_time_setting_hour_last);
                     } else {
-                        tts.speak(--time + "시", QUEUE_FLUSH, null, null);
+                        tts.speak(--time + "o'clock", QUEUE_FLUSH, null, null);
                         activatedEditText.setText(String.format("%02d", time));
                     }
                     break;
                 case "minute":
                     if (time <= 0) {
-                        tts.speak("50분", QUEUE_FLUSH, null, null);
+                        tts.speak("50 minutes", QUEUE_FLUSH, null, null);
                         activatedEditText.setText(R.string.text_time_setting_minute_last);
                     } else {
                         time -= 10;
-                        tts.speak(time + "분", QUEUE_FLUSH, null, null);
+                        tts.speak(time + "minutes", QUEUE_FLUSH, null, null);
                         activatedEditText.setText(String.format("%02d", time));
                     }
                     break;
@@ -178,33 +178,33 @@ public class TimeSettingActivity extends AppCompatActivity {
         TextView tvAnnounce = findViewById(R.id.tv_time_announce);
         tvAnnounce.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
         TextView tvMorning = findViewById(R.id.tv_time_morning);
         tvMorning.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
         TextView tvLunch = findViewById(R.id.tv_time_lunch);
         tvLunch.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
         TextView tvAM = findViewById(R.id.tv_time_lunch_am);
         tvAM.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
         TextView tvPM = findViewById(R.id.tv_time_lunch_pm);
         tvPM.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
 
         TextView tvDinner = findViewById(R.id.tv_time_dinner);
         tvDinner.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
 
         // time EditText 리스너
@@ -213,8 +213,8 @@ public class TimeSettingActivity extends AppCompatActivity {
 
             String[] tags = activatedEditText.getTag().toString().split("_");   // 0: morning/lunch/dinner, 1: hour/minute
 
-            String mealType = tags[0].equals("morning") ? "아침" : tags[0].equals("lunch") ? "점심" : "저녁";
-            String timeType = tags[1].equals("hour") ? "시" : "분";
+            String mealType = tags[0];
+            String timeType = tags[1].equals("hour") ? "o'clock" : "minutes";
 
             String time = activatedEditText.getText().toString();
             if (time.equals("")) {  // 값이 없다면 0으로 초기화
@@ -222,7 +222,7 @@ public class TimeSettingActivity extends AppCompatActivity {
                 activatedEditText.setText(R.string.text_time_setting_00);
             }
 
-            tts.speak(String.format("선택한 항목은 %s %s%s 입니다.", mealType, time, timeType), QUEUE_FLUSH, null, null);
+            tts.speak(String.format("The selected item is %s %s %s.", mealType, time, timeType), QUEUE_FLUSH, null, null);
         };
 
         etTimeMorningHour.setOnClickListener(etTimeClickListener);
@@ -239,7 +239,7 @@ public class TimeSettingActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + ((AppCompatButton) v).getText().toString(), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + ((AppCompatButton) v).getText().toString(), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 String morningHour = etTimeMorningHour.getText().toString();
                 String morningMinute = etTimeMorningMinute.getText().toString();
@@ -249,23 +249,40 @@ public class TimeSettingActivity extends AppCompatActivity {
                 String dinnerMinute = etTimeDinnerMinute.getText().toString();
 
                 // 데이터 유효성 검사 (빈칸 있으면 X)
-                StringBuilder sb = new StringBuilder();
-                if (morningHour.equals(""))
-                    sb.append("아침 시, ");
-                if (morningMinute.equals(""))
-                    sb.append("아침 분, ");
-                if (lunchHour.equals(""))
-                    sb.append("점심 시, ");
-                if (lunchMinute.equals(""))
-                    sb.append("점심 분, ");
-                if (dinnerHour.equals(""))
-                    sb.append("저녁 시, ");
-                if (dinnerMinute.equals(""))
-                    sb.append("저녁 분, ");
-                if (sb.length() != 0) {
-                    sb.append(sb.charAt(sb.length()-3) == '시' ? "가" : "이").append(" 입력되지 않아 저장할 수 없습니다.");
-                    tts.speak(sb.toString(), QUEUE_FLUSH, null, null);
-                    return;
+                int missingCount = 0;
+                StringBuilder missingItems = new StringBuilder();
+                if (morningHour.equals("")) {
+                    missingItems.append("Breakfast Hour, ");
+                    missingCount++;
+                }
+                if (morningMinute.equals("")) {
+                    missingItems.append("Breakfast Minute, ");
+                    missingCount++;
+                }
+                if (lunchHour.equals("")) {
+                    missingItems.append("Lunch Hour, ");
+                    missingCount++;
+                }
+                if (lunchMinute.equals("")) {
+                    missingItems.append("Lunch Minute, ");
+                    missingCount++;
+                }
+                if (dinnerHour.equals("")) {
+                    missingItems.append("Dinner Hour, ");
+                    missingCount++;
+                }
+                if (dinnerMinute.equals("")) {
+                    missingItems.append("Dinner Minute, ");
+                    missingCount++;
+                }
+                if (missingCount != 0) {
+                    if (missingCount == 1) {
+                        tts.speak("Cannot save because " + missingItems + " is not entered.", QUEUE_FLUSH, null, null);
+                        return;
+                    } else {
+                        tts.speak("Cannot save because " + missingItems + " are not entered.", QUEUE_FLUSH, null, null);
+                        return;
+                    }
                 }
 
                 // 사용자 알림 시간대 등록
@@ -285,23 +302,23 @@ public class TimeSettingActivity extends AppCompatActivity {
                                 String[] lunches = result.getString("lunch").split(":");
                                 String[] dinners = result.getString("dinner").split(":");
 
-                                String resultText = String.format("아침 %s시 %s분, 점심 %s시 %s분, 저녁 %s시 %s분으로 저장되었습니다.",
+                                String resultText = String.format("Saved as %s:%s in the morning, %s:%s in the afternoon, and %s:%s in the evening",
                                         mornings[0], mornings[1], lunches[0], lunches[1], dinners[0], dinners[1]);
                                 tts.speak(resultText, QUEUE_FLUSH, null, null);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         } else if (response.code() == 400) {
-                            tts.speak("올바르지 않은 값입니다. 시간대를 다시 설정해주세요.", QUEUE_FLUSH, null, null);
+                            tts.speak("Invalid value. Please reset your time zone.", QUEUE_FLUSH, null, null);
                         } else {
-                            tts.speak("알림 시간대 설정에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There was a problem with the notification time zone setting. Return to the previous screen.", QUEUE_FLUSH, null, null);
                             finish();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, null);
                         finish();
                     }
                 });

@@ -169,7 +169,7 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
             if (!isWaitingForGuide) {
                 if (mappedRecognitions.size() == 0) {
                     Log.e("Object-Detection-result", "no detection");
-                    tts.speak("손이 감지되지 않습니다. 손을 포착할 수 있도록 카메라를 더 멀리 이동해주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                    tts.speak("Hands are not detected. Move the camera farther away to capture the hand.", QUEUE_FLUSH, null, IS_GUIDING);
                 } else {
                     Collections.sort(mappedRecognitions);   // confidence 기준으로 정렬
 
@@ -201,35 +201,35 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
                     if ((objectWidth < rotatedFrameWidth / 2) || (objectHeight < rotatedFrameHeight / 2)) {
                         isNormal = false;
                         Log.e("Object-Detection-result", "too far");
-                        tts.speak("손이 너무 멀리 있습니다. 손바닥을 조금만 가까이 대주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("Hands are too far apart. Put your palms a little closer.", QUEUE_FLUSH, null, IS_GUIDING);
                     } else if (location.left > distanceBoundaryWidth && location.right < rotatedFrameWidth - distanceBoundaryWidth) {
                         isNormal = false;
                         Log.e("Object-Detection-result", "too far");
-                        tts.speak("손이 멀리 있습니다. 손바닥을 조금만 가까이 대주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("Hands are far away. Put your palms a little closer.", QUEUE_FLUSH, null, IS_GUIDING);
                     }
 
                     // 위치 가이드 (여백 정도에 따른 가이드)
                     if (location.bottom < rotatedFrameHeight - boundaryHeight) {   // TODO: 알약이 보통 손바닥 위에 있음을 감안하여 boundary를 줄일지
                         isNormal = false;
                         Log.e("Object-Detection-result", "too over");
-                        tts.speak("손이 위에 있습니다. 손바닥을 조금만 아래로 내려주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("Hands are on top. Put your palms down a little.", QUEUE_FLUSH, null, IS_GUIDING);
                     } else if (location.top > boundaryHeight) {
                         isNormal = false;
                         Log.e("Object-Detection-result", "too under");
-                        tts.speak("손이 아래에 있습니다. 손바닥을 조금만 위로 올려주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("Hands down. Raise your palms slightly upwards.", QUEUE_FLUSH, null, IS_GUIDING);
                     } else if (location.right < rotatedFrameWidth - boundaryWidth) {
                         isNormal = false;
                         Log.e("Object-Detection-result", "too left");
-                        tts.speak("손이 왼쪽에 있습니다. 손바닥을 조금만 오른쪽으로 이동해 주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("The hand is on the left. Move your palm a little bit to the right.", QUEUE_FLUSH, null, IS_GUIDING);
                     } else if (location.left > boundaryWidth) {
                         isNormal = false;
                         Log.e("Object-Detection-result", "too right");
-                        tts.speak("손이 오른쪽에 있습니다. 손바닥을 조금만 왼쪽으로 이동해 주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                        tts.speak("The hand is on the right. Move your palm slightly to the left.", QUEUE_FLUSH, null, IS_GUIDING);
                     }
 
                     if (isNormal) {
                         Log.i("Object-Detection-result", "normal");
-                        tts.speak("알약이 잘 감지되었습니다. 인식 결과를 가져오는 중입니다.", QUEUE_FLUSH, null, API_SUCCESS);
+                        tts.speak("The pills were well detected. Retrieving recognition results.", QUEUE_FLUSH, null, API_SUCCESS);
                         tts.playSilentUtterance(3000, QUEUE_ADD, null);
 
                         // 서버에게 이미지 보내기
@@ -262,10 +262,10 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
                                 } else if (response.code() == 400 || response.code() == 404) {    // 400: flask로 이미지가 전달되지 않음, 404: yolov5에 의해 crop된 알약이 없음
                                     isWaitingForGuide = false;
                                     Log.e("api-response", "bad image");
-                                    tts.speak("알약 인식에 실패했습니다. 다시 시도해주세요.", QUEUE_FLUSH, null, IS_GUIDING);
+                                    tts.speak("Pill recognition failed. please try again.", QUEUE_FLUSH, null, IS_GUIDING);
                                 } else if (response.code() == 500) {
                                     Log.e("api-response", "service error");
-                                    tts.speak("서비스 오류로 인해 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                                    tts.speak("Return to previous screen due to service error.", QUEUE_FLUSH, null, API_FAILED);
                                 } else {
                                     isWaitingForGuide = false;
                                     Log.e("api-response", "case: " + response.code());
@@ -275,7 +275,7 @@ public class SearchPillActivity extends ObjectDetectionCameraActivity implements
                             @Override
                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                                 Log.e("api-response", "no service");
-                                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                                tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, API_FAILED);
                             }
                         });
                     }

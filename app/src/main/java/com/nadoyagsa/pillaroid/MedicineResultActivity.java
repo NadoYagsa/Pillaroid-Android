@@ -144,7 +144,7 @@ public class MedicineResultActivity extends AppCompatActivity {
         // 즐겨찾기 or 알람 기능 사용 시 로그인이 안되었을 때
         startActivityResultLogin = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             String to = Objects.requireNonNull(result.getData()).getStringExtra("to");
-            String type = to.equals("f") ? "즐겨찾기" : "알림";
+            String type = to.equals("f") ? "Favorites" : "Notification";
 
             if (result.getResultCode() == RESULT_OK) {
                 PillaroidAPIImplementation.getApiService().getFavoritesAndAlarm(SharedPrefManager.read("token", ""), medicine.getMedicineIdx()).enqueue(new Callback<String>() {
@@ -160,28 +160,28 @@ public class MedicineResultActivity extends AppCompatActivity {
                                 AlarmInfo alarmInfo = data.isNull("alarmResponse") ? null : new AlarmInfo(data.getJSONObject("alarmResponse"));
                                 medicine.setAlarmInfo(alarmInfo);
 
-                                tts.speak("로그인 되셨습니다. 이후부터 " + type + " 설정이 가능합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                                tts.speak("You are logged in. From then on, " + type + " can be set.", TextToSpeech.QUEUE_FLUSH, null, null);
 
                                 setIcon();     // 즐겨찾기, 알림 아이콘 설정
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         } else if (response.code() == 401) {
-                            tts.speak("허가받지 않은 회원의 접근입니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("Access by unauthorized members. Return to the previous screen.", QUEUE_FLUSH, null, null);
                         } else {
-                            tts.speak(type + " 여부 조회에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There was a problem with the " + type + " status lookup.", QUEUE_FLUSH, null, null);
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("Can't connect to server.", QUEUE_FLUSH, null, null);
                         tts.playSilentUtterance(3000, QUEUE_ADD, null);
                     }
                 });
             }
             else {
-                tts.speak("로그인에 문제가 발생해 " + type + " 기능 사용이 불가합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak("There was a problem logging in, so " + type + " cannot be used.", TextToSpeech.QUEUE_FLUSH, null, null);
             }
         });
     }
@@ -197,10 +197,10 @@ public class MedicineResultActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼. 즐겨찾기", QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_medicine_favorites), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 if (SharedPrefManager.read("token", null) == null) {
-                    tts.speak("즐겨찾기 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+                    tts.speak("Favorites feature requires login. To log in, click the Kakao Login button at the bottom of the screen.", QUEUE_FLUSH, null, null);
 
                     // 로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
                     Intent loginIntent = new Intent(this, LoginActivity.class);
@@ -219,22 +219,22 @@ public class MedicineResultActivity extends AppCompatActivity {
                                         JSONObject data = responseJson.getJSONObject("data");
 
                                         medicine.setFavoritesIdx(data.getLong("favoritesIdx"));
-                                        tts.speak("즐겨찾기 추가", TextToSpeech.QUEUE_FLUSH, null, null);
+                                        tts.speak("Add Favorites", TextToSpeech.QUEUE_FLUSH, null, null);
 
                                         ((AppCompatImageButton) view).setImageResource(R.drawable.icon_star_on);
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
                                 } else if (response.code() == 401) {
-                                    tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("Access by unauthorized members.", QUEUE_FLUSH, null, null);
                                 } else {
-                                    tts.speak("즐겨찾기 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("There was a problem adding favorites.", QUEUE_FLUSH, null, null);
                                 }
                             }
 
                             @Override
                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("Can't connect to server.", QUEUE_FLUSH, null, null);
                                 tts.playSilentUtterance(3000, QUEUE_ADD, null);
                             }
                         });
@@ -244,11 +244,11 @@ public class MedicineResultActivity extends AppCompatActivity {
                             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                 if (response.code() == 200) {
                                     medicine.setFavoritesIdx(null);
-                                    tts.speak("즐겨찾기 삭제", TextToSpeech.QUEUE_FLUSH, null, null);
+                                    tts.speak("Delete Favorites", TextToSpeech.QUEUE_FLUSH, null, null);
 
                                     ((AppCompatImageButton) view).setImageResource(R.drawable.icon_star_off);
                                 } else if (response.code() == 401) {
-                                    tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("Access by unauthorized members.", QUEUE_FLUSH, null, null);
                                 } else if (response.code() == 400) {
                                     if (response.errorBody() != null) {
                                         try {
@@ -257,20 +257,20 @@ public class MedicineResultActivity extends AppCompatActivity {
                                             long errorIdx = errorBody.getLong("errorIdx");
 
                                             if (errorIdx == 40001)  // 삭제 오류
-                                                tts.speak("즐겨찾기에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
+                                                tts.speak("Since it is a medicine that has not been added to favorites, it cannot be deleted.", QUEUE_FLUSH, null, null);
                                         } catch (JSONException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     } else
-                                        tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                        tts.speak("There was a problem deleting favorites.", QUEUE_FLUSH, null, null);
                                 } else {
-                                    tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("There was a problem deleting favorites.", QUEUE_FLUSH, null, null);
                                 }
                             }
 
                             @Override
                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("Can't connect to server.", QUEUE_FLUSH, null, null);
                                 tts.playSilentUtterance(3000, QUEUE_ADD, null);
                             }
                         });
@@ -285,10 +285,10 @@ public class MedicineResultActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼. 알림", QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_notice), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 if (SharedPrefManager.read("token", null) == null) {
-                    tts.speak("알림 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+                    tts.speak("Notification feature requires login. To log in, click the Kakao Login button at the bottom of the screen.", QUEUE_FLUSH, null, null);
 
                     // 로그인 후에 툴바가 바뀌어야 함(로그아웃 버튼이 보임)
                     Intent loginIntent = new Intent(this, LoginActivity.class);
@@ -308,11 +308,11 @@ public class MedicineResultActivity extends AppCompatActivity {
         final EditText etDays = dialogView.findViewById(R.id.et_dialog_addalarm_days);
 
         if (alarmInfo == null) {
-            tts.speak("알림 추가. 알림 이름과 복용 기간을 설정해주세요.", QUEUE_FLUSH, null, null);
+            tts.speak("Add notification. Please set the reminder name and duration of taking.", QUEUE_FLUSH, null, null);
             etLabel.setHint(medicine.getName());
             etDays.setHint("5");
         } else {
-            tts.speak(String.format("현재 등록된 알림은 %s %d일 입니다.", alarmInfo.getName(), alarmInfo.getPeriod()), QUEUE_FLUSH, null, null);
+            tts.speak(String.format("The currently registered notification is %s, %d days.", alarmInfo.getName(), alarmInfo.getPeriod()), QUEUE_FLUSH, null, null);
             etLabel.setText(alarmInfo.getName());
             etDays.setText(String.valueOf(alarmInfo.getPeriod()));
         }
@@ -320,28 +320,28 @@ public class MedicineResultActivity extends AppCompatActivity {
         TextView tvCancel = dialogView.findViewById(R.id.tv_dialog_addalarm_cancel);
         TextView tvOk = dialogView.findViewById(R.id.tv_dialog_addalarm_ok);
         if (ivAlarm.getTag().equals("on")) {
-            tvOk.setText("삭제");
+            tvOk.setText("Delete");
         }
         tvOk.setOnClickListener(v -> {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (ivAlarm.getTag().equals("off")) {        // 알림 추가
                     int days = Integer.parseInt(etDays.getText().toString().equals("") ? etDays.getHint().toString() : etDays.getText().toString());
                     if (days <= 0) {
-                        tts.speak("복용 기간은 양수여야 합니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("Dosage duration must be positive.", QUEUE_FLUSH, null, null);
                         return;
                     }
                     if (days > 92) {
-                        tts.speak("최대 복용 알림 기간은 세 달입니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("The maximum dose reminder period is three months.", QUEUE_FLUSH, null, null);
                         return;
                     }
 
                     String label = etLabel.getText().toString().equals("") ? etLabel.getHint().toString() : etLabel.getText().toString();
                     if (label.length() > 30) {
-                        tts.speak("레이블이 너무 길어 30자까지만 저장합니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("The label is too long and only stores up to 30 characters.", QUEUE_FLUSH, null, null);
                         label = label.substring(0, 30);
                     }
 
@@ -349,6 +349,8 @@ public class MedicineResultActivity extends AppCompatActivity {
                     request.addProperty("medicineIdx", medicine.getMedicineIdx());
                     request.addProperty("name", label);
                     request.addProperty("period", days);
+
+                    Log.e("soeunkk", request.toString());
 
                     PillaroidAPIImplementation.getApiService().postAlarm(SharedPrefManager.read("token", null), request).enqueue(new Callback<String>() {
                         @Override
@@ -360,11 +362,11 @@ public class MedicineResultActivity extends AppCompatActivity {
 
                                     AlarmInfo alarmInfo = new AlarmInfo(data);
                                     medicine.setAlarmInfo(alarmInfo);
-                                    tts.speak(alarmInfo.getName() + " 이름으로 알림이 생성되었습니다. 복용 기간은 " + alarmInfo.getPeriod() + "일 입니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("A notification was created with the name + " + alarmInfo.getName() + ". The duration of use is " + alarmInfo.getPeriod() + " days.", QUEUE_FLUSH, null, null);
 
                                     ivAlarm.setBackgroundDrawable(AppCompatResources.getDrawable(MedicineResultActivity.this, R.drawable.icon_bell_on));
                                     ivAlarm.setTag("on");
-                                    ((TextView) v).setText("삭제");
+                                    ((TextView) v).setText("Delete");
                                     dialog.hide();
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -377,32 +379,32 @@ public class MedicineResultActivity extends AppCompatActivity {
                                         long errorIdx = errorBody.getLong("errorIdx");
 
                                         if (errorIdx == 40004) {        // 복용 시간대 없음
-                                            tts.speak("복용 시간대가 설정되지 않았습니다. 마이페이지에서 설정해주세요.", QUEUE_FLUSH, null, null);
+                                            tts.speak("The dosing time frame has not been established. Please set it on My Page.", QUEUE_FLUSH, null, null);
                                         } else if (errorIdx == 40005) { // 복용시기 파싱 정보 없음
-                                            tts.speak("의약품에서 알림을 위한 정보를 얻을 수 없습니다.", QUEUE_FLUSH, null, null);
+                                            tts.speak("Information for notification could not be obtained from medicines.", QUEUE_FLUSH, null, null);
                                         }
                                     } catch (JSONException | IOException e) {
                                         e.printStackTrace();
                                     }
                                 } else {
-                                    tts.speak("알림 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("I'm having trouble adding notifications.", QUEUE_FLUSH, null, null);
                                     dialog.dismiss();
                                 }
                             } else if (response.code() == 401) {
-                                tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("Access by unauthorized members.", QUEUE_FLUSH, null, null);
                                 dialog.dismiss();
                             } else if (response.code() == 409) {
-                                tts.speak("이미 등록된 알림입니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("This notification is already registered.", QUEUE_FLUSH, null, null);
                                 dialog.dismiss();
                             } else {
-                                tts.speak("알림 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("I'm having trouble adding notifications.", QUEUE_FLUSH, null, null);
                                 dialog.dismiss();
                             }
                         }
 
                         @Override
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                            tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, API_FAILED);
                         }
                     });
                 } else if (ivAlarm.getTag().equals("on")) {        // 알림 삭제
@@ -411,7 +413,7 @@ public class MedicineResultActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             if (response.code() == 200) {
-                                tts.speak("알림이 삭제되었습니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("Notice has been removed.", QUEUE_FLUSH, null, null);
                                 medicine.setAlarmInfo(null);
                             } else if (response.code() == 400) {
                                 if (response.errorBody() != null) {
@@ -421,30 +423,30 @@ public class MedicineResultActivity extends AppCompatActivity {
                                         long errorIdx = errorBody.getLong("errorIdx");
 
                                         if (errorIdx == 40001)  // 존재하지 않는 데이터
-                                            tts.speak("알림에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
+                                            tts.speak("It cannot be deleted because it is a medicine that has not been added to notifications.", QUEUE_FLUSH, null, null);
                                     } catch (JSONException | IOException e) {
                                         e.printStackTrace();
                                     }
                                 } else
-                                    tts.speak("알림 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("There was a problem deleting notifications.", QUEUE_FLUSH, null, null);
                             } else if (response.code() == 401) {
-                                tts.speak("허가받지 않은 회원의 접근입니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("Access by unauthorized members. Return to the previous screen.", QUEUE_FLUSH, null, null);
                                 finish();
                             } else {
                                 Log.e("SOEUN-DEBUG", String.valueOf(response.code()));
-                                tts.speak("알림 기능에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                                tts.speak("There is a problem with the notification function. Return to the previous screen.", QUEUE_FLUSH, null, API_FAILED);
                             }
                         }
 
                         @Override
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                            tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, API_FAILED);
                         }
                     });
 
                     ivAlarm.setBackgroundDrawable(AppCompatResources.getDrawable(this, R.drawable.icon_bell_off));
                     ivAlarm.setTag("off");
-                    ((TextView) v).setText("등록");
+                    ((TextView) v).setText("registration");
 
                     etLabel.setText("");
                     etDays.setText("");
@@ -457,7 +459,7 @@ public class MedicineResultActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 dialog.dismiss();
             }
@@ -529,7 +531,7 @@ public class MedicineResultActivity extends AppCompatActivity {
                                 .replace(']', ')')
                                 .replaceAll("\\([^)]*\\)", "");
 
-                        tts.speak("검색된 의약품은 " + name + "입니다. 효능 및 효과", QUEUE_FLUSH, null, null);
+                        tts.speak("The searched medicine is " + name + ". " + getString(R.string.category_efficacy), QUEUE_FLUSH, null, null);
 
                         JSONObject appearance = data.getJSONObject("appearance");
                         String feature = null, formulation = null, shape = null, color = null, dividingLine = null, identificationMark = null;
@@ -583,10 +585,10 @@ public class MedicineResultActivity extends AppCompatActivity {
 
                         if (errorIdx == RESPONSE_BARCODE_FORMAT_ERROR) {
                             Log.e("api-response", "barcode format error");
-                            tts.speak("바코드에 대한 의약품 정보가 없습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                            tts.speak("There is no medicine information for the barcode. Return to the previous screen.", QUEUE_FLUSH, null, API_FAILED);
                         } else {
                             Log.e("api-response", "bad parameter");
-                            tts.speak("서비스 오류로 인해 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                            tts.speak("Return to previous screen due to service error.", QUEUE_FLUSH, null, API_FAILED);
                         }
                     } catch (JSONException | IOException e) {
                         e.printStackTrace();
@@ -600,10 +602,10 @@ public class MedicineResultActivity extends AppCompatActivity {
 
                         if (errorIdx == RESPONSE_BARCODE_NOT_FOUND) {
                             Log.e("api-response", "barcode not found");
-                            tts.speak("바코드에 대한 의약품 정보가 없습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                            tts.speak("There is no medicine information for the barcode. Return to the previous screen.", QUEUE_FLUSH, null, API_FAILED);
                         } else if (errorIdx == RESPONSE_MEDICINE_NOT_FOUND) {
                             Log.e("api-response", "medicine not found");
-                            tts.speak("해당 의약품은 존재하지 않습니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("The medicine does not exist.", QUEUE_FLUSH, null, null);
                             tts.playSilentUtterance(5000, QUEUE_ADD, null);   // 2초 딜레이
                         }
                     } catch (JSONException | IOException e) {
@@ -611,14 +613,14 @@ public class MedicineResultActivity extends AppCompatActivity {
                     }
                 } else {
                     Log.e("api-response", "service error");
-                    tts.speak("음성 결과 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                    tts.speak("There was a problem with querying voice results. Return to the previous screen.", QUEUE_FLUSH, null, API_FAILED);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                 Log.e("api-response", "no service");
-                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_FAILED);
+                tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, API_FAILED);
             }
         };
 

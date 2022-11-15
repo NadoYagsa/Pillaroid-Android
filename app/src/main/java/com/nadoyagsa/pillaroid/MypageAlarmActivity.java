@@ -96,7 +96,7 @@ public class MypageAlarmActivity extends AppCompatActivity {
                         JSONArray results = responseJson.getJSONArray("data");
 
                         if (results.length() == 0) {
-                            tts.speak("알림을 설정한 의약품이 없습니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There are no medications for which notifications have been set.", QUEUE_FLUSH, null, null);
                             tvAlarmInfo.setText(getString(R.string.text_alarm_no_result));
                         } else {
                             tvAlarmInfo.setVisibility(View.GONE);
@@ -107,23 +107,23 @@ public class MypageAlarmActivity extends AppCompatActivity {
                             }
                             alarmAdapter.notifyDataSetChanged();
 
-                            tts.speak("알림 목록은 총 " + alarmList.size() + "개 입니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There are a total of " +  alarmList.size() + " notification lists.", QUEUE_FLUSH, null, null);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 } else if (response.code() == 401) {
-                    tts.speak("허가받지 않은 회원의 접근입니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("Access by unauthorized members. Return to the previous screen.", QUEUE_FLUSH, null, null);
                     finish();
                 } else {
-                    tts.speak("알림 목록 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("There was a problem with the notification list lookup. Return to the previous screen.", QUEUE_FLUSH, null, null);
                     finish();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, null);
                 finish();
             }
         });

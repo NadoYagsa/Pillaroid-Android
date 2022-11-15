@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         tts = new TextToSpeech(this, status -> {
             if (status == SUCCESS) {
-                int result = tts.setLanguage(Locale.KOREAN);
+                int result = tts.setLanguage(Locale.ENGLISH);
                 if (result == TextToSpeech.LANG_MISSING_DATA
                         || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.e("TTS", "Language is not supported");
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                     SharedPrefManager.write("isFirstConnection", false);
                     startActivity(new Intent(this, IntroActivity.class));
                 } else {
-                    tts.speak("pillaroid 앱이 실행되었습니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("The pillaroid app has been launched.", QUEUE_FLUSH, null, null);
                 }
             } else if (status != ERROR) {
                 Log.e("TTS", "Initialization Failed");
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.code() == 200);
                     else if (response.code() == 401) {
-                        tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("Access by unauthorized members.", QUEUE_FLUSH, null, null);
                     }
                     else if (response.code() == 400) {
                         if (response.errorBody() != null) {
@@ -106,22 +106,22 @@ public class MainActivity extends AppCompatActivity {
                                 long errorIdx = errorBody.getLong("errorIdx");
 
                                 if (errorIdx == 40001)
-                                    tts.speak("알람 토큰이 없습니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("There is no alarm token.", QUEUE_FLUSH, null, null);
                             } catch (JSONException | IOException e) {
                                 e.printStackTrace();
                             }
                         }
                         else
-                            tts.speak("알람을 위한 토큰 설정에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There was a problem setting the token for the alarm.", QUEUE_FLUSH, null, null);
                     }
                     else {
-                        tts.speak("알람을 위한 토큰 설정에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("There was a problem setting the token for the alarm.", QUEUE_FLUSH, null, null);
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("Can't connect to server.", QUEUE_FLUSH, null, null);
                     tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
                 }
             });
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_search_camera), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_search_camera), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (isReadyTts)
                     startActivity(new Intent(this, SearchCameraActivity.class));
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_search_voice), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_search_voice), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (isReadyTts)
                     startActivity(new Intent(this, SearchVoiceActivity.class));
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_search_document), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_search_document), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (isReadyTts)
                     startActivity(new Intent(this, SearchDocumentActivity.class));
@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_mypage), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_mypage), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 if (isReadyTts)
                     startActivity(new Intent(this, MypageActivity.class));
@@ -208,6 +208,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        tts.speak("메인 화면", QUEUE_FLUSH, null, null);
+        tts.speak("main screen", QUEUE_FLUSH, null, null);
     }
 }

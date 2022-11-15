@@ -50,7 +50,7 @@ public class IntroActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_medicine_favorites), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_medicine_favorites), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v){
                 finish();   // MainActivity로 돌아감
             }
@@ -59,7 +59,7 @@ public class IntroActivity extends AppCompatActivity {
         TextView tvDescription = findViewById(R.id.tv_intro_description);
         tvDescription.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
         });
     }
 }

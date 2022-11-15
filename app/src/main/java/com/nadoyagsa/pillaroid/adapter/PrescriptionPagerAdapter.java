@@ -77,12 +77,12 @@ public class PrescriptionPagerAdapter extends RecyclerView.Adapter<PrescriptionP
             if (System.currentTimeMillis() > delay) {
                 currentViewId = IBT_FAVORITES;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼. 즐겨찾기", QUEUE_FLUSH, null, null);
+                tts.speak("Button." + context.getString(R.string.page_medicine_favorites), QUEUE_FLUSH, null, null);
             } else if (currentViewId == IBT_FAVORITES) {
                 final int clickPosition = position;
 
                 if (SharedPrefManager.read("token", null) == null) {
-                    tts.speak("즐겨찾기 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+                    tts.speak("Favorites feature requires login. To log in, click the Kakao Login button at the bottom of the screen.", QUEUE_FLUSH, null, null);
 
                     Intent loginIntent = new Intent(context, LoginActivity.class);
                     loginIntent.putExtra("from", 'r');
@@ -110,15 +110,15 @@ public class PrescriptionPagerAdapter extends RecyclerView.Adapter<PrescriptionP
                                         e.printStackTrace();
                                     }
                                 } else if (response.code() == 401) {
-                                    tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("Access by unauthorized members.", QUEUE_FLUSH, null, null);
                                 } else {
-                                    tts.speak("즐겨찾기 추가에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("There was a problem adding favorites.", QUEUE_FLUSH, null, null);
                                 }
                             }
 
                             @Override
                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("Can't connect to server.", QUEUE_FLUSH, null, null);
                                 tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
                             }
                         });
@@ -128,11 +128,11 @@ public class PrescriptionPagerAdapter extends RecyclerView.Adapter<PrescriptionP
                             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                 if (response.code() == 200) {
                                     resultList.get(clickPosition).setFavoritesIdx(null);
-                                    tts.speak("즐겨찾기 삭제", TextToSpeech.QUEUE_FLUSH, null, null);
+                                    tts.speak("Delete Favorites", TextToSpeech.QUEUE_FLUSH, null, null);
 
                                     notifyItemChanged(clickPosition);
                                 } else if (response.code() == 401) {
-                                    tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("Access by unauthorized members.", QUEUE_FLUSH, null, null);
                                 } else if (response.code() == 400) {
                                     if (response.errorBody() != null) {
                                         try {
@@ -141,20 +141,20 @@ public class PrescriptionPagerAdapter extends RecyclerView.Adapter<PrescriptionP
                                             long errorIdx = errorBody.getLong("errorIdx");
 
                                             if (errorIdx == 40001)  // 삭제 오류
-                                                tts.speak("즐겨찾기에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
+                                                tts.speak("Since it is a drug that has not been added to favorites, it cannot be deleted.", QUEUE_FLUSH, null, null);
                                         } catch (JSONException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     } else
-                                        tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                        tts.speak("There was a problem deleting favorites.", QUEUE_FLUSH, null, null);
                                 } else {
-                                    tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("There was a problem deleting favorites.", QUEUE_FLUSH, null, null);
                                 }
                             }
 
                             @Override
                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("Can't connect to server.", QUEUE_FLUSH, null, null);
                                 tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
                             }
                         });
@@ -253,14 +253,14 @@ public class PrescriptionPagerAdapter extends RecyclerView.Adapter<PrescriptionP
 
             llAppearance.setOnClickListener(v -> {
                 currentViewId = DESCRIPTION_TEXT;
-                tts.speak("텍스트. " + toAppearanceString(), QUEUE_FLUSH, null, null);
+                tts.speak("Text. " + toAppearanceString(), QUEUE_FLUSH, null, null);
             });
             llDosage.setOnClickListener(llClickListener);
             llEfficacy.setOnClickListener(llClickListener);
 
             tvNoAppearance.setOnClickListener(v -> {
                 currentViewId = DESCRIPTION_TEXT;
-                tts.speak("텍스트. " + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+                tts.speak("Text. " + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
             });
         }
 
@@ -268,28 +268,28 @@ public class PrescriptionPagerAdapter extends RecyclerView.Adapter<PrescriptionP
             currentViewId = DESCRIPTION_TEXT;
             TextView tvCategory = (TextView) ((LinearLayout) v).getChildAt(0);
             TextView tvContent = (TextView) ((LinearLayout) v).getChildAt(1);
-            tts.speak("텍스트. " + tvCategory.getText() + ". " + tvContent.getText(), QUEUE_FLUSH, null, null);
+            tts.speak("Text. " + tvCategory.getText() + ". " + tvContent.getText(), QUEUE_FLUSH, null, null);
         };
 
         private String toAppearanceString() {
-            StringBuilder resultSb = new StringBuilder("외형 정보.");
+            StringBuilder resultSb = new StringBuilder("Appearance Information.");
             if (!tvFeature.getText().equals("")) {
-                resultSb.append("성상. " + tvFeature.getText() + ". ");
+                resultSb.append("Feature. " + tvFeature.getText() + ". ");
             }
             if (!tvFormulation.getText().equals("")) {
-                resultSb.append("제형. " + tvFormulation.getText() + ". ");
+                resultSb.append("Formulation. " + tvFormulation.getText() + ". ");
             }
             if (!tvShape.getText().equals("")) {
-                resultSb.append("모양. " + tvShape.getText() + ". ");
+                resultSb.append("Shape. " + tvShape.getText() + ". ");
             }
             if (!tvColor.getText().equals("")) {
-                resultSb.append("색상. " + tvColor.getText() + ". ");
+                resultSb.append("Color. " + tvColor.getText() + ". ");
             }
             if (!tvDividingLine.getText().equals("")) {
-                resultSb.append("분할선. " + tvDividingLine.getText() + ". ");
+                resultSb.append("Dividing Line. " + tvDividingLine.getText() + ". ");
             }
             if (!tvIdentificationMark.getText().equals("")) {
-                resultSb.append("식별표기. " + tvIdentificationMark.getText() + ". ");
+                resultSb.append("Identification Mark. " + tvIdentificationMark.getText() + ". ");
             }
             return resultSb.toString();
         }

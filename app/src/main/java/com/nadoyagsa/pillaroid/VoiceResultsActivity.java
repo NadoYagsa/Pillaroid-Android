@@ -73,13 +73,13 @@ public class VoiceResultsActivity extends AppCompatActivity {
         tvMedicineName.setText(voiceQuery);
         tvMedicineName.setOnClickListener(v -> {
             selectedPos = -1;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
 
         if (voiceQuery != null)
             getVoiceResults();
         else {
-            tts.speak("말하신 의약품명이 전달되지 않았습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+            tts.speak("The name of the medicine you mentioned was not delivered. Return to the previous screen.", QUEUE_FLUSH, null, null);
             tts.playSilentUtterance(2000, TextToSpeech.QUEUE_ADD, null);   // 2초 딜레이
             finish();
         }
@@ -90,13 +90,13 @@ public class VoiceResultsActivity extends AppCompatActivity {
     private void initActionBar(Toolbar toolbar) {
         ImageView ivIcon = toolbar.findViewById(R.id.iv_ab_icontext_icon);
         ivIcon.setImageResource(R.drawable.icon_voice);
-        ivIcon.setContentDescription("녹음기 아이콘");
+        ivIcon.setContentDescription("voice recorder icon");
 
         TextView tvTitle = toolbar.findViewById(R.id.tv_ab_icontext_title);
-        tvTitle.setText("검색 결과");
+        tvTitle.setText("Search Results");
         tvTitle.setOnClickListener(v -> {
             selectedPos = -1;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
     }
 
@@ -142,7 +142,7 @@ public class VoiceResultsActivity extends AppCompatActivity {
         setListener(focusItemHandler);
 
         //차례대로 리스트 읽어주기
-        tts.speak("조회된 의약품을 음성으로 나열합니다. 원하시는 결과가 나오면 볼륨 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+        tts.speak("Lists the queried drugs in negative. When the desired result is reached, press the volume button.", QUEUE_FLUSH, null, null);
         for (int i = 0; i < voiceResults.size(); i++) {
             tts.speak(i+1 + "번. " + voiceResults.get(i).getMedicineName(), QUEUE_ADD, null, "results " + i);
             tts.playSilentUtterance(1000, QUEUE_ADD, "results " + i);   //1초 딜레이
@@ -197,7 +197,7 @@ public class VoiceResultsActivity extends AppCompatActivity {
 
                         JSONArray results = voiceInfo.getJSONArray("data");
                         if (results.length() == 0)
-                            tts.speak(voiceQuery.concat("에 대한 의약품 검색 결과가 없습니다."), QUEUE_FLUSH, null, null);
+                            tts.speak("There are no drug search results for " + voiceQuery + ".", QUEUE_FLUSH, null, null);
                         else {
                             for (int i=0; i<results.length(); i++) {
                                 JSONObject medicine = results.getJSONObject(i);
@@ -214,14 +214,14 @@ public class VoiceResultsActivity extends AppCompatActivity {
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
                 else {
-                    tts.speak("음성 결과 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_ERROR);
+                    tts.speak("There was a problem with querying voice results. Return to the previous screen.", QUEUE_FLUSH, null, API_ERROR);
                     finish();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, API_ERROR);
+                tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, API_ERROR);
                 finish();
             }
         });
@@ -252,12 +252,12 @@ public class VoiceResultsActivity extends AppCompatActivity {
         TextView tvRule = findViewById(R.id.tv_voiceresults_rule);
         tvRule.setOnClickListener(v -> {
             selectedPos = -1;
-            tts.speak("텍스트." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText().toString(), QUEUE_FLUSH, null, null);
         });
         LinearLayout llTotal = findViewById(R.id.ll_voiceresults_total);
         llTotal.setOnClickListener(v -> {
             selectedPos = -1;
-            tts.speak("총 "+tvResultsCount.getText().toString()+"개 중 "+tvResultsIdx.getText().toString() + "개입니다.", QUEUE_FLUSH, null, null);
+            tts.speak(tvResultsIdx.getText().toString() + " out of " + tvResultsCount.getText().toString() + " total.", QUEUE_FLUSH, null, null);
         });
     }
 }

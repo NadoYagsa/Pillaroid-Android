@@ -82,7 +82,7 @@ public class MypageActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼. 로그아웃", QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.text_logout), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 SharedPrefManager.remove("token");
                 SharedPrefManager.remove("alarm_token");
@@ -90,7 +90,7 @@ public class MypageActivity extends AppCompatActivity {
                 isToken = false;
                 llLogout.setVisibility(View.INVISIBLE);
 
-                tts.speak("로그아웃이 완료되었습니다.", QUEUE_FLUSH, null, null);
+                tts.speak("Logout is complete.", QUEUE_FLUSH, null, null);
             }
         });
     }
@@ -102,7 +102,7 @@ public class MypageActivity extends AppCompatActivity {
             int guideVolume = Integer.parseInt(tvGuideVolume.getText().toString());
 
             if (guideVolume == mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) && ivGuideView == findViewById(R.id.iv_mypage_guide_plus)) {
-                tts.speak("최대 음량입니다.", QUEUE_FLUSH, null, null);
+                tts.speak("This is the maximum volume.", QUEUE_FLUSH, null, null);
                 return;
             } else if (guideVolume == 0 && ivGuideView == findViewById(R.id.iv_mypage_guide_minus)) {
                 return;
@@ -115,11 +115,8 @@ public class MypageActivity extends AppCompatActivity {
             tvGuideVolume.setText(String.valueOf(guideVolume));
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, guideVolume, AudioManager.FLAG_SHOW_UI);
 
-            if (guideVolume == 1 || guideVolume == 2 || guideVolume == 4 || guideVolume == 5 || guideVolume == 7 || guideVolume == 8 ||
-                    guideVolume == 9 || guideVolume == 11 || guideVolume == 12 || guideVolume == 14 || guideVolume == 15) {
-                tts.speak("음량이 " + guideVolume + "로 조절되었습니다.", QUEUE_FLUSH, null, null);
-            } else if (guideVolume == 0 || guideVolume == 3 || guideVolume == 6 || guideVolume == 10 || guideVolume == 13) {
-                tts.speak("음량이 " + guideVolume + "으로 조절되었습니다.", QUEUE_FLUSH, null, null);
+            if (guideVolume >= 1 && guideVolume <= 13) {
+                tts.speak("The volume has been adjusted to " + guideVolume + ".", QUEUE_FLUSH, null, null);
             } else {
                 Log.e("guideVolume", "out of range");
             }
@@ -136,7 +133,7 @@ public class MypageActivity extends AppCompatActivity {
                 float speed = (float) seekParams.progress / 100;
                 SharedPrefManager.write("voiceSpeed", speed);
                 tts.setSpeechRate(speed);
-                tts.speak(speed + " 배속으로 설정되었습니다", QUEUE_FLUSH, null, null);
+                tts.speak("Set to " + speed + "x speed.", QUEUE_FLUSH, null, null);
             }
             @Override
             public void onStartTrackingTouch(IndicatorSeekBar seekBar) { }
@@ -160,13 +157,13 @@ public class MypageActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_medicine_favorites), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_medicine_favorites), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 String token = SharedPrefManager.read("token", "");
                 if (!token.equals(""))
                     startActivity(new Intent(this, MypageFavoritesActivity.class));
                 else {
-                    tts.speak("즐겨찾기 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+                    tts.speak("Favorites feature requires login. To log in, click the Kakao Login button at the bottom of the screen.", QUEUE_FLUSH, null, null);
 
                     Intent loginIntent = new Intent(this, LoginActivity.class);
                     loginIntent.putExtra("from", 'f');
@@ -181,13 +178,13 @@ public class MypageActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = view;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_medicine_notice), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_medicine_notice), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == view) {
                 String token = SharedPrefManager.read("token", "");
                 if (!token.equals(""))
                     startActivity(new Intent(this, MypageAlarmActivity.class));
                 else {
-                    tts.speak("알림 기능은 로그인이 필요합니다. 로그인을 하시려면 화면 하단의 카카오 로그인 버튼을 눌러주세요.", QUEUE_FLUSH, null, null);
+                    tts.speak("Notification feature requires login. To log in, click the Kakao Login button at the bottom of the screen.", QUEUE_FLUSH, null, null);
 
                     Intent loginIntent = new Intent(this, LoginActivity.class);
                     loginIntent.putExtra("from", 'a');
@@ -199,19 +196,19 @@ public class MypageActivity extends AppCompatActivity {
         TextView tvDescriptionGuideVolume = findViewById(R.id.tv_mypage_description_guide_volume);
         tvDescriptionGuideVolume.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
         });
 
         TextView tvDescriptionGuideSpeed = findViewById(R.id.tv_mypage_description_guide_speed);
         tvDescriptionGuideSpeed.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
         });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        tts.speak("마이페이지 화면", QUEUE_FLUSH, null, null);
+        tts.speak("Mypage screen", QUEUE_FLUSH, null, null);
     }
 }

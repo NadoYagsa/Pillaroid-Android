@@ -35,11 +35,5 @@
             android:textColor="@color/main_color"
             android:textSize="24sp"
             android:textStyle="bold" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/text_prescription_result"
-            android:textSize="20sp"
-            android:textStyle="bold" />
     </LinearLayout>
 </RelativeLayout>

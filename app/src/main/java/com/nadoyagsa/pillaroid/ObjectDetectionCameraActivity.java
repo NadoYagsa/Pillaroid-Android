@@ -76,7 +76,7 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
             } else {
                 Log.e("Camera", "Permissions not granted by the user");
                 canTtsStop = false;
-                tts.speak("카메라 권한이 승인되지 않아 기능을 사용할 수 없습니다.", QUEUE_FLUSH, null, null);
+                tts.speak("The function cannot be used because the camera permission has not been approved.", QUEUE_FLUSH, null, null);
                 this.finish();
             }
         }
@@ -210,11 +210,11 @@ public abstract class ObjectDetectionCameraActivity extends AppCompatActivity
         // 모든 퍼미션이 있을 때에만 카메라가 켜짐
         if (hasPermission()) {
             setFragment();
-            tts.speak("후면 카메라가 켜졌습니다. 손바닥 위에 알약을 올려놓고 카메라를 들어주세요. 현재 영상을 기준으로 가이드를 안내할 예정입니다.", QUEUE_FLUSH, null, null);
+            tts.speak("The rear camera is turned on. 손바닥 위에 알약을 올려놓고 카메라를 들어주세요. 현재 영상을 기준으로 가이드를 안내할 예정입니다.", QUEUE_FLUSH, null, null);
         } else { // 모든 권한이 허가되지 않았다면 요청
             canTtsStop = false;
             tts.speak("알약을 찍기 위해선 카메라 권한이 필요합니다.", QUEUE_FLUSH, null, null);
-            tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", QUEUE_ADD, null, null);
+            tts.speak("Click the Allow button on the far right of the center of the screen.", QUEUE_ADD, null, null);
             tts.speak("권한 거부 시에는 이전 화면으로 돌아갑니다.", QUEUE_ADD, null, null);
 
             ActivityCompat.requestPermissions(this, new String[] {PERMISSION_CAMERA}, REQUEST_CODE_PERMISSIONS);

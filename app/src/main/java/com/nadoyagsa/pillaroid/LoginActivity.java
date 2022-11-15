@@ -66,11 +66,11 @@ public class LoginActivity extends AppCompatActivity {
                             SharedPrefManager.write("token", token);
 
                             if (fromWhere == 'f') {
-                                tts.speak("로그인 되셨습니다. 즐겨찾기 목록 화면으로 넘어갑니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("You are logged in. Go to the Favorites list screen.", QUEUE_FLUSH, null, null);
                                 startActivity(new Intent(LoginActivity.this, MypageFavoritesActivity.class));
                             }
                             else if (fromWhere == 'a') {
-                                tts.speak("로그인 되셨습니다. 알림 목록 화면으로 넘어갑니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("You are logged in. You will be taken to the notification list screen.", QUEUE_FLUSH, null, null);
                                 startActivity(new Intent(LoginActivity.this, MypageAlarmActivity.class));
                             }
 
@@ -78,21 +78,21 @@ public class LoginActivity extends AppCompatActivity {
                         } catch (JSONException e) { e.printStackTrace(); }
                     }
                     else {
-                        tts.speak("카카오 로그인에 문제가 생겼습니다. 다시 로그인 부탁드립니다.", QUEUE_FLUSH, null, null);
-                        Toast.makeText(LoginActivity.this, "카카오 로그인에 문제가 생겼습니다. 다시 로그인 부탁드립니다.", Toast.LENGTH_SHORT).show();
+                        tts.speak("There is a problem with Kakao login. Please log in again.", QUEUE_FLUSH, null, null);
+                        Toast.makeText(LoginActivity.this, "There is a problem with Kakao login. Please log in again.", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    tts.speak("서버와 연결이 되지 않습니다. 확인해 주세요.", QUEUE_FLUSH, null, null);
-                    Toast.makeText(LoginActivity.this, "서버와 연결이 되지 않습니다. 확인해 주세요:)", Toast.LENGTH_SHORT).show();
+                    tts.speak("Can't connect to server. Please check.", QUEUE_FLUSH, null, null);
+                    Toast.makeText(LoginActivity.this, "Can't connect to server. Please check.", Toast.LENGTH_SHORT).show();
                 }
             });
         }
         else if (throwable != null) {
-            tts.speak("카카오 로그인에 문제가 생겼습니다. 다시 로그인 부탁드립니다.", QUEUE_FLUSH, null, null);
-            Toast.makeText(LoginActivity.this, "카카오 로그인에 문제가 생겼습니다. 다시 로그인 부탁드립니다.", Toast.LENGTH_SHORT).show();
+            tts.speak("There is a problem with Kakao login. Please log in again.", QUEUE_FLUSH, null, null);
+            Toast.makeText(LoginActivity.this, "There is a problem with Kakao login. Please log in again.", Toast.LENGTH_SHORT).show();
         }
 
         return null;
@@ -119,7 +119,7 @@ public class LoginActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼. 카카오 로그인하기", QUEUE_FLUSH, null, null);
+                tts.speak("Button. Log in to Kakao.", QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 // 카카오 로그인 연동
                 if (UserApiClient.getInstance().isKakaoTalkLoginAvailable(this))

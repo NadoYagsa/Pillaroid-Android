@@ -49,7 +49,7 @@ public class SearchDocumentActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_search_prescription), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_search_prescription), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 startActivity(new Intent(this, SearchPrescriptionActivity.class));
             }
@@ -60,7 +60,7 @@ public class SearchDocumentActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_search_pharmacy_envelope), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_search_pharmacy_envelope), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 startActivity(new Intent(this, SearchPharmacyEnvelopeActivity.class));
             }
@@ -70,6 +70,6 @@ public class SearchDocumentActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        tts.speak("문서 선택 화면", QUEUE_FLUSH, null, null);
+        tts.speak("Document selection screen", QUEUE_FLUSH, null, null);
     }
 }

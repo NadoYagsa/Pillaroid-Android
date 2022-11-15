@@ -69,19 +69,19 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 21) {
             // 카메라 권한이 없으면 권한 요청
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
-                tts.speak("처방전 인식을 위해 카메라 권한이 필요합니다.", QUEUE_FLUSH, null, null);
-                tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", QUEUE_ADD, null, null);
-                tts.speak("권한 거부 시에는 메인 화면으로 돌아갑니다.", QUEUE_ADD, null, null);
+                tts.speak("Camera permission is required for prescription recognition.", QUEUE_FLUSH, null, null);
+                tts.speak("Click the Allow button on the far right of the center of the screen.", QUEUE_ADD, null, null);
+                tts.speak("If permission is denied, return to the main screen.", QUEUE_ADD, null, null);
 
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1000);
             } else {
                 canUseCamera = true;
 
-                tts.speak("후면 카메라가 켜졌습니다. 처방전을 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+                tts.speak("The rear camera is turned on. Place the prescription behind the camera.", QUEUE_FLUSH, null, null);
                 startCamera();  //카메라 실행
             }
         } else {
-            tts.speak("SDK 버전이 낮아 카메라 사용이 불가합니다.", QUEUE_ADD, null, null);
+            tts.speak("The camera cannot be used due to the low SDK version.", QUEUE_ADD, null, null);
             finish();
         }
     }
@@ -94,7 +94,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 canUseCamera = true;
 
-                tts.speak("후면 카메라가 켜졌습니다. 처방전을 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+                tts.speak("The rear camera is turned on. Place the prescription behind the camera.", QUEUE_FLUSH, null, null);
                 startCamera();
             } else
                 finish();
@@ -231,7 +231,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                                 startActivity(resultIntent);
                             }
                             else
-                                tts.speak("인식된 처방 의약품이 없습니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("There are no recognized prescription drugs.", QUEUE_FLUSH, null, null);
 
                             imageProxy.close();
 
@@ -239,7 +239,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
                         })
                         .addOnFailureListener(e -> {
                             Log.i("Failure", "사진 속 텍스트 인식 오류");
-                            tts.speak("처방전의 텍스트를 읽는데 오류가 발생했습니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There was an error reading the text of the prescription.", QUEUE_FLUSH, null, null);
                         });
             }
         }
@@ -252,7 +252,7 @@ public class SearchPrescriptionActivity extends AppCompatActivity {
             case KeyEvent.KEYCODE_VOLUME_UP: {      // 촬영 버튼 클릭
                 if (!isSearching) {
                     isSearching = true;
-                    tts.speak("사진이 찍혔습니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("A picture was taken.", QUEUE_FLUSH, null, null);
 
                     imageCapture.takePicture(ContextCompat.getMainExecutor(SearchPrescriptionActivity.this), new ImageCapture.OnImageCapturedCallback() {
                         @Override

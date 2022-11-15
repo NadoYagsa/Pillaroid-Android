@@ -36,7 +36,7 @@ public class SearchCameraActivity extends AppCompatActivity {
         ImageView ivIcon = customView.findViewById(R.id.iv_ab_icontext_icon);
         ivIcon.setImageResource(R.drawable.icon_camera);
         TextView tvTopic = customView.findViewById(R.id.tv_ab_icontext_title);
-        tvTopic.setText("의약품 촬영으로 검색");
+        tvTopic.setText(getText(R.string.page_search_camera));
         ActionBar.LayoutParams params = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
         actionBar.setCustomView(customView, params);
 
@@ -49,7 +49,7 @@ public class SearchCameraActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_search_case), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_search_case), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 startActivity(new Intent(this, SearchCaseActivity.class));
             }
@@ -60,7 +60,7 @@ public class SearchCameraActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + getString(R.string.page_search_pill), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + getString(R.string.page_search_pill), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 startActivity(new Intent(this, SearchPillActivity.class));
             }
@@ -70,6 +70,6 @@ public class SearchCameraActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        tts.speak("의약품 촬영 방식 선택 화면", QUEUE_FLUSH, null, null);
+        tts.speak("Medicine shooting method selection screen", QUEUE_FLUSH, null, null);
     }
 }

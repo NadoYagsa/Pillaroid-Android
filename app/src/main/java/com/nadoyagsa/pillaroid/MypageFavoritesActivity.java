@@ -123,7 +123,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                         JSONArray results = responseJson.getJSONArray("data");
 
                         if (results.length() == 0) {
-                            tts.speak("즐겨찾기를 설정한 의약품이 없습니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There are no medications set as favorites", QUEUE_FLUSH, null, null);
                             tvFavoritesInfo.setText(getString(R.string.text_favorites_no_result));
                         }
                         else {
@@ -136,12 +136,12 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                             favoritesAdapter.setFavoritesWholeList();
                             favoritesAdapter.notifyDataSetChanged();
 
-                            tts.speak("즐겨찾기 목록은 총 "+favoritesList.size()+"개 입니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There are a total of " + favoritesList.size() + " favorites on the list.", QUEUE_FLUSH, null, null);
                         }
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
                 else if (response.code() == 401) {
-                    tts.speak("허가받지 않은 회원의 접근입니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("Access by unauthorized members. Return to the previous screen.", QUEUE_FLUSH, null, null);
                     tts.playSilentUtterance(7000, TextToSpeech.QUEUE_ADD, null);
                     finish();
                 }
@@ -153,7 +153,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                             long errorIdx = errorBody.getLong("errorIdx");
 
                             if (errorIdx == 40403) {
-                                tts.speak("즐겨찾기를 설정한 의약품이 없습니다.", QUEUE_FLUSH, null, null);
+                                tts.speak("There are no medications set as favorites", QUEUE_FLUSH, null, null);
                                 tvFavoritesInfo.setText(getString(R.string.text_favorites_no_result));
                             }
                         } catch (JSONException | IOException e) {
@@ -161,13 +161,13 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                         }
                     }
                     else {
-                        tts.speak("즐겨찾기 목록 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("There was a problem with the Favorites list lookup. Return to the previous screen.", QUEUE_FLUSH, null, null);
                         tts.playSilentUtterance(7000, TextToSpeech.QUEUE_ADD, null);
                         finish();
                     }
                 }
                 else {
-                    tts.speak("즐겨찾기 목록 조회에 문제가 생겼습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("There was a problem with the Favorites list lookup. Return to the previous screen.", QUEUE_FLUSH, null, null);
                     tts.playSilentUtterance(7000, TextToSpeech.QUEUE_ADD, null);
                     finish();
                 }
@@ -175,7 +175,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                tts.speak("서버와 연결이 되지 않습니다. 이전 화면으로 돌아갑니다.", QUEUE_FLUSH, null, null);
+                tts.speak("Can't connect to server. Return to the previous screen.", QUEUE_FLUSH, null, null);
                 tts.playSilentUtterance(5000, TextToSpeech.QUEUE_ADD, null);
                 finish();
             }
@@ -183,19 +183,19 @@ public class MypageFavoritesActivity extends AppCompatActivity {
     }
 
     private void speakRecordMethod() {
-        tts.speak("즐겨찾기 검색은 음량 버튼으로 가능합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+        tts.speak("Searching for favorites is possible with the volume buttons.", TextToSpeech.QUEUE_FLUSH, null, null);
         tts.playSilentUtterance(500, TextToSpeech.QUEUE_ADD, null);
-        tts.speak("상단 음량 버튼으로 녹음을 시작 및 종료를 할 수 있습니다.", TextToSpeech.QUEUE_ADD, null, null);
-        tts.speak("하단 음량 버튼으로 녹음을 중지할 수 있습니다.", TextToSpeech.QUEUE_ADD, null, null);
+        tts.speak("You can start and end recording with the volume button on the top.", TextToSpeech.QUEUE_ADD, null, null);
+        tts.speak("You can stop recording with the lower volume button.", TextToSpeech.QUEUE_ADD, null, null);
     }
 
     private void checkRecordPermission() {
         if (Build.VERSION.SDK_INT >= 23) {
             // 녹음 권한이 없으면 권한 요청
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)== PackageManager.PERMISSION_DENIED) {
-                tts.speak("음성인식을 위해 오디오녹음 권한이 필요합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
-                tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-                tts.speak("권한 거부 시에는 메인 화면으로 돌아갑니다.", TextToSpeech.QUEUE_ADD, null, null);
+                tts.speak("Audio recording permission is required for voice recognition.", TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak("Click the Allow button on the far right of the center of the screen.", TextToSpeech.QUEUE_ADD, null, null);
+                tts.speak("If permission is denied, return to the main screen.", TextToSpeech.QUEUE_ADD, null, null);
 
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1000);
             }
@@ -203,7 +203,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                 speakRecordMethod();
         }
         else {
-            tts.speak("SDK 버전이 낮아 음성 인식이 불가합니다.", TextToSpeech.QUEUE_ADD, null, null);
+            tts.speak("Speech recognition is not possible due to the low SDK version.", TextToSpeech.QUEUE_ADD, null, null);
             finish();
         }
     }
@@ -245,50 +245,50 @@ public class MypageFavoritesActivity extends AppCompatActivity {
 
                 switch (error) {
                     case SpeechRecognizer.ERROR_AUDIO:
-                        message = "오디오 에러";
+                        message = "Audio error";
                         break;
                     case SpeechRecognizer.ERROR_CLIENT:
                         return;
                     case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
-                        message = "권한 없음";
+                        message = "No permission";
                         break;
                     case SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED:
-                        message = "언어 지원 안함";
+                        message = "no language support";
                         break;
                     case SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE:
-                        message = "언어 사용 안됨";
+                        message = "language not used";
                         break;
                     case SpeechRecognizer.ERROR_NETWORK:
-                        message = "네트워크 오류";
+                        message = "network error";
                         break;
                     case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
-                        message = "네트워크 시간 초과";
+                        message = "network timeout";
                         break;
                     case SpeechRecognizer.ERROR_NO_MATCH:
                         if (isRecording)
                             startRecord();
                         return;
                     case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
-                        message = "인식 오류";
+                        message = "recognition error";
                         break;
                     case SpeechRecognizer.ERROR_SERVER:
-                        message = "서버 오류";
+                        message = "server error";
                         break;
                     case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-                        message = "녹음 시간 초과";
+                        message = "recording timeout";
                         break;
                     case SpeechRecognizer.ERROR_SERVER_DISCONNECTED:
-                        message = "서버 연결 오류";
+                        message = "server connection error";
                         break;
                     case SpeechRecognizer.ERROR_TOO_MANY_REQUESTS:
-                        message = "요청 과다";
+                        message = "too many requests";
                         break;
                     default:
-                        message = "알 수 없는 오류";
+                        message = "unknown error";
                         break;
                 }
                 speechRecognizer.cancel();
-                tts.speak(message.concat(" 문제가 발생하였습니다."), TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, null);
             }
 
             @Override
@@ -310,7 +310,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
                 else {              // 인식 종료 버튼이 눌렸을 때, 종료 시점 이후에 결과가 반환이 되는 경우
                     tvTitle.setText(searchKeyword);
                     favoritesAdapter.searchFavoritesList(searchKeyword);
-                    tts.speak(searchKeyword.concat("로 검색된 즐겨찾기 목록은 총 "+favoritesAdapter.getItemCount()+"개 입니다."), TextToSpeech.QUEUE_FLUSH, null, null);
+                    tts.speak("The list of favorites searched for " + searchKeyword + " is a total of " + favoritesAdapter.getItemCount() + ".", TextToSpeech.QUEUE_FLUSH, null, null);
 
                     searchKeyword = "";
                 }
@@ -341,7 +341,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
 
             tvTitle.setText(searchKeyword);
             favoritesAdapter.searchFavoritesList(searchKeyword);
-            tts.speak(searchKeyword.concat("로 검색된 즐겨찾기 목록은 총 "+favoritesAdapter.getItemCount()+"개 입니다."), TextToSpeech.QUEUE_FLUSH, null, null);
+            tts.speak("The list of favorites searched for " + searchKeyword + " is a total of " + favoritesAdapter.getItemCount() + ".", TextToSpeech.QUEUE_FLUSH, null, null);
 
             searchKeyword = "";
         }
@@ -383,7 +383,7 @@ public class MypageFavoritesActivity extends AppCompatActivity {
             favoritesAdapter.notifyDataSetChanged();
 
             tvTitle.setText(getString(R.string.text_favorites_list));
-            tts.speak("전체 즐겨찾기 목록으로 돌아갑니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+            tts.speak("Return to the full list of favorites.", TextToSpeech.QUEUE_FLUSH, null, null);
 
             isSearching = false;
         }

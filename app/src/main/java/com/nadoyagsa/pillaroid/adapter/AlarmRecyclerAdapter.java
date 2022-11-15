@@ -69,7 +69,7 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
 
     @Override
     public void onItemSwipe(int position) { // 알림 삭제
-        tts.speak(alarmList.get(position).getName().concat("의 알림을 삭제하시겠습니까?"), QUEUE_FLUSH, null, null);
+        tts.speak("Are you sure you want to delete notifications from ".concat(alarmList.get(position).getName()).concat("?"), QUEUE_FLUSH, null, null);
 
         View deleteAlarmDialogView = View.inflate(context, R.layout.dialog_delete, null);
 
@@ -94,7 +94,7 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.code() == 200) {
-                        tts.speak("알림이 삭제되었습니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("Notification has been removed.", QUEUE_FLUSH, null, null);
 
                         alarmList.remove(position);     // 스와이프한 객체 삭제
                         notifyItemRemoved(position);
@@ -103,7 +103,7 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
                         return;
                     }
                     else if (response.code() == 401) {
-                        tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("Access by unauthorized members.", QUEUE_FLUSH, null, null);
                     }
                     else if (response.code() == 400) {
                         if (response.errorBody() != null) {
@@ -113,23 +113,23 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
                                 long errorIdx = errorBody.getLong("errorIdx");
 
                                 if (errorIdx == 40001)  // 삭제 오류
-                                    tts.speak("알림에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("It cannot be deleted because it is a drug that has not been added to notifications.", QUEUE_FLUSH, null, null);
                             } catch (JSONException | IOException e) {
                                 e.printStackTrace();
                             }
                         }
                         else
-                            tts.speak("알림 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There was a problem deleting notifications.", QUEUE_FLUSH, null, null);
                     }
                     else {
-                        tts.speak("알림 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("There was a problem deleting notifications.", QUEUE_FLUSH, null, null);
                     }
                     notifyItemChanged(position);
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("Can't connect to server.", QUEUE_FLUSH, null, null);
                     tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
                     notifyItemChanged(position);
                 }
@@ -139,7 +139,7 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
             return true;
         });
         ibtDeleteAlarm.setOnClickListener(view -> {
-            tts.speak("알림 삭제 취소", QUEUE_FLUSH, null, null);
+            tts.speak("Undo Delete Notifications", QUEUE_FLUSH, null, null);
 
             notifyItemChanged(position);
             alertDialog.dismiss();
@@ -160,7 +160,7 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
                 if (System.currentTimeMillis() > delay) {
                     currentClickedPos = pos;
                     delay = System.currentTimeMillis() + 3000;
-                    tts.speak("버튼." + alarmList.get(pos).getName() + ". 상세 보기", QUEUE_FLUSH, null, null);
+                    tts.speak("Button. View " + alarmList.get(pos).getName() + " Details", QUEUE_FLUSH, null, null);
                 } else if (currentClickedPos == pos) {
                     if (pos != RecyclerView.NO_POSITION) {
                         Intent medicineIntent = new Intent(context, MedicineResultActivity.class);
@@ -173,7 +173,7 @@ public class AlarmRecyclerAdapter extends RecyclerView.Adapter<AlarmRecyclerAdap
             tvAlarmDetails.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
                 currentClickedPos = pos;
-                tts.speak("텍스트." + alarmList.get(pos).getName() + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+                tts.speak("Text." + alarmList.get(pos).getName() + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
             });
         }
     }

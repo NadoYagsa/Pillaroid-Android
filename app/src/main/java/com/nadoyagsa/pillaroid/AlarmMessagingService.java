@@ -37,7 +37,7 @@ public class AlarmMessagingService extends FirebaseMessagingService {
             NotificationManager mManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 final String CHANNEL_NAME = "PillaroidChannel";
-                final String CHANNEL_DESCRIPTION = "필라로이드 알림";
+                final String CHANNEL_DESCRIPTION = "Pillaroid Notification";
                 final int importance = NotificationManager.IMPORTANCE_HIGH;
 
                 NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance);

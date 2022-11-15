@@ -144,12 +144,12 @@ public class SearchCaseActivity extends AppCompatActivity {
                             code = barcode.getDisplayValue();
                             Log.d("resultBarcodeCode", code);
 
-                            tts.speak("바코드가 인식되었습니다.", QUEUE_FLUSH, null, BARCODE_SUCCESS); // tts utteranceProgressListener에서 후처리
+                            tts.speak("Barcode has been recognized.", QUEUE_FLUSH, null, BARCODE_SUCCESS); // tts utteranceProgressListener에서 후처리
                         }
                     }
                     if (! isDetected) {
                         if (! tts.isSpeaking()) {
-                            tts.speak("바코드가 인식되지 않았습니다. 용기를 천천히 움직여주세요.", QUEUE_FLUSH, null, BARCODE_FAILED);   // tts utteranceProgressListener에서 후처리
+                            tts.speak("Barcode not recognized. Move your courage slowly.", QUEUE_FLUSH, null, BARCODE_FAILED);   // tts utteranceProgressListener에서 후처리
                         }
                         currentImageProxy.close();
                     }
@@ -164,11 +164,11 @@ public class SearchCaseActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted(grantResults)) {
-                tts.speak("후면 카메라가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+                tts.speak("The rear camera is turned on. Hold the medication in your hand and position it behind the camera.", QUEUE_FLUSH, null, null);
                 startCamera();
             } else {
                 Log.e("Camera", "Permissions not granted by the user");
-                tts.speak("카메라 권한이 승인되지 않아 기능을 사용할 수 없습니다.", QUEUE_FLUSH, null, null);
+                tts.speak("The function cannot be used because the camera permission has not been approved.", QUEUE_FLUSH, null, null);
                 this.finish();
             }
         }
@@ -222,11 +222,11 @@ public class SearchCaseActivity extends AppCompatActivity {
         });
 
         if (hasPermission()) {
-            tts.speak("후면 카메라가 켜졌습니다. 손에 의약품을 잡고 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+            tts.speak("The rear camera is turned on. Hold the medication in your hand and position it behind the camera.", QUEUE_FLUSH, null, null);
             startCamera();
         } else {
-            tts.speak("의약품 용기를 찍기 위해선 카메라 권한이 필요합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
-            tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", QUEUE_ADD, null, null);
+            tts.speak("Camera permission is required to take pictures of medicine containers.", TextToSpeech.QUEUE_FLUSH, null, null);
+            tts.speak("Click the Allow button on the far right of the center of the screen.", QUEUE_ADD, null, null);
             tts.speak("권한 거부 시에는 이전 화면으로 돌아갑니다.", QUEUE_ADD, null, null);
 
             ActivityCompat.requestPermissions(this, new String[] {PERMISSION_CAMERA}, REQUEST_CODE_PERMISSIONS);

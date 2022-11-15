@@ -74,11 +74,11 @@ public class SearchVoiceActivity extends AppCompatActivity {
     }
 
     private void speakRecordMethod() {
-        tts.speak("검색할 의약품 이름을 볼륨 버튼을 누르고 말해주세요.", TextToSpeech.QUEUE_FLUSH, null, null);
+        tts.speak(getString(R.string.text_search_voice_guide1), TextToSpeech.QUEUE_FLUSH, null, null);
         tts.playSilentUtterance(500, TextToSpeech.QUEUE_ADD, null);
-        tts.speak("녹음 시작 시 '띵똥' 소리가 들립니다.", TextToSpeech.QUEUE_ADD, null, null);
-        tts.speak("말하기를 완료하셨다면 볼륨 버튼을 다시 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-        tts.speak("재녹음도 동일한 방법으로 진행됩니다.", TextToSpeech.QUEUE_ADD, null, null);
+        tts.speak(getString(R.string.text_search_voice_guide2), TextToSpeech.QUEUE_ADD, null, null);
+        tts.speak(getString(R.string.text_search_voice_guide3), TextToSpeech.QUEUE_ADD, null, null);
+        tts.speak(getString(R.string.text_search_voice_guide4), TextToSpeech.QUEUE_ADD, null, null);
     }
 
     private void checkRecordPermission() {
@@ -86,9 +86,9 @@ public class SearchVoiceActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 23) {
             // 녹음 권한이 없으면 권한 요청
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_DENIED) {
-                tts.speak("음성인식을 위해 오디오녹음 권한이 필요합니다.", TextToSpeech.QUEUE_FLUSH, null, null);
-                tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", TextToSpeech.QUEUE_ADD, null, null);
-                tts.speak("권한 거부 시에는 메인 화면으로 돌아갑니다.", TextToSpeech.QUEUE_ADD, null, null);
+                tts.speak("Audio recording permission is required for voice recognition.", TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak("Click the Allow button on the far right of the center of the screen.", TextToSpeech.QUEUE_ADD, null, null);
+                tts.speak("If permission is denied, return to the main screen.", TextToSpeech.QUEUE_ADD, null, null);
 
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1000);
             }
@@ -96,7 +96,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
                 speakRecordMethod();
         }
         else {
-            tts.speak("SDK 버전이 낮아 음성 인식이 불가합니다.", TextToSpeech.QUEUE_ADD, null, null);
+            tts.speak("Speech recognition is not possible due to the low SDK version.", TextToSpeech.QUEUE_ADD, null, null);
             finish();
         }
     }
@@ -116,10 +116,10 @@ public class SearchVoiceActivity extends AppCompatActivity {
     private void initActionBar(Toolbar toolbar) {
         ImageView ivIcon = toolbar.findViewById(R.id.iv_ab_icontext_icon);
         ivIcon.setImageResource(R.drawable.icon_voice);
-        ivIcon.setContentDescription("녹음기 아이콘");
+        ivIcon.setContentDescription("Voice Recorder Icon");
 
         TextView tvTitle = toolbar.findViewById(R.id.tv_ab_icontext_title);
-        tvTitle.setText("의약품 음성으로 검색");
+        tvTitle.setText(getString(R.string.page_search_voice));
     }
 
     private void settingForSTT() {
@@ -147,51 +147,50 @@ public class SearchVoiceActivity extends AppCompatActivity {
 
                 switch (error) {
                     case SpeechRecognizer.ERROR_AUDIO:
-                        message = "오디오 에러";
+                        message = "Audio error";
                         break;
                     case SpeechRecognizer.ERROR_CLIENT:
                         return;
                     case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
-                        message = "권한 없음";
+                        message = "No permission";
                         break;
                     case SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED:
-                        message = "언어 지원 안함";
+                        message = "no language support";
                         break;
                     case SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE:
-                        message = "언어 사용 안됨";
+                        message = "language not used";
                         break;
                     case SpeechRecognizer.ERROR_NETWORK:
-                        message = "네트워크 오류";
+                        message = "network error";
                         break;
                     case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
-                        message = "네트워크 시간 초과";
+                        message = "network timeout";
                         break;
                     case SpeechRecognizer.ERROR_NO_MATCH:
-                        // 녹음을 오래하거나 speechRecognizer.stopListening()을 호출하면 발생하는 오류
                         if (isRecording)
                             startRecord();
                         return;
                     case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
-                        message = "인식 오류";
+                        message = "recognition error";
                         break;
                     case SpeechRecognizer.ERROR_SERVER:
-                        message = "서버 오류";
+                        message = "server error";
                         break;
                     case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-                        message = "녹음 시간 초과";
+                        message = "recording timeout";
                         break;
                     case SpeechRecognizer.ERROR_SERVER_DISCONNECTED:
-                        message = "서버 연결 오류";
+                        message = "server connection error";
                         break;
                     case SpeechRecognizer.ERROR_TOO_MANY_REQUESTS:
-                        message = "요청 과다";
+                        message = "too many requests";
                         break;
                     default:
-                        message = "알 수 없는 오류";
+                        message = "unknown error";
                         break;
                 }
                 speechRecognizer.cancel();
-                tts.speak(message.concat(" 문제가 발생하였습니다."), TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, null);
             }
 
             @Override
@@ -214,7 +213,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
                 else {              // 인식 종료 버튼이 눌렸을 때, 종료 시점 이후에 결과가 반환이 되는 경우
                     temporaryQuery = "";
                     etQuery.setText(etQuery.getText().toString().replaceAll("\\s", ""));
-                    tts.speak("음성 인식 종료." + etQuery.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                    tts.speak("End of speech recognition." + etQuery.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, null);
                 }
 
                 if (isResultBtClicked) {
@@ -251,7 +250,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
         if (isResultEnd) {
             temporaryQuery = "";
             etQuery.setText(etQuery.getText().toString().replaceAll("\\s", ""));
-            tts.speak("음성 인식 종료." + etQuery.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+            tts.speak("End of speech recognition." + etQuery.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, null);
         }
     }
 
@@ -298,7 +297,7 @@ public class SearchVoiceActivity extends AppCompatActivity {
             if (System.currentTimeMillis() > delay) {
                 currentClickedView = v;
                 delay = System.currentTimeMillis() + 3000;
-                tts.speak("버튼." + ((AppCompatButton) v).getText(), QUEUE_FLUSH, null, null);
+                tts.speak("Button." + ((AppCompatButton) v).getText(), QUEUE_FLUSH, null, null);
             } else if (currentClickedView == v) {
                 tts.stop();     //진행중이던 tts speak가 있다면 멈춤
                 if (etQuery.getText().length() > 0) {
@@ -316,38 +315,38 @@ public class SearchVoiceActivity extends AppCompatActivity {
                     }
                     // isResultEnd == false일 때는 recognitionListener에서 처리함
                 } else
-                    tts.speak("검색할 단어가 없습니다.", TextToSpeech.QUEUE_FLUSH, null, null);
+                    tts.speak("There are no words to search for.", TextToSpeech.QUEUE_FLUSH, null, null);
             }
         });
 
         TextView tvDescriptionResult = findViewById(R.id.tv_voicesearch_description_result);
         tvDescriptionResult.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
         });
 
         TextView tvDescriptionRule = findViewById(R.id.tv_voicesearch_description_rule);
         tvDescriptionRule.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
         });
 
         TextView tvDescriptionRule1 = findViewById(R.id.tv_voicesearch_description_rule1);
         tvDescriptionRule1.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트. " + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            tts.speak("Text. " + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
         });
 
         TextView tvDescriptionRule2 = findViewById(R.id.tv_voicesearch_description_rule2);
         tvDescriptionRule2.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
         });
 
         TextView tvDescriptionRule3 = findViewById(R.id.tv_voicesearch_description_rule3);
         tvDescriptionRule3.setOnClickListener(v -> {
             currentClickedView = v;
-            tts.speak("텍스트." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
+            tts.speak("Text." + ((TextView) v).getText(), QUEUE_FLUSH, null, null);
         });
     }
 }

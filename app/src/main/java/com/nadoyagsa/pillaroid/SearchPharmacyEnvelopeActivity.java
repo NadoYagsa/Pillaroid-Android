@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
     private static final String PHARMACY_ENVELOPE_LAST_GUIDE = "pharmacy-envelope-last-guide";
     private static final int REQUEST_CODE_PERMISSIONS = 1000;
+    private static final String[] MONTHS = {"", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
     private ImageCapture imageCapture;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -71,17 +72,17 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 canUseCamera = true;
 
-                tts.speak("후면 카메라가 켜졌습니다. 약국 봉투를 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+                tts.speak("The rear camera is turned on. Place the pharmacy envelope behind the camera.", QUEUE_FLUSH, null, null);
                 startCamera();
             } else {
-                tts.speak("약국 봉투 인식을 위해 카메라 권한이 필요합니다.", QUEUE_FLUSH, null, null);
-                tts.speak("화면 중앙의 가장 우측에 있는 허용 버튼을 눌러주세요.", QUEUE_ADD, null, null);
-                tts.speak("권한 거부 시에는 메인 화면으로 돌아갑니다.", QUEUE_ADD, null, null);
+                tts.speak("Camera permission is required for pharmacy envelope recognition.", QUEUE_FLUSH, null, null);
+                tts.speak("Click the Allow button on the far right of the center of the screen.", QUEUE_ADD, null, null);
+                tts.speak("If permission is denied, return to the main screen.", QUEUE_ADD, null, null);
 
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSIONS);
             }
         } else {
-            tts.speak("SDK 버전이 낮아 카메라 사용이 불가합니다.", QUEUE_ADD, null, null);
+            tts.speak("The camera cannot be used due to the low SDK version.", QUEUE_ADD, null, null);
             finish();
         }
     }
@@ -94,10 +95,10 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 canUseCamera = true;
 
-                tts.speak("후면 카메라가 켜졌습니다. 약국 봉투를 카메라 뒤로 위치시켜주세요.", QUEUE_FLUSH, null, null);
+                tts.speak("The rear camera is turned on. Place the pharmacy envelope behind the camera.", QUEUE_FLUSH, null, null);
                 startCamera();
             } else {
-                tts.speak("카메라 권한이 승인되지 않아 기능을 사용할 수 없습니다.", QUEUE_FLUSH, null, null);
+                tts.speak("The function cannot be used because the camera permission has not been approved.", QUEUE_FLUSH, null, null);
                 finish();
             }
         }
@@ -141,7 +142,7 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
             case KeyEvent.KEYCODE_VOLUME_UP: {      // 촬영 버튼 클릭
                 if (!isSearching) {
                     isSearching = true;
-                    tts.speak("사진이 찍혔습니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("A picture was taken.", QUEUE_FLUSH, null, null);
 
                     imageCapture.takePicture(ContextCompat.getMainExecutor(SearchPharmacyEnvelopeActivity.this), new ImageCapture.OnImageCapturedCallback() {
                         @Override
@@ -154,7 +155,7 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
                         @Override
                         public void onError(@NonNull ImageCaptureException exception) {
                             super.onError(exception);
-                            tts.speak("사진을 찍는데 오류가 발생했습니다. 다시 시도해주세요.", QUEUE_FLUSH, null, PHARMACY_ENVELOPE_LAST_GUIDE);
+                            tts.speak("An error occurred while taking a picture. please try again.", QUEUE_FLUSH, null, PHARMACY_ENVELOPE_LAST_GUIDE);
                         }
                     });
                 }
@@ -217,7 +218,7 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
             recognizer.process(image)
                     .addOnSuccessListener(new PharmacyEnvelopeSuccessListener())
                     .addOnFailureListener(e -> {
-                        tts.speak("약국 봉투의 텍스트를 읽는데 오류가 발생했습니다.", QUEUE_FLUSH, null, PHARMACY_ENVELOPE_LAST_GUIDE);
+                        tts.speak("Error reading text on pharmacy envelope.", QUEUE_FLUSH, null, PHARMACY_ENVELOPE_LAST_GUIDE);
                     });
         }
     }
@@ -320,41 +321,41 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
 
         private void speakDetectedPharmacyName(String pharmacyName) {
             if (pharmacyName != null){
-                tts.speak(String.format("%s에서 만들어진 약 봉투입니다.", pharmacyName), QUEUE_FLUSH, null, null);
+                tts.speak(String.format("A medicine envelope made from %s.", pharmacyName), QUEUE_FLUSH, null, null);
             }
         }
 
         private void speakDetectedThreeTimes(int[] threeTimes) {
             StringBuilder ThreeTimesGuide = new StringBuilder();
-            ThreeTimesGuide.append("사진에서 ");
             if (threeTimes[0] != 0) {
-                ThreeTimesGuide.append("아침 ").append(threeTimes[0]).append("개, ");
+                ThreeTimesGuide.append(threeTimes[0]).append("breakfast, ");
             }
             if (threeTimes[1] != 0) {
-                ThreeTimesGuide.append("점심 ").append(threeTimes[1]).append("개, ");
+                ThreeTimesGuide.append(threeTimes[1]).append("lunch, ");
             }
             if (threeTimes[2] != 0) {
-                ThreeTimesGuide.append("저녁 ").append(threeTimes[2]).append("개, ");
+                ThreeTimesGuide.append(threeTimes[2]).append("dinner, ");
             }
-            ThreeTimesGuide.append("의 단어가 발견되었습니다.");
+            ThreeTimesGuide.append("words were found in the picture.");
             tts.speak(ThreeTimesGuide.toString(), QUEUE_ADD, null, null);
         }
 
         private void speakDetectedVoiceQR(boolean voiceQR) {
             if (voiceQR) {
-                tts.speak("음성복약지도 큐알코드가 발견되었습니다. 보이스아이 어플을 통해 세부 복약 정보를 음성으로 확인하실 수 있습니다.", QUEUE_ADD, null, null);
+                tts.speak("Voice Medication Guide QR code was found. Through the Voice Eye app, you can check detailed medication information by voice.", QUEUE_ADD, null, null);
             }
         }
 
         private void speakDetectedPharmacyNameAndDispensingDate(String pharmacyName, String dispensingYear, String dispensingMonth, String dispensingDay) {
             if (pharmacyName != null && dispensingYear != null) {
-                tts.speak(String.format("%s년 %s월 %s일, %s에서 만들어진 약 봉투입니다.", dispensingYear, dispensingMonth, dispensingDay, pharmacyName), QUEUE_FLUSH, null, null);
+                tts.speak(String.format("It is a medicine envelop manufactured by %s on %s %s, %s.", pharmacyName, MONTHS[Integer.parseInt(dispensingMonth)], dispensingDay, dispensingYear), QUEUE_FLUSH, null, null);
             } else if (pharmacyName != null){
-                tts.speak(String.format("%s에서 만들어진 약 봉투입니다.", pharmacyName), QUEUE_FLUSH, null, null);
+                tts.speak(String.format("A medicine envelope made from %s.", pharmacyName), QUEUE_FLUSH, null, null);
             } else if (dispensingYear != null) {
-                tts.speak(String.format("%s년 %s월 %s일에 제조된 약 봉투입니다.", dispensingYear, dispensingMonth, dispensingDay), QUEUE_FLUSH, null, null);
+
+                tts.speak(String.format("It is a medicine envelop made on %s %s, %s.", MONTHS[Integer.parseInt(dispensingMonth)], dispensingDay, dispensingYear), QUEUE_FLUSH, null, null);
             } else {
-                tts.speak("약국과 제조일자에 대한 정보를 찾을 수 없습니다.", QUEUE_FLUSH, null, null);
+                tts.speak("We could not find any information about the pharmacy and date of manufacture.", QUEUE_FLUSH, null, null);
             }
         }
 
@@ -362,14 +363,19 @@ public class SearchPharmacyEnvelopeActivity  extends AppCompatActivity {
             if (detectedCategories.size() > 0) {
                 StringBuilder sb = new StringBuilder();
 
-                sb.append("조회된 약제 종류는 ");
-                for (String category: detectedCategories) {
-                    sb.append(category).append(", ");
+                sb.append("The searched medicine types are ");
+                for (int i = 0; i < detectedCategories.size(); i++) {
+                    if (i == detectedCategories.size() - 1) {
+                        sb.append(detectedCategories.get(i)).append(".");
+                    } else if (i == detectedCategories.size() - 2) {
+                        sb.append(detectedCategories.get(i)).append(", and");
+                    } else {
+                        sb.append(detectedCategories.get(i)).append(",");
+                    }
                 }
-                sb.append("입니다.");
                 tts.speak(sb, QUEUE_ADD, null, PHARMACY_ENVELOPE_LAST_GUIDE);
             } else {
-                tts.speak("약제 종류 정보를 찾을 수 없습니다.", QUEUE_ADD, null, PHARMACY_ENVELOPE_LAST_GUIDE);
+                tts.speak("Could not find medicine type information.", QUEUE_ADD, null, PHARMACY_ENVELOPE_LAST_GUIDE);
             }
         }
     }

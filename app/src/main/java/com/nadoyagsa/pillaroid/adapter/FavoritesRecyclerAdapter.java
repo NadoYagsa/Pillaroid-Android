@@ -85,7 +85,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
 
     @Override
     public void onItemSwipe(int position) {     // 즐겨찾기 삭제
-        tts.speak(favoritesList.get(position).getMedicineName().concat("의 즐겨찾기를 삭제하시겠습니까?"), TextToSpeech.QUEUE_FLUSH, null, null);
+        tts.speak("Are you sure you want to delete " + favoritesList.get(position).getMedicineName() + "'s favorites?", TextToSpeech.QUEUE_FLUSH, null, null);
 
         View deleteFavoritesDialogView = View.inflate(context, R.layout.dialog_delete, null);
 
@@ -110,7 +110,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.code() == 200) {
-                        tts.speak("즐겨찾기 삭제", TextToSpeech.QUEUE_FLUSH, null, null);
+                        tts.speak("Delete Favorites", TextToSpeech.QUEUE_FLUSH, null, null);
 
                         favoritesWholeList.remove(favoritesList.get(position));
                         favoritesList.remove(position);     // 스와이프한 객체 삭제
@@ -120,7 +120,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
                         return;
                     }
                     else if (response.code() == 401) {
-                        tts.speak("허가받지 않은 회원의 접근입니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("Access by unauthorized members.", QUEUE_FLUSH, null, null);
                     }
                     else if (response.code() == 400) {
                         if (response.errorBody() != null) {
@@ -130,23 +130,23 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
                                 long errorIdx = errorBody.getLong("errorIdx");
 
                                 if (errorIdx == 40001)  // 삭제 오류
-                                    tts.speak("즐겨찾기에 추가되지 않은 의약품이기에 삭제가 불가합니다.", QUEUE_FLUSH, null, null);
+                                    tts.speak("Since it is a drug that has not been added to favorites, it cannot be deleted.", QUEUE_FLUSH, null, null);
                             } catch (JSONException | IOException e) {
                                 e.printStackTrace();
                             }
                         }
                         else
-                            tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                            tts.speak("There was a problem deleting favorites.", QUEUE_FLUSH, null, null);
                     }
                     else {
-                        tts.speak("즐겨찾기 삭제에 문제가 생겼습니다.", QUEUE_FLUSH, null, null);
+                        tts.speak("There was a problem deleting favorites.", QUEUE_FLUSH, null, null);
                     }
                     notifyItemChanged(position);
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    tts.speak("서버와 연결이 되지 않습니다.", QUEUE_FLUSH, null, null);
+                    tts.speak("Can't connect to server.", QUEUE_FLUSH, null, null);
                     tts.playSilentUtterance(3000, TextToSpeech.QUEUE_ADD, null);
                     notifyItemChanged(position);
                 }
@@ -156,7 +156,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
             return true;
         });
         ibtDeleteFavorites.setOnClickListener(view -> {
-            tts.speak("즐겨찾기 삭제 취소", QUEUE_FLUSH, null, null);
+            tts.speak("Undo Delete Favorites", QUEUE_FLUSH, null, null);
 
             notifyItemChanged(position);
             alertDialog.dismiss();
@@ -178,7 +178,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
                 if (System.currentTimeMillis() > delay) {
                     currentClickedPos = pos;
                     delay = System.currentTimeMillis() + 3000;
-                    tts.speak("버튼." + favoritesList.get(pos).getMedicineName(), QUEUE_FLUSH, null, null);
+                    tts.speak("Button." + favoritesList.get(pos).getMedicineName(), QUEUE_FLUSH, null, null);
                 } else if (currentClickedPos == pos) {
                     if (pos != RecyclerView.NO_POSITION) {
                         Intent medicineIntent = new Intent(context, MedicineResultActivity.class);
